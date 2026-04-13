@@ -1,5 +1,5 @@
 """
-WSGI config for Quantix project.
+WSGI config for theproject project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -11,6 +11,6 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Quantix.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'theproject.settings')
 
 application = get_wsgi_application()
