@@ -1,0 +1,10 @@
+{% extends 'municipality_portal/base.html' %}
+{% block content %}
+<h2>إيقاف البسطة</h2>
+<br>
+<form method="post" class="card">
+    {% csrf_token %}
+    <p style="margin-bottom:10px;">هل أنت متأكد من إيقاف هذه البسطة؟</p>
+    <button type="submit" class="btn btn-danger" style="width:100%">تأكيد الإيقاف</button>
+</form>
+{% endblock %}

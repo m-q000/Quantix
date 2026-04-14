@@ -1,0 +1,301 @@
+{% extends 'vendor_portal/base.html' %}
+
+{% block title %}إدارة الصور{% endblock %}
+
+{% block extra_styles %}
+/* Counter bar */
+.counter-bar {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    border: 1px solid var(--glass-border);
+    animation: slideUp 0.35s var(--ease-out) both;
+}
+
+.counter-track {
+    flex: 1;
+    height: 6px;
+    background: var(--surface-hover);
+    border-radius: 6px;
+    margin: 0 14px;
+    overflow: hidden;
+}
+
+.counter-fill {
+    height: 100%;
+    border-radius: 6px;
+    background: var(--success);
+    transition: width 0.4s var(--ease-out);
+}
+
+.counter-fill.full { background: var(--warning); }
+
+.counter-label {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+/* Images grid */
+.images-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.image-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--glass-border);
+    animation: slideUp 0.4s var(--ease-out) both;
+}
+
+.image-card img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    display: block;
+}
+
+.image-card .img-meta {
+    padding: 8px 10px;
+}
+
+.img-meta .img-caption {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.img-meta .img-date {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* Upload zone */
+.upload-zone {
+    background: var(--surface);
+    border: 2px dashed var(--glass-border);
+    border-radius: var(--radius-xl);
+    padding: 28px 20px;
+    text-align: center;
+    transition: border-color 0.2s, background 0.2s;
+    cursor: pointer;
+    animation: slideUp 0.4s var(--ease-out) both;
+}
+
+.upload-zone.drag-over {
+    border-color: var(--accent);
+    background: rgba(16,16,16,0.02);
+}
+
+.upload-zone.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.upload-icon {
+    font-size: 2.2rem;
+    display: block;
+    margin-bottom: 10px;
+    color: var(--text-muted);
+}
+
+.upload-zone h3 {
+    font-size: 1rem;
+    margin-bottom: 4px;
+}
+
+.upload-zone p {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+}
+
+/* Preview */
+#preview-container { display: none; margin-top: 16px; }
+
+#preview-img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: contain;
+    border-radius: var(--radius-md);
+    background: var(--surface-hover);
+}
+
+/* Hidden file input */
+#id_image { display: none; }
+{% endblock %}
+
+{% block content %}
+
+<!-- Page heading -->
+<div class="page-heading">
+    <h2>صور البسطة</h2>
+    <p>أضف حتى 5 صور لمنتجاتك لجذب العملاء</p>
+</div>
+
+<!-- Counter bar -->
+<div class="counter-bar">
+    <span class="counter-label" style="color:var(--text-main);">{{ image_count }}</span>
+    <div class="counter-track">
+        <div class="counter-fill {% if image_count == max_images %}full{% endif %}"
+             style="width: {% widthratio image_count max_images 100 %}%">
+        </div>
+    </div>
+    <span class="counter-label">{{ max_images }} صور</span>
+</div>
+
+<!-- Existing images -->
+{% if images %}
+<div class="section-header">
+    <h3>الصور الحالية</h3>
+    <span style="font-size:0.82rem; color:var(--text-muted);">{{ image_count }}/{{ max_images }}</span>
+</div>
+
+<div class="images-grid">
+    {% for img in images %}
+    <div class="image-card" style="animation-delay: {{ forloop.counter0 }}00ms;">
+        <img src="{{ img.image.url }}" alt="{{ img.caption|default:'صورة' }}" loading="lazy">
+        <div class="img-meta">
+            <div class="img-caption">{{ img.caption|default:"بدون عنوان" }}</div>
+            <div class="img-date">{{ img.uploaded_at|date:"d/m/Y" }}</div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Upload form -->
+{% if image_count < max_images %}
+<div class="section-header" style="margin-top:{% if images %}8{% else %}0{% endif %}px;">
+    <h3>رفع صورة جديدة</h3>
+    <span style="font-size:0.82rem; color:var(--success);">{{ slots_left }} خانة متبقية</span>
+</div>
+
+<form method="post" enctype="multipart/form-data" id="upload-form">
+    {% csrf_token %}
+
+    <!-- Clickable upload zone -->
+    <div class="upload-zone" id="upload-zone" onclick="document.getElementById('id_image').click();">
+        <i class="ri-image-add-line upload-icon"></i>
+        <h3>اختر صورة للرفع</h3>
+        <p>PNG أو JPG · الحد الأقصى 5MB</p>
+
+        <!-- File input (hidden) -->
+        {{ form.image }}
+
+        <!-- Preview -->
+        <div id="preview-container">
+            <img id="preview-img" src="" alt="معاينة">
+        </div>
+    </div>
+
+    {% if form.image.errors %}
+    <div class="field-error" style="margin-top:8px;">{{ form.image.errors.0 }}</div>
+    {% endif %}
+
+    <!-- Caption -->
+    <div class="form-group" style="margin-top:14px;">
+        <label class="form-label" for="{{ form.caption.id_for_label }}">
+            <i class="ri-text"></i> وصف الصورة (اختياري)
+        </label>
+        <input type="text"
+               name="{{ form.caption.html_name }}"
+               id="{{ form.caption.id_for_label }}"
+               class="form-control"
+               placeholder="مثال: أفضل منتجاتنا الطازجة..."
+               value="{{ form.caption.value|default:'' }}"
+               maxlength="200">
+        {% if form.caption.errors %}
+        <div class="field-error">{{ form.caption.errors.0 }}</div>
+        {% endif %}
+    </div>
+
+    <button type="submit" class="btn-primary" id="upload-btn">
+        <i class="ri-upload-cloud-line"></i>
+        رفع الصورة
+    </button>
+</form>
+
+{% else %}
+<!-- Max images reached -->
+<div style="background:rgba(245,158,11,0.07); border:1px solid rgba(245,158,11,0.2); border-radius:var(--radius-lg); padding:20px; text-align:center; margin-top:8px;">
+    <i class="ri-image-fill" style="font-size:1.8rem; color:var(--warning); display:block; margin-bottom:8px;"></i>
+    <div style="font-weight:700; margin-bottom:4px;">وصلت للحد الأقصى</div>
+    <div style="font-size:0.84rem; color:var(--text-muted);">لديك 5 صور — أقصى عدد مسموح</div>
+</div>
+{% endif %}
+
+<div style="margin-top:12px;">
+    <a href="{% url 'vendor_portal:my_stall' %}" class="btn-secondary" style="text-decoration:none;">
+        <i class="ri-arrow-right-line"></i>
+        العودة لبسطتي
+    </a>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+    const fileInput = document.getElementById('id_image');
+    const previewContainer = document.getElementById('preview-container');
+    const previewImg = document.getElementById('preview-img');
+    const uploadZone = document.getElementById('upload-zone');
+
+    if (!fileInput) return;
+
+    fileInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            previewImg.src = e.target.result;
+            previewContainer.style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // Drag & drop
+    uploadZone.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        this.classList.add('drag-over');
+    });
+
+    uploadZone.addEventListener('dragleave', function () {
+        this.classList.remove('drag-over');
+    });
+
+    uploadZone.addEventListener('drop', function (e) {
+        e.preventDefault();
+        this.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files = dt.files;
+            fileInput.dispatchEvent(new Event('change'));
+        }
+    });
+
+    // Prevent zone click propagating twice when input is inside it
+    fileInput.addEventListener('click', function (e) {
+        e.stopPropagation();
+    });
+})();
+</script>
+{% endblock %}

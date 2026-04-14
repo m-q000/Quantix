@@ -1,0 +1,281 @@
+{% extends 'vendor_portal/base.html' %}
+
+{% block title %}رمز QR{% endblock %}
+{% block nav_qr %}active{% endblock %}
+{% block nav_qr_icon %}fill{% endblock %}
+
+{% block extra_styles %}
+/* QR display card */
+.qr-card {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    padding: 28px 20px;
+    text-align: center;
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--glass-border);
+    margin-bottom: 12px;
+    animation: slideUp 0.35s var(--ease-out) both;
+}
+
+.qr-wrapper {
+    display: inline-flex;
+    padding: 16px;
+    background: white;
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+}
+
+.qr-wrapper img {
+    width: 200px;
+    height: 200px;
+    display: block;
+}
+
+.qr-not-ready {
+    width: 200px;
+    height: 200px;
+    border: 2px dashed var(--glass-border);
+    border-radius: var(--radius-md);
+    display: grid;
+    place-items: center;
+    flex-direction: column;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin: 0 auto;
+}
+
+.qr-not-ready i { font-size: 2rem; display: block; margin-bottom: 8px; opacity: 0.4; }
+
+.qr-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.qr-stall-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+/* URL display */
+.url-box {
+    background: var(--surface-hover);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+    border: 1px solid var(--glass-border);
+}
+
+.url-text {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: right;
+    direction: ltr;
+    flex: 1;
+}
+
+.copy-btn {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 8px 14px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+    transition: background 0.2s, transform 0.2s var(--spring);
+}
+
+.copy-btn:active { transform: scale(0.96); }
+.copy-btn.copied { background: var(--success); }
+
+/* How it works */
+.steps-card {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--glass-border);
+    animation: slideUp 0.4s var(--ease-out) 0.1s both;
+}
+
+.step-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.step-row:last-child { border-bottom: none; }
+
+.step-num {
+    width: 28px; height: 28px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 0.78rem;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.step-text {
+    font-size: 0.88rem;
+    color: var(--text-main);
+    line-height: 1.6;
+    padding-top: 4px;
+}
+{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+    <h2>رمز QR الخاص بك</h2>
+    <p>يستخدمه المفتش للتحقق من صحة بسطتك</p>
+</div>
+
+<!-- QR Card -->
+<div class="qr-card">
+    {% if stall.qr_code_image %}
+    <div class="qr-wrapper">
+        <img src="{{ stall.qr_code_image.url }}" alt="رمز QR">
+    </div>
+    {% else %}
+    <div style="display:flex; justify-content:center; margin-bottom:16px;">
+        <div class="qr-not-ready">
+            <i class="ri-qr-code-line"></i>
+            {% if stall.status == 'pending' %}
+                <span>يُنشأ بعد الموافقة</span>
+            {% else %}
+                <span>رمز QR غير متاح</span>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="qr-label">فئة البسطة</div>
+    <div class="qr-stall-name">{{ stall.category.name }}</div>
+
+    {% if stall.location %}
+    <div style="display:inline-flex; align-items:center; gap:6px; background:var(--surface-hover); border-radius:var(--radius-pill); padding:6px 14px; font-size:0.82rem; font-weight:600; color:var(--text-muted); margin-bottom:16px;">
+        <i class="ri-map-pin-line"></i>
+        {{ stall.location.name }}
+    </div>
+    {% endif %}
+
+    <!-- Verify URL -->
+    {% if stall.status == 'active' %}
+    <div class="url-box">
+        <span class="url-text" id="verify-url" dir="ltr">
+            {{ request.scheme }}://{{ request.get_host }}{% url 'public_portal:verify_qr' stall.qr_token %}
+        </span>
+        <button class="copy-btn" id="copy-btn" onclick="copyUrl()">
+            <i class="ri-file-copy-line"></i>
+            نسخ
+        </button>
+    </div>
+    {% endif %}
+
+    <!-- Download -->
+    {% if stall.qr_code_image %}
+    <a href="{{ stall.qr_code_image.url }}"
+       download="QR-{{ stall.pk }}.png"
+       class="btn-primary"
+       style="text-decoration:none;">
+        <i class="ri-download-line"></i>
+        تحميل الرمز
+    </a>
+    {% endif %}
+</div>
+
+<!-- How it works -->
+<div class="section-header">
+    <h3>كيف يعمل؟</h3>
+</div>
+
+<div class="steps-card">
+    <div class="step-row">
+        <div class="step-num">١</div>
+        <div class="step-text">اطبع الرمز وعلّقه بشكل واضح على بسطتك</div>
+    </div>
+    <div class="step-row">
+        <div class="step-num">٢</div>
+        <div class="step-text">يمسح المفتش الرمز أثناء جولته للتحقق من الامتثال</div>
+    </div>
+    <div class="step-row">
+        <div class="step-num">٣</div>
+        <div class="step-text">يتحقق النظام تلقائياً من الموقع والوقت والنشاط والاشتراك</div>
+    </div>
+    <div class="step-row">
+        <div class="step-num">٤</div>
+        <div class="step-text">يمكن للمواطنين أيضاً مسح الرمز لرؤية تفاصيل بسطتك</div>
+    </div>
+</div>
+
+<!-- Status note -->
+{% if stall.status != 'active' %}
+<div style="background:rgba(245,158,11,0.07); border:1px solid rgba(245,158,11,0.2); border-radius:var(--radius-lg); padding:16px; margin-top:12px; display:flex; align-items:center; gap:12px;">
+    <i class="ri-information-line" style="color:var(--warning); font-size:1.2rem; flex-shrink:0;"></i>
+    <div style="font-size:0.85rem; color:var(--text-main);">
+        {% if stall.status == 'pending' %}
+            سيتم إنشاء رمز QR خاص ببسطتك بعد الموافقة عليها من البلدية
+        {% else %}
+            الرمز متاح فقط للبسطات النشطة
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function copyUrl() {
+    const urlEl = document.getElementById('verify-url');
+    const btn = document.getElementById('copy-btn');
+    if (!urlEl || !btn) return;
+
+    const text = urlEl.textContent.trim();
+    navigator.clipboard.writeText(text).then(function () {
+        btn.innerHTML = '<i class="ri-check-line"></i> تم النسخ';
+        btn.classList.add('copied');
+        setTimeout(function () {
+            btn.innerHTML = '<i class="ri-file-copy-line"></i> نسخ';
+            btn.classList.remove('copied');
+        }, 2000);
+    }).catch(function () {
+        // Fallback
+        const el = document.createElement('textarea');
+        el.value = text;
+        el.style.position = 'fixed';
+        el.style.opacity = '0';
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+        btn.innerHTML = '<i class="ri-check-line"></i> تم';
+        btn.classList.add('copied');
+        setTimeout(function () {
+            btn.innerHTML = '<i class="ri-file-copy-line"></i> نسخ';
+            btn.classList.remove('copied');
+        }, 2000);
+    });
+}
+</script>
+{% endblock %}

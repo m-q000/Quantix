@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% block title %}بوابة البائع{% endblock %} | Q-Zone</title>
+
+    <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,700,500,400&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+    <style>
+        /* =====================================================
+           Q-Zone Vendor Portal — Design System
+           Aesthetic: "Civic Market" — Warm, approachable, precise
+           Matches Q-Zone design (Cabinet Grotesk + Satoshi,
+           same color variables, same glass morphism language)
+           Language: Arabic RTL
+           ===================================================== */
+        :root {
+            --base:          #F8F9FA;
+            --surface:       #FFFFFF;
+            --surface-hover: #F1F3F5;
+            --text-main:     #0B0F19;
+            --text-muted:    #64748B;
+            --accent:        #101010;
+            --accent-hover:  #2D3748;
+            --success:       #10B981;
+            --warning:       #F59E0B;
+            --danger:        #EF4444;
+            --glass-bg:      rgba(255,255,255,0.92);
+            --glass-border:  rgba(0,0,0,0.06);
+            --font-display:  'Cabinet Grotesk', sans-serif;
+            --font-body:     'Satoshi', sans-serif;
+            --radius-pill:   100px;
+            --radius-xl:     24px;
+            --radius-lg:     16px;
+            --radius-md:     12px;
+            --shadow-float:  0 12px 32px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+            --shadow-card:   0 2px 12px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.03);
+            --shadow-sheet:  0 -8px 32px rgba(0,0,0,0.07);
+            --spring:        cubic-bezier(0.175, 0.885, 0.32, 1.15);
+            --ease-out:      cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            height: 100%;
+            font-family: var(--font-body);
+            background: var(--base);
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            line-height: 1.2;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        button { font-family: var(--font-body); cursor: pointer; border: none; background: none; }
+
+        /* ── App shell ──────────────────────────────────── */
+        .app-shell {
+            display: flex;
+            flex-direction: column;
+            height: 100dvh;
+            max-width: 480px;
+            margin: 0 auto;
+            position: relative;
+            background: var(--base);
+            overflow: hidden;
+        }
+
+        /* ── Header ─────────────────────────────────────── */
+        .vendor-header {
+            background: var(--accent);
+            color: white;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            z-index: 200;
+            position: relative;
+        }
+
+        .vendor-header::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 1px;
+            background: rgba(255,255,255,0.07);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-brand .live-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 0 0 rgba(16,185,129,0.5);
+            animation: pulse 2.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(16,185,129,0.5); }
+            70%  { box-shadow: 0 0 0 6px rgba(16,185,129,0); }
+            100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); }
+        }
+
+        .brand-text h1 {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: white;
+        }
+
+        .brand-text .portal-name {
+            font-size: 0.68rem;
+            color: rgba(255,255,255,0.45);
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .vendor-chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.09);
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: var(--radius-pill);
+            padding: 6px 12px;
+        }
+
+        .vendor-chip i {
+            font-size: 0.85rem;
+            color: rgba(255,255,255,0.55);
+        }
+
+        .vendor-chip .vendor-name {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: white;
+            max-width: 100px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .logout-btn {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.1);
+            display: grid;
+            place-items: center;
+            color: rgba(255,255,255,0.6);
+            font-size: 1rem;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(239,68,68,0.2);
+            color: #fca5a5;
+        }
+
+        /* ── Content area ────────────────────────────────── */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 20px 16px 88px;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+        }
+
+        /* ── Bottom navigation ──────────────────────────── */
+        .bottom-nav {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: var(--glass-bg);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-top: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 8px 8px 18px;
+            z-index: 100;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            color: var(--text-muted);
+            font-size: 0.68rem;
+            font-weight: 600;
+            flex: 1;
+            padding: 6px 4px;
+            border-radius: var(--radius-lg);
+            transition: color 0.2s;
+        }
+
+        .nav-item i { font-size: 1.4rem; }
+        .nav-item.active { color: var(--accent); }
+
+        /* Center apply FAB */
+        .nav-apply {
+            position: relative;
+            top: -14px;
+            flex: 1.2;
+        }
+
+        .apply-circle {
+            width: 54px; height: 54px;
+            background: var(--accent);
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            box-shadow: var(--shadow-float);
+            color: white;
+            margin: 0 auto 4px;
+            transition: transform 0.3s var(--spring), background 0.2s;
+        }
+
+        .nav-apply.active .apply-circle { background: #1a1a2e; }
+        .nav-apply:active .apply-circle { transform: scale(0.93); }
+        .nav-apply i { font-size: 1.5rem; }
+
+        /* ── Shared card ────────────────────────────────── */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-xl);
+            padding: 20px;
+            box-shadow: var(--shadow-card);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 12px;
+            animation: slideUp 0.4s var(--ease-out) both;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .card:nth-child(1) { animation-delay: 0.04s; }
+        .card:nth-child(2) { animation-delay: 0.08s; }
+        .card:nth-child(3) { animation-delay: 0.12s; }
+        .card:nth-child(4) { animation-delay: 0.16s; }
+        .card:nth-child(5) { animation-delay: 0.20s; }
+
+        /* ── Status badges ───────────────────────────────── */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: var(--radius-pill);
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .status-pending  { background: rgba(245,158,11,0.1);  color: var(--warning); }
+        .status-active   { background: rgba(16,185,129,0.1);  color: var(--success); }
+        .status-expired  { background: rgba(100,116,139,0.1); color: var(--text-muted); }
+        .status-suspended{ background: rgba(239,68,68,0.1);   color: var(--danger); }
+        .status-rejected { background: rgba(239,68,68,0.1);   color: var(--danger); }
+
+        /* ── Form controls ───────────────────────────────── */
+        .form-group { margin-bottom: 16px; }
+
+        .form-label {
+            display: block;
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 7px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            background: var(--surface-hover);
+            border: 1.5px solid transparent;
+            border-radius: var(--radius-md);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            color: var(--text-main);
+            direction: rtl;
+            text-align: right;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+            -webkit-appearance: none;
+        }
+
+        .form-control:focus {
+            outline: none;
+            background: var(--surface);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(16,16,16,0.05);
+        }
+
+        textarea.form-control { resize: vertical; min-height: 90px; }
+        select.form-control { cursor: pointer; }
+
+        /* ── Buttons ─────────────────────────────────────── */
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.2s var(--spring), background 0.2s;
+        }
+        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-primary:active { transform: scale(0.98); }
+
+        .btn-secondary {
+            width: 100%;
+            padding: 14px;
+            background: var(--surface-hover);
+            color: var(--text-main);
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+        .btn-secondary:hover { background: #e2e8f0; }
+
+        .btn-success {
+            width: 100%;
+            padding: 16px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.2s var(--spring), opacity 0.2s;
+        }
+        .btn-success:active { transform: scale(0.98); }
+
+        /* ── Section header ──────────────────────────────── */
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+        }
+
+        .section-header h3 { font-size: 1rem; font-weight: 700; }
+        .section-header a  { font-size: 0.82rem; font-weight: 600; color: var(--text-muted); }
+
+        /* ── Page heading ────────────────────────────────── */
+        .page-heading { margin-bottom: 20px; }
+        .page-heading h2 { font-size: 1.5rem; font-weight: 800; }
+        .page-heading p  { font-size: 0.87rem; color: var(--text-muted); margin-top: 4px; }
+
+        /* ── Empty state ─────────────────────────────────── */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-muted);
+        }
+        .empty-state i { font-size: 2.5rem; display: block; margin-bottom: 12px; opacity: 0.4; }
+        .empty-state p { font-size: 0.9rem; }
+
+        /* ── Detail row ──────────────────────────────────── */
+        .detail-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-row i { font-size: 1.1rem; color: var(--text-muted); margin-top: 2px; width: 20px; text-align: center; flex-shrink: 0; }
+        .detail-row .detail-label { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 2px; }
+        .detail-row .detail-value { font-size: 0.93rem; font-weight: 600; }
+
+        /* ── Field error ─────────────────────────────────── */
+        .field-error {
+            font-size: 0.8rem;
+            color: var(--danger);
+            margin-top: 5px;
+        }
+
+        .form-errors-banner {
+            background: rgba(239,68,68,0.07);
+            border: 1px solid rgba(239,68,68,0.15);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            margin-bottom: 16px;
+            font-size: 0.87rem;
+            color: var(--danger);
+        }
+
+        /* ── Spinner ─────────────────────────────────────── */
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin { animation: spin 0.8s linear infinite; display: inline-block; }
+
+        {% block extra_styles %}{% endblock %}
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+
+        <!-- ── Header ── -->
+        <header class="vendor-header">
+            <div class="header-brand">
+                <div class="live-dot"></div>
+                <div class="brand-text">
+                    <h1>Q-Zone</h1>
+                    <div class="portal-name">بوابة البائع</div>
+                </div>
+            </div>
+            <div class="header-actions">
+                {% if user.is_authenticated %}
+                <div class="vendor-chip">
+                    <i class="ri-store-2-line"></i>
+                    <span class="vendor-name">{{ user.get_full_name|default:user.username }}</span>
+                </div>
+                {% endif %}
+                <a href="{% url 'accounts:logout' %}" class="logout-btn" title="تسجيل الخروج">
+                    <i class="ri-logout-box-r-line"></i>
+                </a>
+            </div>
+        </header>
+
+        <!-- ── Main content ── -->
+        <main class="content-area">
+            {% block content %}{% endblock %}
+        </main>
+
+        <!-- ── Bottom navigation ── -->
+        <nav class="bottom-nav">
+            <a href="{% url 'vendor_portal:dashboard' %}"
+               class="nav-item {% block nav_home %}{% endblock %}">
+                <i class="ri-home-5-{% block nav_home_icon %}line{% endblock %}"></i>
+                <span>الرئيسية</span>
+            </a>
+
+            <a href="{% url 'vendor_portal:apply' %}"
+               class="nav-item nav-apply {% block nav_apply %}{% endblock %}">
+                <div class="apply-circle">
+                    <i class="ri-map-pin-add-line"></i>
+                </div>
+                <span>بسطتي</span>
+            </a>
+
+            <a href="{% url 'vendor_portal:qr_code' %}"
+               class="nav-item {% block nav_qr %}{% endblock %}">
+                <i class="ri-qr-code-{% block nav_qr_icon %}line{% endblock %}"></i>
+                <span>رمز QR</span>
+            </a>
+        </nav>
+
+    </div><!-- .app-shell -->
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
