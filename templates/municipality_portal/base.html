@@ -3,411 +3,377 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>{% block title %}بوابة البلدية{% endblock %} | Q-Zone</title>
+    <title>{% block title %}بوابة بلدية الخليل الرقمية{% endblock %}</title>
 
-    <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,700,500,400&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200..700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 
     <style>
         :root {
-            --base:          #F8F9FA;
-            --surface:       #FFFFFF;
-            --surface-hover: #F1F3F5;
-            --text-main:     #0B0F19;
-            --text-muted:    #64748B;
-            --accent:        #101010;
-            --accent-hover:  #2D3748;
-            --success:       #10B981;
-            --warning:       #F59E0B;
-            --danger:        #EF4444;
-            --glass-bg:      rgba(255,255,255,0.92);
-            --glass-border:  rgba(0,0,0,0.06);
-            --font-display:  'Cabinet Grotesk', sans-serif;
-            --font-body:     'Satoshi', sans-serif;
-            --radius-pill:   100px;
-            --radius-xl:     24px;
-            --radius-lg:     16px;
-            --radius-md:     12px;
-            --shadow-float:  0 12px 32px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
-            --shadow-card:   0 2px 12px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.03);
-            --spring:        cubic-bezier(0.175, 0.885, 0.32, 1.15);
-            --ease-out:      cubic-bezier(0.25, 1, 0.5, 1);
-            --sidebar-width: 260px;
+            /* 10x Palette: Refined Excellence */
+            --brand-primary:   #4F46E5; /* Indigo 600 */
+            --brand-secondary: #0EA5E9; /* Sky 500 */
+            --bg-base:         #F8FAFC; /* Slate 50 */
+            --bg-surface:      #FFFFFF;
+            --text-heading:    #0F172A; /* Slate 900 */
+            --text-body:       #334155; /* Slate 700 */
+            --text-muted:      #64748B; /* Slate 500 */
+            --border-light:    #E2E8F0; /* Slate 200 */
+            
+            --success:         #10B981;
+            --warning:         #F59E0B;
+            --danger:          #EF4444;
+            
+            --sidebar-width:   280px;
+            --header-height:   80px;
+            --radius-lg:       16px;
+            --radius-xl:       24px;
+            
+            --shadow-sm:       0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md:       0 4px 12px -2px rgba(0,0,0,0.08), 0 2px 6px -1px rgba(0,0,0,0.04);
+            --shadow-lg:       0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            --transition:      all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        html, body {
-            height: 100%;
-            font-family: var(--font-body);
-            background: var(--base);
-            color: var(--text-main);
+        body {
+            font-family: 'Readex Pro', sans-serif;
+            background: var(--bg-base);
+            color: var(--text-body);
+            line-height: 1.6;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
-        h1, h2, h3, h4 {
-            font-family: var(--font-display);
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            line-height: 1.2;
-        }
-
-        a { text-decoration: none; color: inherit; }
-        button { cursor: pointer; border: none; background: none; font-family: inherit; }
-
-        /* ── App Layout ───────────────────────────── */
-        .app-wrapper {
-            display: flex;
+        /* ── Advanced Layout ── */
+        .dashboard-shell {
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 1fr;
             min-height: 100vh;
         }
 
-        /* ── Sidebar (Desktop) ─────────────────────── */
+        /* ── Sidebar (Premium Glassmorphism) ── */
         .sidebar {
-            width: var(--sidebar-width);
-            background: var(--surface);
-            border-left: 1px solid var(--glass-border);
-            display: flex;
-            flex-direction: column;
+            background: #020617; /* Slate 950 */
+            color: #F1F5F9;
+            height: 100vh;
             position: sticky;
             top: 0;
-            height: 100vh;
+            padding: 40px 24px;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid rgba(255,255,255,0.05);
             z-index: 1000;
         }
 
-        .sidebar-header {
-            padding: 24px;
+        .brand-section {
             display: flex;
             align-items: center;
-            gap: 12px;
-            border-bottom: 1px solid var(--glass-border);
+            gap: 16px;
+            margin-bottom: 48px;
+            padding: 0 8px;
         }
 
-        .brand-logo {
-            width: 32px; height: 32px;
-            background: var(--accent);
-            border-radius: 8px;
+        .brand-circle {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            border-radius: 12px;
             display: grid; place-items: center;
-            color: white; font-weight: 800;
+            color: white; font-weight: 800; font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
         }
 
-        .sidebar-nav {
-            flex: 1;
-            padding: 20px 12px;
-            overflow-y: auto;
+        .brand-text h1 { font-size: 1.3rem; font-weight: 700; color: white; letter-spacing: -0.01em; }
+        .brand-text p { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+
+        .nav-section-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin: 32px 12px 12px;
         }
 
-        .nav-link {
+        .sidebar-nav { flex: 1; }
+
+        .nav-item {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             padding: 12px 16px;
-            border-radius: var(--radius-md);
-            color: var(--text-muted);
-            font-weight: 600;
-            transition: all 0.2s;
+            border-radius: 12px;
+            color: #94A3B8;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: var(--transition);
             margin-bottom: 4px;
+            text-decoration: none;
         }
 
-        .nav-link:hover {
-            background: var(--surface-hover);
-            color: var(--text-main);
-        }
+        .nav-item i { font-size: 1.4rem; transition: var(--transition); }
 
-        .nav-link.active {
-            background: var(--accent);
+        .nav-item:hover {
+            background: rgba(255,255,255,0.05);
             color: white;
         }
 
-        .sidebar-footer {
-            padding: 16px;
-            border-top: 1px solid var(--glass-border);
+        .nav-item.active {
+            background: var(--brand-primary);
+            color: white;
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
         }
 
-        /* ── Main Content ─────────────────────────── */
-        .main-container {
-            flex: 1;
+        .nav-item.active i { transform: scale(1.1); }
+
+        .sidebar-footer {
+            margin-top: auto;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 24px;
+        }
+
+        /* ── Main Panel ── */
+        .main-panel {
+            min-width: 0;
             display: flex;
             flex-direction: column;
-            min-width: 0;
         }
 
-        .top-bar {
-            height: 64px;
-            background: var(--surface);
-            border-bottom: 1px solid var(--glass-border);
+        .top-nav {
+            height: var(--header-height);
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border-light);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 24px;
+            padding: 0 48px;
             position: sticky;
             top: 0;
             z-index: 900;
+            backdrop-filter: blur(8px);
+            background: rgba(255,255,255,0.8);
         }
 
-        .page-content {
-            padding: 32px;
-            max-width: 1200px;
-            width: 100%;
+        .page-header-title { font-size: 1.5rem; font-weight: 700; color: var(--text-heading); }
+
+        .user-widget {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-avatar {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            background: #F1F5F9;
+            display: grid; place-items: center;
+            font-weight: 800; color: var(--brand-primary);
+            border: 2px solid var(--border-light);
+        }
+
+        .user-meta { text-align: left; line-height: 1.3; }
+        .user-meta .name { font-weight: 700; color: var(--text-heading); font-size: 0.95rem; }
+        .user-meta .role { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
+
+        /* ── Page Wrapper ── */
+        .content-container {
+            padding: 48px;
+            max-width: 1600px;
             margin: 0 auto;
+            width: 100%;
         }
 
-        /* ── Mobile UI Elements ─────────────────────── */
-        .mobile-header { display: none; }
-        .bottom-nav { display: none; }
-
-        /* ── Components ───────────────────────────── */
+        /* ── Component Primitives ── */
         .card {
-            background: var(--surface);
-            border-radius: var(--radius-xl);
-            padding: 24px;
-            box-shadow: var(--shadow-card);
-            border: 1px solid var(--glass-border);
-            margin-bottom: 24px;
-        }
-
-        .data-table-wrapper {
-            background: var(--surface);
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-card);
-            border: 1px solid var(--glass-border);
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-md);
+            transition: var(--transition);
             overflow: hidden;
         }
 
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: right;
-        }
-
-        .data-table th {
-            padding: 16px 24px;
-            background: var(--surface-hover);
-            color: var(--text-muted);
-            font-weight: 700;
-            font-size: 0.85rem;
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .data-table td {
-            padding: 16px 24px;
-            border-bottom: 1px solid var(--glass-border);
-            font-size: 0.95rem;
-        }
-
-        .data-table tr:last-child td { border-bottom: none; }
-        .data-table tr:hover { background: var(--base); }
+        .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
 
         .btn {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            border-radius: var(--radius-md);
-            font-weight: 700;
-            transition: all 0.2s;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
             font-size: 0.9rem;
+            transition: var(--transition);
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
         }
 
-        .btn-primary { background: var(--accent); color: white; }
-        .btn-primary:hover { background: var(--accent-hover); }
+        .btn-primary { 
+            background: var(--brand-primary); 
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+        .btn-primary:hover { background: #4338CA; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3); }
 
-        .btn-success { background: var(--success); color: white; }
-        .btn-outline { border: 1px solid var(--glass-border); color: var(--text-main); }
-        .btn-outline:hover { background: var(--surface-hover); }
+        .btn-white { background: white; color: var(--text-heading); border: 1px solid var(--border-light); }
+        .btn-white:hover { background: var(--bg-base); }
 
-        .badge {
-            padding: 4px 10px;
-            border-radius: var(--radius-pill);
+        /* ── Tables (High Fidelity) ── */
+        .table-view { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .table-view th {
+            padding: 20px 24px;
+            text-align: right;
+            background: #F8FAFC;
             font-size: 0.75rem;
             font-weight: 800;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border-light);
         }
-
-        .badge-success { background: rgba(16,185,129,0.1); color: var(--success); }
-        .badge-warning { background: rgba(245,158,11,0.1); color: var(--warning); }
-        .badge-danger { background: rgba(239,68,68,0.1); color: var(--danger); }
-
-        /* ── Responsive ───────────────────────────── */
-        @media (max-width: 1024px) {
-            .sidebar { display: none; }
-            
-            .mobile-header {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                padding: 14px 20px;
-                background: var(--accent);
-                color: white;
-                position: sticky;
-                top: 0;
-                z-index: 1000;
-            }
-
-            .bottom-nav {
-                display: flex;
-                position: fixed;
-                bottom: 0; left: 0; right: 0;
-                background: var(--glass-bg);
-                backdrop-filter: blur(20px);
-                border-top: 1px solid var(--glass-border);
-                justify-content: space-around;
-                padding: 10px 0 24px;
-                z-index: 1000;
-            }
-
-            .bottom-nav .nav-item {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 4px;
-                color: var(--text-muted);
-                font-size: 0.7rem;
-                font-weight: 700;
-            }
-
-            .bottom-nav .nav-item.active { color: var(--accent); }
-            .bottom-nav i { font-size: 1.4rem; }
-
-            .page-content { padding: 20px 16px 100px; }
-            .top-bar { display: none; }
-            
-            .desktop-only { display: none; }
-            .mobile-cards { display: block; }
+        .table-view td {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 0.95rem;
+            color: var(--text-body);
+            background: white;
         }
+        .table-view tr:last-child td { border-bottom: none; }
+        .table-view tr:hover td { background: #F8FAFC; }
 
-        @media (min-width: 1025px) {
-            .mobile-cards { display: none; }
-        }
-
-        /* ── Grid System ──────────────────────────── */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-            margin-bottom: 32px;
-        }
-
-        .stat-card {
-            background: var(--surface);
-            padding: 24px;
-            border-radius: var(--radius-xl);
-            border: 1px solid var(--glass-border);
-            display: flex;
+        /* ── Badges ── */
+        .badge {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
             align-items: center;
-            gap: 20px;
+            gap: 6px;
         }
+        .badge-success { background: #DCFCE7; color: #166534; }
+        .badge-warning { background: #FEF3C7; color: #92400E; }
+        .badge-danger  { background: #FEE2E2; color: #991B1B; }
 
-        .stat-icon {
-            width: 48px; height: 48px;
+        /* ── Form Controls (10x Styling) ── */
+        .form-group { margin-bottom: 24px; }
+        .form-label { display: block; font-weight: 700; color: var(--text-heading); margin-bottom: 8px; font-size: 0.9rem; }
+        .form-control {
+            width: 100%;
+            padding: 14px 18px;
+            background: #F8FAFC;
+            border: 1.5px solid var(--border-light);
             border-radius: 12px;
-            display: grid; place-items: center;
-            font-size: 1.5rem;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--brand-primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
         }
 
-        {% block extra_styles %}{% endblock %}
+        /* ── Responsive ── */
+        @media (max-width: 1024px) {
+            .dashboard-shell { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .top-nav { padding: 0 24px; }
+            .content-container { padding: 24px 16px; }
+        }
+
+        {% block extra_css %}{% endblock %}
     </style>
 </head>
 <body>
-    <div class="app-wrapper">
-        <!-- Desktop Sidebar -->
+    <div class="dashboard-shell">
+        <!-- Sidebar -->
         <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="brand-logo">Q</div>
-                <div style="line-height: 1">
-                    <h2 style="font-size: 1.1rem">Q-Zone</h2>
-                    <span style="font-size: 0.7rem; color: var(--text-muted); font-weight: 700">بوابة البلدية</span>
+            <div class="brand-section">
+                <div class="brand-circle">Q</div>
+                <div class="brand-text">
+                    <h1>كيو زون</h1>
+                    <p>بلدية الخليل المركزية</p>
                 </div>
             </div>
-            
+
             <nav class="sidebar-nav">
-                <a href="{% url 'municipality_portal:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-                    <i class="ri-dashboard-line"></i>
-                    <span>الرئيسية</span>
+                <div class="nav-section-label">البوابة الرئيسية</div>
+                <a href="{% url 'municipality_portal:dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="ri-dashboard-fill"></i>
+                    <span>لوحة التحكم</span>
                 </a>
-                <a href="{% url 'municipality_portal:stall_list' %}" class="nav-link {% if 'stall' in request.path %}active{% endif %}">
-                    <i class="ri-store-2-line"></i>
-                    <span>إدارة البسطات</span>
+
+                <div class="nav-section-label">إدارة العمليات</div>
+                <a href="{% url 'municipality_portal:stall_list' %}" class="nav-item {% if 'stall' in request.path %}active{% endif %}">
+                    <i class="ri-store-3-fill"></i>
+                    <span>منظومة البسطات</span>
                 </a>
-                <a href="{% url 'municipality_portal:location_list' %}" class="nav-link {% if 'location' in request.path %}active{% endif %}">
-                    <i class="ri-map-pin-line"></i>
-                    <span>المواقع المسموحة</span>
+                <a href="{% url 'municipality_portal:location_list' %}" class="nav-item {% if 'location' in request.path %}active{% endif %}">
+                    <i class="ri-map-pin-fill"></i>
+                    <span>المناطق المعتمدة</span>
                 </a>
-                <a href="{% url 'municipality_portal:vendor_list' %}" class="nav-link {% if 'vendor' in request.path %}active{% endif %}">
-                    <i class="ri-user-2-line"></i>
-                    <span>التجار</span>
+                <a href="{% url 'municipality_portal:vendor_list' %}" class="nav-item {% if 'vendor' in request.path %}active{% endif %}">
+                    <i class="ri-user-star-fill"></i>
+                    <span>سجل التجار</span>
                 </a>
-                <a href="{% url 'municipality_portal:officer_list' %}" class="nav-link {% if 'officer' in request.path %}active{% endif %}">
-                    <i class="ri-shield-check-line"></i>
-                    <span>المفتشين</span>
+
+                <div class="nav-section-label">الرقابة والمتابعة</div>
+                <a href="{% url 'municipality_portal:officer_list' %}" class="nav-item {% if 'officer' in request.path %}active{% endif %}">
+                    <i class="ri-shield-user-fill"></i>
+                    <span>فريق الرقابة</span>
                 </a>
-                <a href="{% url 'municipality_portal:violation_list' %}" class="nav-link {% if 'violation' in request.path %}active{% endif %}">
-                    <i class="ri-error-warning-line"></i>
-                    <span>المخالفات</span>
+                <a href="{% url 'municipality_portal:violation_list' %}" class="nav-item {% if 'violation' in request.path %}active{% endif %}">
+                    <i class="ri-alarm-warning-fill"></i>
+                    <span>المخالفات الميدانية</span>
                 </a>
-                <a href="{% url 'municipality_portal:reports' %}" class="nav-link {% if 'reports' in request.path %}active{% endif %}">
-                    <i class="ri-bar-chart-box-line"></i>
-                    <span>التقارير</span>
+                <a href="{% url 'municipality_portal:reports' %}" class="nav-item {% if 'reports' in request.path %}active{% endif %}">
+                    <i class="ri-pie-chart-2-fill"></i>
+                    <span>التقارير التحليلية</span>
                 </a>
             </nav>
 
             <div class="sidebar-footer">
-                <a href="{% url 'accounts:logout' %}" class="nav-link" style="color: var(--danger)">
-                    <i class="ri-logout-box-r-line"></i>
-                    <span>تسجيل الخروج</span>
+                <a href="{% url 'accounts:logout' %}" class="nav-item" style="color: #F87171">
+                    <i class="ri-logout-box-r-fill"></i>
+                    <span>تسجيل الخروج الرسمي</span>
                 </a>
             </div>
         </aside>
 
-        <!-- Main Content -->
-        <div class="main-container">
-            <!-- Desktop Top Bar -->
-            <header class="top-bar">
-                <h2 style="font-size: 1.2rem">{% block page_title %}لوحة التحكم{% endblock %}</h2>
-                <div style="display: flex; align-items: center; gap: 16px">
-                    <div style="text-align: left; line-height: 1.2">
-                        <div style="font-weight: 700; font-size: 0.9rem">{{ user.get_full_name|default:user.username }}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted)">مسؤول بلدية</div>
+        <!-- Main Panel -->
+        <main class="main-panel">
+            <header class="top-nav">
+                <div class="page-header-title">
+                    {% block page_title %}لوحة القيادة والمتابعة{% endblock %}
+                </div>
+
+                <div class="user-widget">
+                    <div class="user-meta desktop-only">
+                        <div class="name">تحية طيبة، {{ user.get_full_name|default:user.username }}</div>
+                        <div class="role">المسؤول الإداري المركزي</div>
                     </div>
                 </div>
             </header>
 
-            <!-- Mobile Header -->
-            <header class="mobile-header">
-                <div style="display: flex; align-items: center; gap: 10px">
-                    <div class="brand-logo" style="background: white; color: black">Q</div>
-                    <span style="font-weight: 800">Q-Zone</span>
-                </div>
-                <a href="{% url 'accounts:logout' %}" style="color: white"><i class="ri-logout-box-r-line"></i></a>
-            </header>
-
-            <main class="page-content">
+            <div class="content-container">
                 {% block content %}{% endblock %}
-            </main>
-        </div>
-
-        <!-- Mobile Bottom Nav -->
-        <nav class="bottom-nav">
-            <a href="{% url 'municipality_portal:dashboard' %}" class="nav-item active">
-                <i class="ri-home-5-line"></i>
-                <span>الرئيسية</span>
-            </a>
-            <a href="{% url 'municipality_portal:stall_list' %}" class="nav-item">
-                <i class="ri-store-2-line"></i>
-                <span>البسطات</span>
-            </a>
-            <a href="{% url 'municipality_portal:location_list' %}" class="nav-item">
-                <i class="ri-map-pin-line"></i>
-                <span>المواقع</span>
-            </a>
-            <a href="{% url 'municipality_portal:vendor_list' %}" class="nav-item">
-                <i class="ri-user-2-line"></i>
-                <span>التجار</span>
-            </a>
-        </nav>
+            </div>
+        </main>
     </div>
 
     <!-- Leaflet.js -->
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
-    {% block scripts %}{% endblock %}
+    <script>
+        // Global logic for dashboard interactions
+    </script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -24,7 +24,24 @@ class StallAssignLocationForm(forms.Form):
     )
 
 
+DAYS_CHOICES = [
+    ('monday', 'الإثنين'),
+    ('tuesday', 'الثلاثاء'),
+    ('wednesday', 'الأربعاء'),
+    ('thursday', 'الخميس'),
+    ('friday', 'الجمعة'),
+    ('saturday', 'السبت'),
+    ('sunday', 'الأحد'),
+]
+
 class LocationForm(forms.ModelForm):
+    allowed_days = forms.MultipleChoiceField(
+        choices=DAYS_CHOICES,
+        widget=forms.CheckboxSelectMultiple,
+        label="أيام العمل المسموحة",
+        required=True
+    )
+
     class Meta:
         model = Location
         fields = [

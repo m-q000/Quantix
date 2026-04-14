@@ -1,10 +1,89 @@
 {% extends 'municipality_portal/base.html' %}
+
+{% block page_title %}ملف الشريك التاجر: {{ vendor.user.get_full_name }}{% endblock %}
+
 {% block content %}
-<h2>تفاصيل التاجر</h2>
-<br>
-<div class="card">
-    <p><strong>الاسم:</strong> {{ vendor.user.get_full_name }}</p>
-    <p><strong>الهوية:</strong> {{ vendor.national_id }}</p>
-    <p><strong>الحالة:</strong> {{ vendor.get_status_display }}</p>
+<div style="display: grid; grid-template-columns: 1fr 2fr; gap: 40px; align-items: start;">
+    
+    <!-- Profile Sidebar -->
+    <aside>
+        <div class="card" style="padding: 40px; text-align: center">
+            <div style="width: 120px; height: 120px; background: #F8FAFC; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 24px; font-size: 3rem; color: var(--brand-primary); border: 4px solid white; box-shadow: var(--shadow-md)">
+                <i class="ri-user-star-fill"></i>
+            </div>
+            <h3 style="font-size: 1.5rem; margin-bottom: 4px">{{ vendor.user.get_full_name }}</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600; margin-bottom: 32px">تاجر معتمد لدى بلدية الخليل</p>
+
+            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px">
+                <div style="padding: 16px; background: #F8FAFC; border-radius: 16px; text-align: right">
+                    <label style="font-size: 0.72rem; color: var(--text-muted); font-weight: 800; display: block; margin-bottom: 4px">رقم القيد الوطني (ID)</label>
+                    <span style="font-weight: 800; font-family: 'Inter', sans-serif; font-size: 1.1rem">{{ vendor.national_id }}</span>
+                </div>
+                <div style="padding: 16px; background: #F8FAFC; border-radius: 16px; text-align: right">
+                    <label style="font-size: 0.72rem; color: var(--text-muted); font-weight: 800; display: block; margin-bottom: 4px">تاريخ الانضمام للنظام</label>
+                    <span style="font-weight: 800; font-size: 1.1rem">{{ vendor.created_at|date:"Y/m/d" }}</span>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 16px">
+                <button class="btn btn-primary" style="width: 100%; padding: 16px">تحديث بيانات الملف</button>
+                <button class="btn btn-white" style="width: 100%; color: var(--danger); border-color: #FEE2E2">إلغاء تفعيل حساب التاجر</button>
+            </div>
+        </div>
+
+        <div class="card" style="padding: 24px; margin-top: 24px; background: #0F172A; color: white; text-align: center">
+            <div style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 12px">حالة الالتزام المالي</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: var(--success)">لا يوجد متأخرات</div>
+        </div>
+    </aside>
+
+    <!-- Content Area -->
+    <div class="vendor-activity">
+        <div class="card" style="padding: 0; margin-bottom: 32px">
+            <div style="padding: 32px; border-bottom: 1px solid var(--border-light)">
+                <h4 style="font-size: 1.3rem">البسطات والأنشطة التجارية النشطة</h4>
+            </div>
+            
+            <div style="padding: 32px">
+                <div style="display: grid; gap: 20px">
+                    {% for stall in vendor.user.stalls.all %}
+                    <div style="padding: 24px; background: white; border: 2px solid var(--bg-base); border-radius: 20px; display: flex; justify-content: space-between; align-items: center; transition: var(--transition)" onmouseover="this.style.borderColor='var(--brand-primary)'" onmouseout="this.style.borderColor='var(--bg-base)'">
+                        <div style="display: flex; align-items: center; gap: 20px">
+                            <div style="width: 52px; height: 52px; background: rgba(79, 70, 229, 0.05); border-radius: 14px; display: grid; place-items: center; color: var(--brand-primary)">
+                                <i class="ri-store-3-line" style="font-size: 1.6rem"></i>
+                            </div>
+                            <div>
+                                <div style="font-weight: 800; font-size: 1.1rem">{{ stall.category.name }}</div>
+                                <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600">الموقع: {{ stall.location.name|default:"بانتظار التعيين" }}</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 24px">
+                            {% if stall.status == 'active' or stall.status == 'approved' %}
+                            <span class="badge badge-success">نشط</span>
+                            {% else %}
+                            <span class="badge badge-warning">قيد المراجعة</span>
+                            {% endif %}
+                            <a href="{% url 'municipality_portal:stall_detail' stall.pk %}" class="btn btn-white" style="padding: 8px"><i class="ri-arrow-left-s-line"></i></a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div style="text-align: center; padding: 48px; color: var(--text-muted)">
+                        <i class="ri-history-line" style="font-size: 3rem; display: block; margin-bottom: 16px; opacity: 0.1"></i>
+                        <p>لا يوجد سجل أنشطة نشطة لهذا التاجر حالياً.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card" style="padding: 32px">
+            <h4 style="font-size: 1.3rem; margin-bottom: 24px">سجل المخالفات والتقييم الميداني</h4>
+            <div style="padding: 64px; text-align: center; background: #F8FAFC; border-radius: 20px; border: 2px dashed var(--border-light)">
+                <i class="ri-shield-check-line" style="font-size: 3rem; display: block; margin-bottom: 16px; color: var(--success); opacity: 0.5"></i>
+                <p style="font-weight: 700; color: var(--text-muted)">السجل نظيف تماماً</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px">لم يتم تسجيل أي مخالفات بحق هذا التاجر منذ انضمامه للنظام.</p>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

@@ -1,23 +1,26 @@
 {% extends 'municipality_portal/base.html' %}
 
-{% block page_title %}إدارة المواقع المسموح التواجد فيها{% endblock %}
+{% block page_title %}إدارة المواقع الجغرافية المعتمدة{% endblock %}
 
 {% block content %}
-<div style="margin-bottom: 24px; display: flex; justify-content: flex-end">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px">
+    <div>
+        <h2 style="font-size: 1.5rem; margin-bottom: 4px">المناطق والساحات العامة</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem">توزيع نقاط التواجد القانونية للبسطات في مختلف أحياء المدينة.</p>
+    </div>
     <a href="{% url 'municipality_portal:location_create' %}" class="btn btn-primary">
-        <i class="ri-map-pin-add-line"></i> إضافة موقع مسموح جديد
+        <i class="ri-map-pin-add-line"></i> إضافة موقع معتمد جديد
     </a>
 </div>
 
-<div class="data-table-wrapper">
-    <table class="data-table desktop-only">
+<div class="card" style="padding: 0">
+    <table class="table-view">
         <thead>
             <tr>
-                <th>اسم الموقع</th>
-                <th>الإحداثيات</th>
-                <th>السعة</th>
-                <th>أوقات العمل</th>
-                <th>الأيام</th>
+                <th>تسمية الموقع</th>
+                <th>إحداثيات المركز</th>
+                <th>الاستيعاب الحالي</th>
+                <th>ساعات العمل النشطة</th>
                 <th>الحالة</th>
                 <th>الإجراء</th>
             </tr>
@@ -25,48 +28,46 @@
         <tbody>
             {% for loc in locations %}
             <tr>
-                <td style="font-weight: 700">{{ loc.name }}</td>
-                <td style="font-size: 0.8rem; color: var(--text-muted)">
-                    {{ loc.latitude|floatformat:4 }}, {{ loc.longitude|floatformat:4 }}
+                <td style="font-weight: 700">
+                    <div>{{ loc.name }}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500">منطقة #{{ loc.pk }}</div>
                 </td>
-                <td><span style="font-weight: 700">{{ loc.stalls.count }}/{{ loc.max_stalls }}</span></td>
-                <td>{{ loc.start_time|time:"H:i" }} - {{ loc.end_time|time:"H:i" }}</td>
-                <td style="font-size: 0.8rem">{{ loc.allowed_days|join:", " }}</td>
                 <td>
-                    <span class="badge {% if loc.is_active %}badge-success{% else %}badge-danger{% endif %}">
-                        {% if loc.is_active %}متاح{% else %}مغلق{% endif %}
+                    <span style="font-family: 'Inter', sans-serif; font-size: 0.85rem; color: var(--brand-primary); font-weight: 600">
+                        {{ loc.latitude|floatformat:4 }}N, {{ loc.longitude|floatformat:4 }}E
                     </span>
                 </td>
                 <td>
-                    <div style="display: flex; gap: 8px">
-                        <a href="{% url 'municipality_portal:location_edit' loc.pk %}" class="btn btn-outline" style="padding: 6px 14px; font-size: 0.8rem">تعديل</a>
+                    <div style="display: flex; align-items: center; gap: 8px">
+                        <div style="flex: 1; height: 8px; background: #F1F5F9; border-radius: 4px; overflow: hidden; max-width: 80px">
+                            <div style="width: {% if loc.max_stalls > 0 %}{{ loc.stalls.count|add:0|divisibleby:loc.max_stalls|add:100 }}{% else %}0{% endif %}%; height: 100%; background: var(--brand-primary)"></div>
+                        </div>
+                        <span style="font-weight: 700">{{ loc.stalls.count }} / {{ loc.max_stalls }}</span>
                     </div>
+                </td>
+                <td>
+                    <div style="font-weight: 600">{{ loc.start_time|time:"H:i" }} - {{ loc.end_time|time:"H:i" }}</div>
+                </td>
+                <td>
+                    {% if loc.is_active %}
+                    <span class="badge badge-success">نشط ومتاح</span>
+                    {% else %}
+                    <span class="badge badge-danger">مغلق مؤقتاً</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'municipality_portal:location_edit' loc.pk %}" class="btn btn-white" style="padding: 6px 14px; font-size: 0.75rem">إعدادات الموقع</a>
                 </td>
             </tr>
             {% empty %}
-            <tr><td colspan="7" style="text-align: center; padding: 48px; color: var(--text-muted)">لا توجد مواقع مضافة بعد</td></tr>
+            <tr>
+                <td colspan="6" style="padding: 80px; text-align: center; color: var(--text-muted)">
+                    <i class="ri-map-pin-line" style="font-size: 3rem; display: block; margin-bottom: 20px; opacity: 0.2"></i>
+                    لم يتم تسجيل أي مواقع رسمية بعد في النظام الرقمي.
+                </td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
-
-    <!-- Mobile Cards -->
-    <div class="mobile-cards" style="padding: 16px">
-        {% for loc in locations %}
-        <div class="card" style="padding: 16px; margin-bottom: 12px">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px">
-                <span class="badge {% if loc.is_active %}badge-success{% else %}badge-danger{% endif %}">
-                    {% if loc.is_active %}نشط{% else %}غير نشط{% endif %}
-                </span>
-                <span style="font-size: 0.8rem; color: var(--text-muted)">سعة: {{ loc.max_stalls }}</span>
-            </div>
-            <h4 style="margin-bottom: 8px">{{ loc.name }}</h4>
-            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px">
-                <i class="ri-time-line"></i> {{ loc.start_time|time:"H:i" }} - {{ loc.end_time|time:"H:i" }}<br>
-                <i class="ri-calendar-line"></i> {{ loc.allowed_days|join:", " }}
-            </div>
-            <a href="{% url 'municipality_portal:location_edit' loc.pk %}" class="btn btn-outline" style="width: 100%">تعديل البيانات</a>
-        </div>
-        {% endfor %}
-    </div>
 </div>
 {% endblock %}

@@ -1,62 +1,72 @@
 {% extends 'municipality_portal/base.html' %}
 
-{% block page_title %}إدارة البسطات والموافقة عليها{% endblock %}
+{% block page_title %}إدارة سجلات وطلبات البسطات{% endblock %}
 
 {% block content %}
-<div class="data-table-wrapper">
-    <table class="data-table desktop-only">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px">
+    <div>
+        <h2 style="font-size: 1.5rem; margin-bottom: 4px">منظومة البسطات التجارية</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem">متابعة كافة الطلبات النشطة، التراخيص، وحالة الامتثال الميداني.</p>
+    </div>
+</div>
+
+<div class="card" style="padding: 0">
+    <table class="table-view">
         <thead>
             <tr>
-                <th>المعرف</th>
-                <th>التاجر</th>
-                <th>الموقع</th>
-                <th>التصنيف</th>
-                <th>الحالة</th>
-                <th>تاريخ الطلب</th>
+                <th>المالك / التاجر</th>
+                <th>نوع النشاط</th>
+                <th>الموقع المعتمد</th>
+                <th>حالة الترخيص</th>
+                <th>تاريخ الانضمام</th>
                 <th>الإجراء</th>
             </tr>
         </thead>
         <tbody>
             {% for stall in stalls %}
             <tr>
-                <td style="color: var(--text-muted)">#{{ stall.pk }}</td>
-                <td style="font-weight: 700">{{ stall.owner.user.get_full_name }}</td>
-                <td>{{ stall.location.name|default:"—" }}</td>
-                <td>{{ stall.category.name }}</td>
                 <td>
-                    <span class="badge 
-                        {% if stall.status == 'approved' or stall.status == 'active' %}badge-success
-                        {% elif stall.status == 'pending' %}badge-warning
-                        {% else %}badge-danger{% endif %}">
-                        {{ stall.get_status_display }}
-                    </span>
+                    <div style="font-weight: 700; color: var(--text-heading)">{{ stall.owner.user.get_full_name }}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted)">{{ stall.owner.national_id }}</div>
                 </td>
-                <td style="color: var(--text-muted)">{{ stall.created_at|date:"Y-m-d" }}</td>
                 <td>
-                    <a href="{% url 'municipality_portal:stall_detail' stall.pk %}" class="btn btn-outline" style="padding: 6px 14px; font-size: 0.8rem">تفاصيل</a>
+                    <div style="display: flex; align-items: center; gap: 8px">
+                        <i class="ri-price-tag-3-line" style="color: var(--brand-primary)"></i>
+                        <span style="font-weight: 500">{{ stall.category.name }}</span>
+                    </div>
+                </td>
+                <td>
+                    {% if stall.location %}
+                    <span style="font-weight: 600; color: var(--text-heading)">{{ stall.location.name }}</span>
+                    {% else %}
+                    <span style="color: var(--text-muted); font-style: italic; font-size: 0.85rem">لم يحدد الموقع بك</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if stall.status == 'pending' %}
+                        <span class="badge badge-warning">بانتظار المراجعة</span>
+                    {% elif stall.status == 'active' or stall.status == 'approved' %}
+                        <span class="badge badge-success">مرخص ونشط</span>
+                    {% elif stall.status == 'suspended' %}
+                        <span class="badge badge-danger">موقوف مؤقتاً</span>
+                    {% else %}
+                        <span class="badge badge-info">{{ stall.get_status_display }}</span>
+                    {% endif %}
+                </td>
+                <td style="color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 0.85rem">{{ stall.created_at|date:"Y/m/d" }}</td>
+                <td>
+                    <a href="{% url 'municipality_portal:stall_detail' stall.pk %}" class="btn btn-white" style="padding: 6px 14px; font-size: 0.75rem">تفاصيل الملف</a>
                 </td>
             </tr>
             {% empty %}
-            <tr><td colspan="7" style="text-align: center; padding: 48px; color: var(--text-muted)">لا توجد بسطات مسجلة بعد</td></tr>
+            <tr>
+                <td colspan="6" style="padding: 80px; text-align: center; color: var(--text-muted)">
+                    <i class="ri-store-3-line" style="font-size: 3rem; display: block; margin-bottom: 20px; opacity: 0.15"></i>
+                    لا توجد بسطات مسجلة في السجل الرقمي حالياً.
+                </td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
-
-    <!-- Mobile Cards -->
-    <div class="mobile-cards" style="padding: 16px">
-        {% for stall in stalls %}
-        <div class="card" style="padding: 16px; margin-bottom: 12px">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px">
-                <span class="badge {% if stall.status == 'active' %}badge-success{% elif stall.status == 'pending' %}badge-warning{% else %}badge-danger{% endif %}">{{ stall.get_status_display }}</span>
-                <span style="font-size: 0.8rem; color: var(--text-muted)">#{{ stall.pk }}</span>
-            </div>
-            <h4 style="margin-bottom: 4px">{{ stall.owner.user.get_full_name }}</h4>
-            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px">
-                {{ stall.category.name }} · {{ stall.location.name|default:"لم يحدد" }}
-            </div>
-            <a href="{% url 'municipality_portal:stall_detail' stall.pk %}" class="btn btn-primary" style="width: 100%">عرض التفاصيل</a>
-        </div>
-        {% endfor %}
-    </div>
 </div>
 {% endblock %}
