@@ -1,0 +1,409 @@
+/* =========================================================
+   Aesthetic Concept: "Elevated Civic Utility" (Uber/Airbnb style)
+   Focuses on extreme crispness, monochromatic base with 
+   purposeful color coding, generous touch targets, and
+   fluid motion.
+   ========================================================= */
+
+:root {
+    /* Color System */
+    --base: #F8F9FA;
+    --surface: #FFFFFF;
+    --surface-hover: #F1F3F5;
+    --text-main: #0B0F19;
+    --text-muted: #64748B;
+    
+    --accent: #101010;
+    --accent-hover: #2D3748;
+    
+    --success: #10B981;
+    --warning: #F59E0B;
+    --danger: #EF4444;
+    
+    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-border: rgba(0, 0, 0, 0.05);
+    
+    /* Typography */
+    --font-display: 'Cabinet Grotesk', sans-serif;
+    --font-body: 'Satoshi', sans-serif;
+    
+    /* Geometry & Spacing */
+    --radius-pill: 100px;
+    --radius-xl: 24px;
+    --radius-lg: 16px;
+    --radius-md: 12px;
+    
+    --shadow-float: 0 12px 32px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+    --shadow-sheet: 0 -8px 24px rgba(0,0,0,0.06);
+    
+    /* Animation */
+    --spring: cubic-bezier(0.175, 0.885, 0.32, 1.15);
+    --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-body);
+    background-color: var(--base);
+    color: var(--text-main);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Typography styles */
+h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+button {
+    font-family: var(--font-body);
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+/* Map specific tweaks to hide default controls to keep UI clean */
+#map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+}
+.mapboxgl-ctrl-bottom-right, 
+.mapboxgl-ctrl-bottom-left {
+    display: none !important;
+}
+
+/* UI Overlay Layer */
+.ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    pointer-events: none; /* Let clicks pass through */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Components that need pointer events */
+.glass-header, .fab, .bottom-sheet, .mapboxgl-popup {
+    pointer-events: auto;
+}
+
+/* Top Navigation */
+.top-layer {
+    padding: 16px;
+    width: 100%;
+}
+
+.glass-header {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-pill);
+    padding: 8px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow-float);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.brand h1 {
+    font-size: 1.1rem;
+    font-weight: 800;
+    margin-right: 8px;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--danger);
+}
+.dot.active { background: var(--success); }
+
+.mode-toggles {
+    display: flex;
+    background: var(--surface-hover);
+    border-radius: var(--radius-pill);
+    padding: 4px;
+}
+
+.mode-btn {
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    transition: all 0.3s var(--ease-out);
+}
+
+.mode-btn.active {
+    background: var(--surface);
+    color: var(--text-main);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    font-weight: 700;
+}
+
+.menu-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--surface);
+    border: 1px solid var(--glass-border);
+    transition: transform 0.2s;
+}
+.menu-btn:hover { transform: scale(1.05); }
+
+/* Status Pill */
+.status-pill {
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: white;
+    padding: 10px 20px;
+    border-radius: var(--radius-pill);
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: var(--shadow-float);
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: auto;
+}
+.status-pill.hidden {
+    opacity: 0;
+    transform: translate(-50%, -20px);
+    pointer-events: none;
+}
+
+/* Floating Action Button */
+.fab {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent);
+    color: white;
+    padding: 18px 32px;
+    border-radius: var(--radius-pill);
+    font-size: 1.1rem;
+    font-weight: 700;
+    font-family: var(--font-display);
+    box-shadow: var(--shadow-float);
+    transition: transform 0.3s var(--spring), opacity 0.3s;
+    z-index: 20;
+}
+.fab:hover {
+    background: var(--accent-hover);
+    transform: translateX(-50%) scale(1.02);
+}
+.fab:active {
+    transform: translateX(-50%) scale(0.98);
+}
+.fab.hidden {
+    opacity: 0;
+    transform: translate(-50%, 40px);
+    pointer-events: none;
+}
+.fab-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Bottom Sheet */
+.bottom-sheet {
+    background: var(--surface);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    box-shadow: var(--shadow-sheet);
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translate(-50%, 0);
+    transition: transform 0.4s var(--spring), opacity 0.3s;
+    display: flex;
+    flex-direction: column;
+    max-height: 80vh;
+    z-index: 30;
+}
+.bottom-sheet.hidden {
+    transform: translate(-50%, 100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.sheet-handle-container {
+    padding: 12px 0;
+    cursor: grab;
+    display: flex;
+    justify-content: center;
+}
+.sheet-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--glass-border);
+    border-radius: 4px;
+}
+
+.sheet-content {
+    padding: 0 24px 32px;
+    overflow-y: auto;
+}
+
+/* Dynamic Sheet Cards */
+.vendor-card, .booking-card, .zone-card {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    animation: slideUp 0.4s var(--ease-out) forwards;
+}
+
+@keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.card-header h2 {
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+}
+.card-subtitle {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.badge {
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.badge.open { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+.badge.closed { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+.badge.zone { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--glass-border);
+}
+.detail-row i {
+    font-size: 1.25rem;
+    color: var(--text-muted);
+    width: 24px;
+    text-align: center;
+}
+
+.action-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.btn-primary, .btn-secondary {
+    padding: 14px;
+    border-radius: var(--radius-md);
+    font-weight: 700;
+    text-align: center;
+    transition: all 0.2s;
+}
+.btn-primary {
+    background: var(--accent);
+    color: white;
+}
+.btn-primary:active { transform: scale(0.98); }
+.btn-secondary {
+    background: var(--surface-hover);
+    color: var(--text-main);
+}
+.btn-secondary:hover { background: #E2E8F0; }
+
+.zone-selector {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.zone-pill {
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--glass-border);
+    color: var(--text-main);
+    font-weight: 500;
+    transition: all 0.2s;
+}
+.zone-pill.selected {
+    background: var(--warning);
+    border-color: var(--warning);
+    color: white;
+}
+
+/* Custom Marker Styles */
+.custom-marker {
+    width: 32px;
+    height: 32px;
+    background: white;
+    border: 2px solid var(--accent);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    cursor: pointer;
+    transition: transform 0.3s var(--spring);
+}
+.custom-marker:hover, .custom-marker.active {
+    transform: scale(1.2);
+    z-index: 100;
+}
+.marker-food { border-color: var(--warning); color: var(--warning); }
+.marker-goods { border-color: #3B82F6; color: #3B82F6; }
+.marker-services { border-color: var(--success); color: var(--success); }
+
+@media (max-width: 640px) {
+    .glass-header { margin: 0; border-radius: var(--radius-lg); }
+    .bottom-sheet { max-width: 100%; }
+}
