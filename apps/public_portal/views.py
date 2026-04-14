@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import get_object_or_404, render
 
 from apps.stalls.models import Stall, StallCategory
@@ -6,15 +8,36 @@ from apps.stalls.models import Stall, StallCategory
 def map_view(request):
     """
     Interactive map showing all active stalls.
-    Passes stall data as JSON context for Leaflet.js markers.
+    Passes stall data as JSON for Leaflet.js markers.
     """
-    stalls = Stall.objects.filter(status=Stall.STATUS_ACTIVE).select_related(
-        'location', 'category'
+    stalls_qs = Stall.objects.filter(status=Stall.STATUS_ACTIVE).select_related(
+        'location', 'category', 'owner__user'
     )
     categories = StallCategory.objects.all()
+
+    stalls_data = []
+    for stall in stalls_qs:
+        if stall.location:
+            stalls_data.append({
+                'id': stall.pk,
+                'owner': stall.owner.user.get_full_name() or stall.owner.user.username,
+                'category': stall.category.name if stall.category else '',
+                'category_icon': stall.category.icon if stall.category else '',
+                'lat': float(stall.location.latitude),
+                'lng': float(stall.location.longitude),
+                'location_name': stall.location.name,
+                'start_time': stall.location.start_time.strftime('%H:%M') if stall.location.start_time else '',
+                'end_time': stall.location.end_time.strftime('%H:%M') if stall.location.end_time else '',
+                'allowed_days': stall.location.allowed_days or [],
+                'status': stall.status,
+                'is_open': stall.is_open_now(),
+                'qr_token': str(stall.qr_token),
+            })
+
     return render(request, 'public_portal/map.html', {
-        'stalls': stalls,
+        'stalls': stalls_qs,
         'categories': categories,
+        'stalls_json': json.dumps(stalls_data, ensure_ascii=False),
     })
 
 

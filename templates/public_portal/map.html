@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Q-Zone | منصة تنظيم بسطات الحرة</title>
+
+    <!-- Leaflet CSS (replaces Mapbox — no API key required) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+
+    <!-- Fonts & Icons (same as frontend/index.html) -->
+    <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,700,500,400&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+
+    <style>
+        /* =====================================================
+           Q-Zone Public Map — Design System
+           Mirrors frontend/styles.css exactly so the layout
+           is identical to the prototype in frontend/index.html
+           ===================================================== */
+        :root {
+            --base:          #F8F9FA;
+            --surface:       #FFFFFF;
+            --surface-hover: #F1F3F5;
+            --text-main:     #0B0F19;
+            --text-muted:    #64748B;
+            --accent:        #101010;
+            --accent-hover:  #2D3748;
+            --success:       #10B981;
+            --warning:       #F59E0B;
+            --danger:        #EF4444;
+            --glass-bg:      rgba(255, 255, 255, 0.85);
+            --glass-border:  rgba(0, 0, 0, 0.05);
+            --font-display:  'Cabinet Grotesk', sans-serif;
+            --font-body:     'Satoshi', sans-serif;
+            --radius-pill:   100px;
+            --radius-xl:     24px;
+            --radius-lg:     16px;
+            --radius-md:     12px;
+            --shadow-float:  0 12px 32px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.04);
+            --shadow-sheet:  0 -8px 24px rgba(0,0,0,0.06);
+            --spring:        cubic-bezier(0.175, 0.885, 0.32, 1.15);
+            --ease-out:      cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-body);
+            background-color: var(--base);
+            color: var(--text-main);
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: var(--font-display);
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+        }
+
+        button {
+            font-family: var(--font-body);
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* ── Map fills entire viewport ──────────────────── */
+        #map {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+        }
+
+        /* Hide default Leaflet controls for a clean look */
+        .leaflet-control-zoom,
+        .leaflet-control-attribution {
+            display: none !important;
+        }
+
+        /* ── UI Overlay ─────────────────────────────────── */
+        .ui-layer {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        .glass-header, .fab, .bottom-sheet, .status-pill {
+            pointer-events: auto;
+        }
+
+        /* ── Top Navigation — pinned so it always floats
+              above the Leaflet map regardless of pane z-index ── */
+        .top-layer {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            padding: 16px;
+            z-index: 1001;
+        }
+
+        .glass-header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-pill);
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow-float);
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* ── Search Bar ─────────────────────────────────── */
+        .search-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            background: var(--surface-hover);
+            border-radius: var(--radius-pill);
+            padding: 7px 14px;
+            gap: 8px;
+        }
+
+        .search-icon {
+            color: var(--text-muted);
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .search-container input {
+            flex: 1;
+            border: none;
+            background: none;
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            color: var(--text-main);
+            outline: none;
+            min-width: 0;
+        }
+
+        .search-container input::placeholder { color: var(--text-muted); }
+
+        /* ── Auth Buttons ───────────────────────────────── */
+        .auth-buttons {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .btn-text {
+            color: var(--text-main);
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 0 6px;
+            white-space: nowrap;
+        }
+
+        .btn-sm {
+            padding: 8px 18px;
+            border-radius: var(--radius-pill);
+            font-size: 0.9rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .btn-primary-sm {
+            background: var(--accent);
+            color: white;
+        }
+        .btn-primary-sm:hover { background: var(--accent-hover); }
+
+        /* ── Hamburger ──────────────────────────────────── */
+        .menu-btn {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            background: var(--surface);
+            border: 1px solid var(--glass-border);
+            transition: transform 0.2s;
+            flex-shrink: 0;
+            font-size: 1.1rem;
+            color: var(--text-main);
+        }
+        .menu-btn:hover { transform: scale(1.05); }
+
+        /* ── Brand (used inside side menu) ─────────────── */
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand h1 {
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        .dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--danger);
+        }
+        .dot.active { background: var(--success); }
+
+        /* ── Side Drawer Menu ───────────────────────────── */
+        .side-menu {
+            position: fixed;
+            top: 0; right: 0;
+            width: 300px;
+            height: 100vh;
+            background: var(--surface);
+            z-index: 2000;
+            transform: translateX(100%);
+            transition: transform 0.35s var(--ease-out);
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .side-menu.open { transform: translateX(0); }
+
+        .menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 20px 20px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .menu-content { padding: 8px 0; }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            flex-direction: row-reverse;
+            gap: 14px;
+            padding: 14px 20px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.97rem;
+            font-weight: 500;
+            width: 100%;
+            text-align: right;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-family: var(--font-body);
+        }
+        .menu-item:hover { background: var(--surface-hover); }
+        .menu-item i { font-size: 1.15rem; color: var(--text-muted); }
+
+        .menu-divider {
+            height: 1px;
+            background: var(--glass-border);
+            margin: 8px 0;
+        }
+
+        /* ── Dim Overlay ────────────────────────────────── */
+        .ui-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1500;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .ui-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* ── Status Pill ────────────────────────────────── */
+        .status-pill {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--radius-pill);
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: var(--shadow-float);
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: auto;
+        }
+        .status-pill.hidden {
+            opacity: 0;
+            transform: translate(-50%, -20px);
+            pointer-events: none;
+        }
+
+        /* ── Floating Action Button ─────────────────────── */
+        .fab {
+            position: absolute;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent);
+            color: white;
+            padding: 18px 32px;
+            border-radius: var(--radius-pill);
+            font-size: 1.1rem;
+            font-weight: 700;
+            font-family: var(--font-display);
+            box-shadow: var(--shadow-float);
+            transition: transform 0.3s var(--spring), opacity 0.3s;
+            z-index: 20;
+        }
+        .fab:hover {
+            background: var(--accent-hover);
+            transform: translateX(-50%) scale(1.02);
+        }
+        .fab:active  { transform: translateX(-50%) scale(0.98); }
+        .fab.hidden  {
+            opacity: 0;
+            transform: translate(-50%, 40px);
+            pointer-events: none;
+        }
+
+        .fab-content {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ── Bottom Sheet ───────────────────────────────── */
+        .bottom-sheet {
+            background: var(--surface);
+            border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+            box-shadow: var(--shadow-sheet);
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            position: absolute;
+            bottom: 0; left: 50%;
+            transform: translate(-50%, 0);
+            transition: transform 0.4s var(--spring), opacity 0.3s;
+            display: flex;
+            flex-direction: column;
+            max-height: 80vh;
+            z-index: 30;
+        }
+        .bottom-sheet.hidden {
+            transform: translate(-50%, 100%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .sheet-handle-container {
+            padding: 12px 0;
+            cursor: grab;
+            display: flex;
+            justify-content: center;
+        }
+
+        .sheet-handle {
+            width: 40px; height: 4px;
+            background: var(--glass-border);
+            border-radius: 4px;
+        }
+
+        .sheet-content {
+            padding: 0 24px 32px;
+            overflow-y: auto;
+        }
+
+        /* ── Sheet Cards ────────────────────────────────── */
+        .vendor-card, .booking-card, .zone-card {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            animation: slideUp 0.4s var(--ease-out) forwards;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        .card-header h2 { font-size: 1.5rem; margin-bottom: 4px; }
+        .card-subtitle  { color: var(--text-muted); font-size: 0.95rem; }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: var(--radius-pill);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .badge.open   { background: rgba(16,185,129,0.1); color: var(--success); }
+        .badge.closed { background: rgba(239,68,68,0.1);  color: var(--danger); }
+
+        .detail-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+        .detail-row:last-child { border-bottom: none; }
+        .detail-row i {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            width: 24px;
+            text-align: center;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .btn-primary, .btn-secondary {
+            padding: 14px;
+            border-radius: var(--radius-md);
+            font-weight: 700;
+            text-align: center;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-primary  { background: var(--accent); color: white; }
+        .btn-primary:active  { transform: scale(0.98); }
+        .btn-secondary { background: var(--surface-hover); color: var(--text-main); }
+        .btn-secondary:hover { background: #E2E8F0; }
+
+        /* ── Custom Map Markers ─────────────────────────── */
+        .custom-marker {
+            width: 32px; height: 32px;
+            background: white;
+            border: 2px solid var(--accent);
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            cursor: pointer;
+            transition: transform 0.3s var(--spring);
+        }
+        .custom-marker:hover, .custom-marker.active { transform: scale(1.2); z-index: 100; }
+        .marker-food     { border-color: var(--warning); color: var(--warning); }
+        .marker-goods    { border-color: #3B82F6;       color: #3B82F6; }
+        .marker-services { border-color: var(--success); color: var(--success); }
+        .marker-closed   { border-color: var(--text-muted); color: var(--text-muted); opacity: 0.6; }
+
+        /* Dot for open/closed status */
+        .status-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        .status-dot.open   { background: var(--success); }
+        .status-dot.closed { background: var(--danger); }
+
+        @media (max-width: 640px) {
+            .glass-header { margin: 0; border-radius: var(--radius-lg); }
+            .bottom-sheet { max-width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Map Container (Leaflet renders here) -->
+    <div id="map"></div>
+
+    <!-- UI Overlay Layer — mirrors frontend/index.html exactly -->
+    <div class="ui-layer">
+
+        <!-- Top Navigation -->
+        <header class="top-layer">
+            <div class="glass-header">
+
+                <!-- Hamburger (right side in RTL) -->
+                <button class="menu-btn" aria-label="القائمة" id="hamburger-btn">
+                    <i class="ri-menu-4-line"></i>
+                </button>
+
+                <!-- Search Bar -->
+                <div class="search-container">
+                    <i class="ri-search-line search-icon"></i>
+                    <input type="text" id="search-input" placeholder="ابحث عن البائعين، المنتجات، الأماكن...">
+                </div>
+
+                <!-- Auth Buttons -->
+                <div class="auth-buttons">
+                    <button class="btn-text" id="login-btn">تسجيل الدخول</button>
+                    <button class="btn-primary-sm btn-sm" id="signup-btn">إنشاء حساب</button>
+                </div>
+
+            </div>
+        </header>
+
+        <!-- Floating Status Pill -->
+        <div class="status-pill hidden" id="status-pill">
+            <i class="ri-map-pin-line"></i>
+            <span id="status-text">اختر نقطة على الخريطة</span>
+        </div>
+
+        <!-- Floating Action Button (Vendor mode) -->
+        <button id="main-fab" class="fab hidden" onclick="showBookingInfo()">
+            <div class="fab-content">
+                <span>تقديم طلب</span>
+                <i class="ri-arrow-left-line"></i>
+            </div>
+        </button>
+
+        <!-- Dynamic Bottom Sheet -->
+        <div id="bottom-sheet" class="bottom-sheet hidden">
+            <div class="sheet-handle-container" id="sheet-drag-handle" onclick="closeSheet()">
+                <div class="sheet-handle"></div>
+            </div>
+            <div id="sheet-content" class="sheet-content">
+                <!-- Injected by JS -->
+            </div>
+        </div>
+
+    </div><!-- .ui-layer -->
+
+    <!-- Side Drawer Menu -->
+    <div id="side-menu" class="side-menu">
+        <div class="menu-header">
+            <button class="menu-btn" id="close-menu-btn">
+                <i class="ri-close-line"></i>
+            </button>
+            <div class="brand">
+                <h1>كيو-زون</h1>
+                <div class="dot active"></div>
+            </div>
+        </div>
+
+        <div class="menu-content">
+            <a href="#" class="menu-item">
+                <i class="ri-star-line"></i>
+                <span>البائعين الأعلى تقييماً</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="ri-bookmark-line"></i>
+                <span>البائعين المحفوظين</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="ri-edit-box-line"></i>
+                <span>إضافة تقييم</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="ri-share-forward-line"></i>
+                <span>مشاركة كشك البائع</span>
+            </a>
+
+            <div class="menu-divider"></div>
+
+            <a href="#" class="menu-item">
+                <i class="ri-information-line"></i>
+                <span>معلومات عنا</span>
+            </a>
+            <button class="menu-item" id="lang-toggle-btn">
+                <i class="ri-translate-2"></i>
+                <span>English / الإنجليزية</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Dim Overlay -->
+    <div id="ui-overlay" class="ui-overlay"></div>
+
+    <!-- Stall data from Django (JSON) -->
+    <script id="stalls-data" type="application/json">{{ stalls_json|safe }}</script>
+
+    <!-- Leaflet.js -->
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+    (function () {
+        'use strict';
+
+        /* ── Stall data from Django ── */
+        const STALLS = JSON.parse(document.getElementById('stalls-data').textContent || '[]');
+
+        const ui = {
+            fab:     document.getElementById('main-fab'),
+            pill:    document.getElementById('status-pill'),
+            sheet:   document.getElementById('bottom-sheet'),
+            content: document.getElementById('sheet-content'),
+        };
+
+        /* ── Category → marker class mapping ── */
+        function markerClass(category) {
+            const lower = (category || '').toLowerCase();
+            if (lower.includes('food') || lower.includes('طعام') || lower.includes('أكل'))
+                return 'marker-food';
+            if (lower.includes('retail') || lower.includes('goods') || lower.includes('بضائع'))
+                return 'marker-goods';
+            return 'marker-services';
+        }
+
+        function markerIcon(category) {
+            const lower = (category || '').toLowerCase();
+            if (lower.includes('food') || lower.includes('طعام')) return 'ri-restaurant-line';
+            if (lower.includes('juice') || lower.includes('drink'))  return 'ri-goblet-line';
+            if (lower.includes('retail') || lower.includes('goods') || lower.includes('بضاع')) return 'ri-shopping-bag-3-line';
+            return 'ri-store-2-line';
+        }
+
+        /* ── Map init (Leaflet + CartoDB Positron tiles) ── */
+        const HEBRON = [31.5326, 35.1042];
+
+        const map = L.map('map', {
+            center: HEBRON,
+            zoom: 15,
+            zoomControl: false,
+            attributionControl: false,
+        });
+
+        L.tileLayer(
+            'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+            { subdomains: 'abcd', maxZoom: 20 }
+        ).addTo(map);
+
+        /* ── Render stall markers ── */
+        const markerObjects = [];
+
+        function renderMarkers() {
+            markerObjects.forEach(function (m) { map.removeLayer(m); });
+            markerObjects.length = 0;
+
+            STALLS.forEach(function (stall) {
+                const el = document.createElement('div');
+                el.className = 'custom-marker ' + (stall.is_open ? markerClass(stall.category) : 'marker-closed');
+                el.innerHTML = '<i class="' + markerIcon(stall.category) + '"></i>';
+                el.title = stall.owner;
+
+                const icon = L.divIcon({
+                    html: el.outerHTML,
+                    className: '',
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16],
+                });
+
+                const marker = L.marker([stall.lat, stall.lng], { icon: icon }).addTo(map);
+                marker.on('click', function () { showStallDetails(stall); });
+                markerObjects.push(marker);
+            });
+        }
+
+        renderMarkers();
+
+        /* ── Bottom sheet: stall details ── */
+        function showStallDetails(stall) {
+            const openBadge = stall.is_open
+                ? '<span class="badge open">مفتوح</span>'
+                : '<span class="badge closed">مغلق</span>';
+
+            const schedule = (stall.start_time && stall.end_time)
+                ? stall.start_time + ' – ' + stall.end_time
+                : 'غير محدد';
+
+            const days = Array.isArray(stall.allowed_days) && stall.allowed_days.length
+                ? stall.allowed_days.join('، ')
+                : '—';
+
+            ui.content.innerHTML = `
+                <div class="vendor-card" style="padding-top:16px;">
+                    <div class="card-header">
+                        <div>
+                            <h2>${escHtml(stall.owner)}</h2>
+                            <span class="card-subtitle">${escHtml(stall.category)} · ${escHtml(stall.location_name)}</span>
+                        </div>
+                        ${openBadge}
+                    </div>
+                    <div>
+                        <div class="detail-row">
+                            <i class="ri-time-line"></i>
+                            <span>${schedule}</span>
+                        </div>
+                        <div class="detail-row">
+                            <i class="ri-calendar-line"></i>
+                            <span>${days}</span>
+                        </div>
+                        <div class="detail-row">
+                            <i class="ri-map-pin-line"></i>
+                            <span>${escHtml(stall.location_name)}</span>
+                        </div>
+                    </div>
+                    <div class="action-grid">
+                        <button class="btn-secondary" onclick="closeSheet()">
+                            <i class="ri-close-line"></i> إغلاق
+                        </button>
+                        <a href="/verify/${escHtml(stall.qr_token)}/" class="btn-primary" style="text-decoration:none;">
+                            <i class="ri-qr-code-line"></i> تفاصيل
+                        </a>
+                    </div>
+                </div>
+            `;
+            ui.sheet.classList.remove('hidden');
+        }
+
+        /* ── Vendor mode: booking info ── */
+        window.showBookingInfo = function () {
+            ui.content.innerHTML = `
+                <div class="booking-card" style="padding-top:16px;">
+                    <div class="card-header">
+                        <div>
+                            <h2>تقديم طلب كشك</h2>
+                            <span class="card-subtitle">سجل دخولك كتاجر للمتابعة</span>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <i class="ri-information-line"></i>
+                        <span>يمكنك تقديم طلب احتجاز موقع بعد تسجيل الدخول كتاجر</span>
+                    </div>
+                    <div class="action-grid">
+                        <button class="btn-secondary" onclick="closeSheet()">لاحقاً</button>
+                        <a href="/auth/login/" class="btn-primary" style="text-decoration:none;">
+                            <i class="ri-login-box-line"></i> تسجيل الدخول
+                        </a>
+                    </div>
+                </div>
+            `;
+            ui.sheet.classList.remove('hidden');
+        };
+
+        /* ── Side menu open / close ── */
+        const sideMenu   = document.getElementById('side-menu');
+        const uiOverlay  = document.getElementById('ui-overlay');
+
+        function openMenu() {
+            sideMenu.classList.add('open');
+            uiOverlay.classList.add('visible');
+        }
+
+        function closeMenu() {
+            sideMenu.classList.remove('open');
+            uiOverlay.classList.remove('visible');
+        }
+
+        document.getElementById('hamburger-btn').addEventListener('click', openMenu);
+        document.getElementById('close-menu-btn').addEventListener('click', closeMenu);
+        uiOverlay.addEventListener('click', closeMenu);
+
+        /* ── Status pill helpers ── */
+        function showPill(text) {
+            document.getElementById('status-text').textContent = text;
+            ui.pill.classList.remove('hidden');
+        }
+
+        function closePill() { ui.pill.classList.add('hidden'); }
+
+        /* ── Close sheet ── */
+        window.closeSheet = function () { ui.sheet.classList.add('hidden'); };
+
+        /* ── Escape HTML helper ── */
+        function escHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        /* ── Close sheet on map click ── */
+        map.on('click', function () { closeSheet(); });
+
+        /* ── Show count pill on load if stalls present ── */
+        if (STALLS.length > 0) {
+            const openCount = STALLS.filter(function (s) { return s.is_open; }).length;
+            showPill(openCount + ' كشك مفتوح الآن');
+            setTimeout(closePill, 3500);
+        }
+
+    })();
+    </script>
+
+</body>
+</html>
