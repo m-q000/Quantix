@@ -475,18 +475,18 @@
                 <span>الرئيسية</span>
             </a>
 
-            <a href="{% url 'vendor_portal:apply' %}"
-               class="nav-item nav-apply {% block nav_apply %}{% endblock %}">
+            <a href="{% url 'vendor_portal:reserve' %}"
+               class="nav-item nav-apply {% block nav_reserve %}{% endblock %}">
                 <div class="apply-circle">
                     <i class="ri-map-pin-add-line"></i>
                 </div>
-                <span>بسطتي</span>
+                <span>احجز موقع</span>
             </a>
 
-            <a href="{% url 'vendor_portal:qr_code' %}"
-               class="nav-item {% block nav_qr %}{% endblock %}">
-                <i class="ri-qr-code-{% block nav_qr_icon %}line{% endblock %}"></i>
-                <span>رمز QR</span>
+            <a href="{% url 'vendor_portal:my_reservations' %}"
+               class="nav-item {% block nav_reservations %}{% endblock %}">
+                <i class="ri-calendar-check-{% block nav_reservations_icon %}line{% endblock %}"></i>
+                <span>حجوزاتي</span>
             </a>
         </nav>
 

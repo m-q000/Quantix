@@ -1,7 +1,30 @@
 from django import forms
 
-from apps.locations.models import Location
+from apps.locations.models import Location, Reservation
 from apps.stalls.models import Stall, StallImage
+
+
+class ReservationForm(forms.ModelForm):
+    """Vendor reserves a municipality-defined location for a date range."""
+
+    class Meta:
+        model = Reservation
+        fields = ['location', 'start_date', 'end_date', 'notes']
+        widgets = {
+            'location': forms.HiddenInput(attrs={'id': 'id_location_selected'}),
+            'start_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'end_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'notes': forms.Textarea(attrs={'rows': 3, 'class': 'form-control',
+                                           'placeholder': 'ملاحظات إضافية (اختياري)...'}),
+        }
+
+    def clean(self):
+        cleaned = super().clean()
+        start = cleaned.get('start_date')
+        end = cleaned.get('end_date')
+        if start and end and end < start:
+            raise forms.ValidationError('تاريخ الانتهاء يجب أن يكون بعد تاريخ البداية')
+        return cleaned
 
 
 class StallApplicationForm(forms.ModelForm):

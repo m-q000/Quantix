@@ -1,0 +1,270 @@
+{% extends 'vendor_portal/base.html' %}
+
+{% block title %}حجوزاتي{% endblock %}
+{% block nav_reserve %}active{% endblock %}
+
+{% block extra_styles %}
+.page-heading {
+    margin-bottom: 16px;
+}
+
+/* Reservation card */
+.reservation-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: 10px;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-card);
+    animation: slideUp 0.35s var(--ease-out) both;
+}
+
+.reservation-card:nth-child(1) { animation-delay: 0.04s; }
+.reservation-card:nth-child(2) { animation-delay: 0.08s; }
+.reservation-card:nth-child(3) { animation-delay: 0.12s; }
+.reservation-card:nth-child(4) { animation-delay: 0.16s; }
+
+.res-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.res-location {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+.res-icon {
+    width: 40px; height: 40px;
+    border-radius: var(--radius-md);
+    display: grid;
+    place-items: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.res-icon.pending   { background: rgba(245,158,11,0.1); color: var(--warning); }
+.res-icon.approved  { background: rgba(16,185,129,0.1); color: var(--success); }
+.res-icon.active    { background: rgba(16,185,129,0.1); color: var(--success); }
+.res-icon.rejected  { background: rgba(239,68,68,0.1); color: var(--danger); }
+.res-icon.expired   { background: rgba(100,116,139,0.1); color: var(--text-muted); }
+.res-icon.cancelled { background: rgba(100,116,139,0.1); color: var(--text-muted); }
+
+.res-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.res-date-sub {
+    font-size: 0.76rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* Status badge */
+.res-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 0.74rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.res-status.pending   { background: rgba(245,158,11,0.1); color: var(--warning); }
+.res-status.approved  { background: rgba(16,185,129,0.1); color: var(--success); }
+.res-status.active    { background: rgba(16,185,129,0.1); color: var(--success); }
+.res-status.rejected  { background: rgba(239,68,68,0.1); color: var(--danger); }
+.res-status.expired   { background: rgba(100,116,139,0.1); color: var(--text-muted); }
+.res-status.cancelled { background: rgba(100,116,139,0.1); color: var(--text-muted); }
+
+/* Date range bar */
+.res-dates {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface-hover);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    font-size: 0.82rem;
+    margin-bottom: 10px;
+}
+
+.res-dates i {
+    font-size: 1rem;
+    color: var(--text-muted);
+}
+
+.res-dates .date-range {
+    font-weight: 600;
+    flex: 1;
+}
+
+.res-dates .date-sep {
+    color: var(--text-muted);
+    margin: 0 4px;
+}
+
+/* Cancel button */
+.cancel-form {
+    margin-top: 8px;
+}
+
+.btn-cancel {
+    width: 100%;
+    padding: 10px;
+    background: rgba(239,68,68,0.06);
+    color: var(--danger);
+    border: 1px solid rgba(239,68,68,0.15);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: background 0.2s;
+}
+
+.btn-cancel:active { background: rgba(239,68,68,0.12); }
+
+/* Empty state */
+.empty-reservations {
+    text-align: center;
+    padding: 48px 20px;
+    color: var(--text-muted);
+}
+
+.empty-reservations i {
+    font-size: 2.5rem;
+    display: block;
+    margin-bottom: 12px;
+    opacity: 0.35;
+}
+
+.empty-reservations p {
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+/* New reservation CTA */
+.new-reservation-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px;
+    background: var(--accent);
+    color: white;
+    border-radius: var(--radius-md);
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 16px;
+    transition: transform 0.2s var(--spring), background 0.2s;
+}
+
+.new-reservation-btn:active { transform: scale(0.98); }
+.new-reservation-btn:hover { background: var(--accent-hover); }
+{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+    <h2>حجوزاتي</h2>
+    <p>عرض وإدارة جميع حجوزات المواقع الخاصة بك</p>
+</div>
+
+<a href="{% url 'vendor_portal:reserve' %}" class="new-reservation-btn">
+    <i class="ri-add-line"></i>
+    حجز موقع جديد
+</a>
+
+{% if reservations %}
+
+{% for res in reservations %}
+<div class="reservation-card">
+    <div class="res-header">
+        <div class="res-location">
+            <div class="res-icon {{ res.status }}">
+                {% if res.status == 'pending' %}
+                    <i class="ri-time-line"></i>
+                {% elif res.status == 'approved' or res.status == 'active' %}
+                    <i class="ri-checkbox-circle-line"></i>
+                {% elif res.status == 'rejected' %}
+                    <i class="ri-close-circle-line"></i>
+                {% else %}
+                    <i class="ri-history-line"></i>
+                {% endif %}
+            </div>
+            <div style="min-width:0;">
+                <div class="res-name">{{ res.location.name }}</div>
+                <div class="res-date-sub">{{ res.created_at|date:"d/m/Y" }}</div>
+            </div>
+        </div>
+        <span class="res-status {{ res.status }}">
+            {% if res.status == 'pending' %}قيد المراجعة
+            {% elif res.status == 'approved' %}موافق عليه
+            {% elif res.status == 'active' %}نشط
+            {% elif res.status == 'rejected' %}مرفوض
+            {% elif res.status == 'expired' %}منتهي
+            {% elif res.status == 'cancelled' %}ملغي
+            {% endif %}
+        </span>
+    </div>
+
+    <div class="res-dates">
+        <i class="ri-calendar-2-line"></i>
+        <div class="date-range">
+            {{ res.start_date|date:"d/m/Y" }}
+            <span class="date-sep">←</span>
+            {{ res.end_date|date:"d/m/Y" }}
+        </div>
+    </div>
+
+    {% if res.notes %}
+    <div style="font-size:0.82rem; color:var(--text-muted); margin-bottom:8px; line-height:1.5;">
+        {{ res.notes }}
+    </div>
+    {% endif %}
+
+    {% if res.status == 'pending' %}
+    <form method="post" action="{% url 'vendor_portal:cancel_reservation' res.pk %}" class="cancel-form">
+        {% csrf_token %}
+        <button type="submit" class="btn-cancel" onclick="return confirm('هل أنت متأكد من إلغاء هذا الحجز؟')">
+            <i class="ri-close-line"></i>
+            إلغاء الحجز
+        </button>
+    </form>
+    {% endif %}
+</div>
+{% endfor %}
+
+{% else %}
+
+<div class="empty-reservations">
+    <i class="ri-calendar-todo-line"></i>
+    <p>لا توجد حجوزات حالياً<br>اختر موقعاً من الخريطة واحجز مكانك</p>
+    <a href="{% url 'vendor_portal:reserve' %}" class="btn-primary" style="text-decoration:none; max-width:260px; margin:0 auto;">
+        <i class="ri-map-pin-add-line"></i>
+        احجز الآن
+    </a>
+</div>
+
+{% endif %}
+
+{% endblock %}

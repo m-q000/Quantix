@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
 from .forms import LoginForm, VendorRegistrationForm
-from .models import CustomUser, OfficerProfile
+from .models import CustomUser, OfficerProfile, VendorProfile
 
 
 def login_view(request):
@@ -94,6 +94,12 @@ def demo_login(request, role):
     elif user.role != role:
         user.role = role
         user.save(update_fields=['role'])
+
+    if role == CustomUser.ROLE_VENDOR:
+        VendorProfile.objects.get_or_create(
+            user=user,
+            defaults={'national_id': 'DEMO-V-001', 'status': VendorProfile.STATUS_APPROVED},
+        )
 
     if role == CustomUser.ROLE_OFFICER:
         OfficerProfile.objects.get_or_create(

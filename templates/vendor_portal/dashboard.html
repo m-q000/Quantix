@@ -333,6 +333,26 @@
             <div class="action-sub">سجل الاشتراكات</div>
         </div>
     </a>
+
+    <a href="{% url 'vendor_portal:reserve' %}" class="action-card">
+        <div class="action-icon" style="background:rgba(16,185,129,0.1); color:var(--success);">
+            <i class="ri-map-pin-add-line"></i>
+        </div>
+        <div>
+            <div class="action-label">حجز موقع</div>
+            <div class="action-sub">احجز مكانك على الخريطة</div>
+        </div>
+    </a>
+
+    <a href="{% url 'vendor_portal:my_reservations' %}" class="action-card">
+        <div class="action-icon" style="background:rgba(124,58,237,0.1); color:#7C3AED;">
+            <i class="ri-calendar-check-line"></i>
+        </div>
+        <div>
+            <div class="action-label">حجوزاتي</div>
+            <div class="action-sub">عرض وإدارة الحجوزات</div>
+        </div>
+    </a>
 </div>
 
 <!-- Recent violations -->
@@ -371,11 +391,14 @@
 <!-- No stall yet — CTA -->
 <div class="cta-card">
     <i class="ri-map-pin-add-line"></i>
-    <h3>لا توجد بسطة بعد</h3>
-    <p>قدّم طلبك الآن واختر موقعك المناسب على الخريطة ليتم مراجعته من البلدية</p>
-    <a href="{% url 'vendor_portal:apply' %}" class="btn-primary" style="text-decoration:none; border-radius:var(--radius-pill);">
+    <h3>احجز موقعك الآن</h3>
+    <p>تصفّح المواقع المتاحة من البلدية على الخريطة واحجز مكانك لفترة محددة</p>
+    <a href="{% url 'vendor_portal:reserve' %}" class="btn-primary" style="text-decoration:none; border-radius:var(--radius-pill);">
         <i class="ri-map-pin-add-line"></i>
-        تقديم طلب جديد
+        احجز موقع
+    </a>
+    <a href="{% url 'vendor_portal:my_reservations' %}" style="display:inline-block; margin-top:12px; font-size:0.85rem; color:var(--text-muted); font-weight:600;">
+        عرض حجوزاتي <i class="ri-arrow-left-s-line"></i>
     </a>
 </div>
 {% endif %}

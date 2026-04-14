@@ -1,0 +1,489 @@
+{% extends 'vendor_portal/base.html' %}
+
+{% block title %}حجز موقع{% endblock %}
+{% block nav_reserve %}active{% endblock %}
+
+{% block extra_styles %}
+.content-area {
+    padding: 0 !important;
+    overflow: hidden !important;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Map ────────────────────────────────────────────── */
+#reserve-map {
+    width: 100%;
+    flex: 0 0 50%;
+    z-index: 1;
+}
+
+.leaflet-control-attribution { display: none !important; }
+.leaflet-control-zoom { border-radius: var(--radius-md) !important; overflow: hidden; }
+
+/* Location markers */
+.loc-marker {
+    width: 40px;
+    height: 40px;
+    background: white;
+    border: 2.5px solid var(--success);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--success);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+    cursor: pointer;
+    transition: transform 0.25s var(--spring), border-color 0.2s, background 0.2s, color 0.2s;
+    font-family: var(--font-display);
+}
+
+.loc-marker.full {
+    border-color: var(--text-muted);
+    color: var(--text-muted);
+    opacity: 0.55;
+}
+
+.loc-marker.selected {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+    transform: scale(1.25);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+
+/* ── Bottom sheet ───────────────────────────────────── */
+.reserve-panel {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--base);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    padding: 14px 16px 100px;
+    box-shadow: 0 -6px 24px rgba(0,0,0,0.07);
+    position: relative;
+    z-index: 10;
+}
+
+.drag-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--glass-border);
+    border-radius: 4px;
+    margin: 0 auto 14px;
+}
+
+/* Location detail card */
+.loc-detail-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    margin-bottom: 14px;
+    border: 1.5px solid var(--glass-border);
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.loc-detail-card.has-selection {
+    border-color: var(--success);
+    box-shadow: 0 0 0 3px rgba(16,185,129,0.08);
+}
+
+.loc-detail-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+
+.loc-detail-icon {
+    width: 44px; height: 44px;
+    border-radius: var(--radius-md);
+    background: var(--surface-hover);
+    display: grid;
+    place-items: center;
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: background 0.2s, color 0.2s;
+}
+
+.loc-detail-card.has-selection .loc-detail-icon {
+    background: rgba(16,185,129,0.1);
+    color: var(--success);
+}
+
+.loc-detail-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.loc-detail-sub {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* Stats row */
+.loc-stats {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.loc-stat {
+    flex: 1;
+    background: var(--surface-hover);
+    border-radius: var(--radius-md);
+    padding: 10px;
+    text-align: center;
+}
+
+.loc-stat .stat-value {
+    font-size: 1.15rem;
+    font-weight: 800;
+    font-family: var(--font-display);
+}
+
+.loc-stat .stat-label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.stat-available { color: var(--success); }
+.stat-reserved  { color: var(--warning); }
+.stat-total     { color: var(--text-main); }
+
+/* Notes */
+.loc-notes {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    padding: 8px 10px;
+    background: var(--surface-hover);
+    border-radius: var(--radius-md);
+    line-height: 1.5;
+}
+
+/* ── Date fields ────────────────────────────────────── */
+.date-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.date-row .form-group { flex: 1; margin-bottom: 0; }
+
+/* Availability badge on marker tooltip */
+.avail-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.avail-open   { background: rgba(16,185,129,0.12); color: var(--success); }
+.avail-closed { background: rgba(100,116,139,0.12); color: var(--text-muted); }
+
+/* Prompt state (no selection yet) */
+.prompt-state {
+    text-align: center;
+    padding: 24px 16px;
+    color: var(--text-muted);
+}
+
+.prompt-state i { font-size: 2rem; display: block; margin-bottom: 8px; opacity: 0.35; }
+.prompt-state p { font-size: 0.88rem; line-height: 1.6; }
+{% endblock %}
+
+{% block content %}
+
+<!-- Map -->
+<div id="reserve-map"></div>
+
+<!-- Bottom panel -->
+<div class="reserve-panel" id="reserve-panel">
+    <div class="drag-handle"></div>
+
+    <div class="page-heading" style="margin-bottom:12px;">
+        <h2>احجز موقعك</h2>
+        <p>اختر نقطة متاحة على الخريطة ثم حدد فترة الحجز</p>
+    </div>
+
+    {% if form.errors %}
+    <div class="form-errors-banner">
+        <i class="ri-error-warning-line"></i> يرجى تصحيح الأخطاء أدناه
+        {% for err in form.non_field_errors %}
+        <div style="margin-top:4px;">{{ err }}</div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Prompt (before selection) -->
+    <div id="prompt-state" class="prompt-state">
+        <i class="ri-map-pin-add-line"></i>
+        <p>انقر على أحد المواقع المتاحة على الخريطة<br>لعرض التفاصيل وحجز مكان</p>
+    </div>
+
+    <!-- Location detail + form (hidden until selection) -->
+    <div id="selection-state" style="display:none;">
+        <form method="post" id="reserve-form">
+            {% csrf_token %}
+            {{ form.location }}
+
+            <!-- Location detail card -->
+            <div class="loc-detail-card has-selection" id="loc-card">
+                <div class="loc-detail-header">
+                    <div class="loc-detail-icon">
+                        <i class="ri-map-pin-2-fill"></i>
+                    </div>
+                    <div>
+                        <div class="loc-detail-name" id="loc-name"></div>
+                        <div class="loc-detail-sub" id="loc-schedule"></div>
+                    </div>
+                </div>
+
+                <div class="loc-stats">
+                    <div class="loc-stat">
+                        <div class="stat-value stat-available" id="loc-available">-</div>
+                        <div class="stat-label">متاح</div>
+                    </div>
+                    <div class="loc-stat">
+                        <div class="stat-value stat-reserved" id="loc-reserved">-</div>
+                        <div class="stat-label">محجوز</div>
+                    </div>
+                    <div class="loc-stat">
+                        <div class="stat-value stat-total" id="loc-total">-</div>
+                        <div class="stat-label">الإجمالي</div>
+                    </div>
+                </div>
+
+                <div class="loc-notes" id="loc-notes" style="display:none;"></div>
+            </div>
+
+            <!-- Date range -->
+            <div class="date-row">
+                <div class="form-group">
+                    <label class="form-label" for="id_start_date">
+                        <i class="ri-calendar-line"></i> من تاريخ
+                    </label>
+                    {{ form.start_date }}
+                    {% if form.start_date.errors %}
+                    <div class="field-error">{{ form.start_date.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="id_end_date">
+                        <i class="ri-calendar-check-line"></i> إلى تاريخ
+                    </label>
+                    {{ form.end_date }}
+                    {% if form.end_date.errors %}
+                    <div class="field-error">{{ form.end_date.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Notes -->
+            <div class="form-group">
+                <label class="form-label" for="id_notes">
+                    <i class="ri-file-text-line"></i> ملاحظات
+                </label>
+                {{ form.notes }}
+            </div>
+
+            <button type="submit" class="btn-success" id="submit-btn">
+                <i class="ri-check-line"></i>
+                تأكيد الحجز
+            </button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+(function () {
+    'use strict';
+
+    const LOCATIONS = {{ locations_json|safe }};
+
+    const DAYS_AR = {
+        monday: 'الإثنين', tuesday: 'الثلاثاء', wednesday: 'الأربعاء',
+        thursday: 'الخميس', friday: 'الجمعة', saturday: 'السبت', sunday: 'الأحد'
+    };
+
+    // ── Map ──────────────────────────────────────────────
+    const defaultCenter = LOCATIONS.length
+        ? [LOCATIONS[0].lat, LOCATIONS[0].lng]
+        : [31.527, 35.100];
+
+    const map = L.map('reserve-map', {
+        center: defaultCenter,
+        zoom: 14,
+        zoomControl: true,
+        attributionControl: false,
+    });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+    }).addTo(map);
+
+    // ── State ───────────────────────────────────────────
+    let selectedId = null;
+    const markerEls = {};
+    const markerObjs = {};
+
+    // ── UI refs ─────────────────────────────────────────
+    const hiddenInput    = document.getElementById('id_location_selected');
+    const promptState    = document.getElementById('prompt-state');
+    const selectionState = document.getElementById('selection-state');
+    const locName        = document.getElementById('loc-name');
+    const locSchedule    = document.getElementById('loc-schedule');
+    const locAvailable   = document.getElementById('loc-available');
+    const locReserved    = document.getElementById('loc-reserved');
+    const locTotal       = document.getElementById('loc-total');
+    const locNotes       = document.getElementById('loc-notes');
+    const startDate      = document.getElementById('id_start_date');
+    const endDate        = document.getElementById('id_end_date');
+
+    // Set min date to today
+    const today = new Date().toISOString().split('T')[0];
+    startDate.setAttribute('min', today);
+    endDate.setAttribute('min', today);
+
+    startDate.addEventListener('change', function () {
+        endDate.setAttribute('min', this.value || today);
+        if (endDate.value && endDate.value < this.value) {
+            endDate.value = this.value;
+        }
+    });
+
+    function selectLocation(loc) {
+        if (loc.available <= 0) return; // Can't select full locations
+
+        selectedId = loc.id;
+        hiddenInput.value = loc.id;
+
+        // Show selection state
+        promptState.style.display = 'none';
+        selectionState.style.display = 'block';
+
+        // Populate detail card
+        locName.textContent = loc.name;
+
+        const days = (loc.days || []).map(d => DAYS_AR[d] || d).join('، ');
+        locSchedule.textContent = days
+            ? days + ' · ' + loc.start + ' – ' + loc.end
+            : loc.start + ' – ' + loc.end;
+
+        locAvailable.textContent = loc.available;
+        locReserved.textContent  = loc.reserved;
+        locTotal.textContent     = loc.max_stalls;
+
+        if (loc.notes) {
+            locNotes.textContent = loc.notes;
+            locNotes.style.display = 'block';
+        } else {
+            locNotes.style.display = 'none';
+        }
+
+        // Update marker styles
+        Object.keys(markerEls).forEach(id => {
+            markerEls[id].classList.remove('selected');
+        });
+        if (markerEls[loc.id]) {
+            markerEls[loc.id].classList.add('selected');
+        }
+
+        map.flyTo([loc.lat, loc.lng], 16, { duration: 0.6 });
+    }
+
+    // ── Render markers ──────────────────────────────────
+    LOCATIONS.forEach(loc => {
+        const isFull = loc.available <= 0;
+
+        const el = document.createElement('div');
+        el.className = 'loc-marker' + (isFull ? ' full' : '');
+        el.textContent = loc.available;
+
+        const marker = L.marker([loc.lat, loc.lng], {
+            icon: L.divIcon({
+                html: el.outerHTML,
+                className: '',
+                iconSize: [40, 40],
+                iconAnchor: [20, 20],
+            })
+        }).addTo(map);
+
+        marker.on('add', function () {
+            const domEl = marker.getElement();
+            if (domEl) {
+                markerEls[loc.id] = domEl.querySelector('.loc-marker') || domEl;
+            }
+        });
+
+        marker.on('click', function () {
+            selectLocation(loc);
+        });
+
+        // Tooltip
+        const statusHtml = isFull
+            ? '<span class="avail-badge avail-closed">مكتمل</span>'
+            : '<span class="avail-badge avail-open">' + loc.available + ' متاح</span>';
+
+        marker.bindTooltip(
+            '<strong>' + loc.name + '</strong><br>' + statusHtml,
+            {
+                direction: 'top',
+                offset: [0, -22],
+                permanent: false,
+                className: 'reserve-tooltip',
+            }
+        );
+
+        markerObjs[loc.id] = marker;
+    });
+
+    // Fit map
+    if (LOCATIONS.length > 1) {
+        const group = L.featureGroup(Object.values(markerObjs));
+        map.fitBounds(group.getBounds().pad(0.15));
+    }
+
+    // ── Form validation ─────────────────────────────────
+    document.getElementById('reserve-form').addEventListener('submit', function (e) {
+        if (!hiddenInput.value) {
+            e.preventDefault();
+            promptState.style.display = 'block';
+            selectionState.style.display = 'none';
+            document.getElementById('reserve-map').scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+})();
+</script>
+
+<style>
+.reserve-tooltip {
+    background: var(--surface);
+    color: var(--text-main);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    font-family: var(--font-body);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+    line-height: 1.6;
+    text-align: right;
+    direction: rtl;
+}
+.reserve-tooltip::before { border-top-color: var(--glass-border) !important; }
+</style>
+{% endblock %}
