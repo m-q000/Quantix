@@ -1,336 +1,247 @@
 {% extends "officer_portal/base.html" %}
 
 {% block title %}سجل التفتيشات{% endblock %}
+{% block page_title %}سجل التفتيشات{% endblock %}
 {% block nav_inspections %}active{% endblock %}
-{% block nav_inspections_icon %}fill{% endblock %}
 
 {% block extra_styles %}
 
-/* Page heading with search */
-.list-heading {
-    margin-bottom: 18px;
+/* ── Stats strip ── */
+.stat-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 22px;
 }
 
-.list-heading h2 {
-    font-size: 1.4rem;
-    font-weight: 800;
+/* ── Toolbar ── */
+.list-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    gap: 16px;
+    flex-wrap: wrap;
 }
 
-.list-heading .count-label {
-    font-size: 0.84rem;
-    color: var(--text-muted);
-    margin-top: 3px;
-}
-
-/* Filter tabs */
 .filter-tabs {
     display: flex;
-    gap: 8px;
-    margin-bottom: 18px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
+    gap: 6px;
+    flex-wrap: wrap;
 }
-
-.filter-tabs::-webkit-scrollbar { display: none; }
 
 .filter-tab {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 7px 16px;
+    gap: 5px;
+    padding: 6px 14px;
     border-radius: var(--radius-pill);
-    font-size: 0.82rem;
+    font-size: 0.78rem;
     font-weight: 700;
-    border: 1.5px solid var(--glass-border);
+    border: 1.5px solid var(--border-strong);
     background: var(--surface);
     color: var(--text-muted);
     cursor: pointer;
     white-space: nowrap;
-    transition: all 0.2s;
-    flex-shrink: 0;
+    transition: all 0.15s;
 }
 
+.filter-tab:hover { background: var(--surface-hover); color: var(--text-main); }
+
 .filter-tab.active-filter {
-    color: var(--text-main);
-    border-color: var(--accent);
     background: var(--accent);
+    border-color: var(--accent);
     color: white;
 }
 
-.filter-tab.ok-filter.active-filter      { background: var(--success); border-color: var(--success); }
-.filter-tab.warn-filter.active-filter    { background: var(--warning); border-color: var(--warning); }
-.filter-tab.viol-filter.active-filter    { background: var(--danger);  border-color: var(--danger); }
+.filter-tab.ok-filter.active-filter    { background: var(--success); border-color: var(--success); }
+.filter-tab.warn-filter.active-filter  { background: var(--warning); border-color: var(--warning); }
+.filter-tab.viol-filter.active-filter  { background: var(--danger);  border-color: var(--danger); }
 
-.filter-tab .tab-count {
+.tab-count {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-width: 18px; height: 18px;
     background: rgba(0,0,0,0.1);
     border-radius: var(--radius-pill);
-    font-size: 0.7rem;
-    padding: 0 5px;
-}
-
-.filter-tab.active-filter .tab-count { background: rgba(255,255,255,0.2); }
-
-/* Stats row */
-.stats-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
-.stat-mini {
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    padding: 14px 12px;
-    text-align: center;
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--shadow-card);
-    animation: slideUp 0.35s var(--ease-out) both;
-}
-
-.stat-mini:nth-child(1) { animation-delay: 0.04s; }
-.stat-mini:nth-child(2) { animation-delay: 0.07s; }
-.stat-mini:nth-child(3) { animation-delay: 0.10s; }
-
-.stat-mini .s-num {
-    font-family: var(--font-display);
-    font-size: 1.6rem;
-    font-weight: 800;
-    line-height: 1;
-}
-
-.stat-mini .s-lbl {
     font-size: 0.68rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    margin-top: 3px;
+    padding: 0 4px;
 }
 
-.s-ok   .s-num { color: var(--success); }
-.s-warn .s-num { color: var(--warning); }
-.s-viol .s-num { color: var(--danger);  }
+.filter-tab.active-filter .tab-count { background: rgba(255,255,255,0.22); }
 
-/* Inspection list items */
-.insp-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.insp-row {
-    display: flex;
+/* ── Table ── */
+.result-cell {
+    display: inline-flex;
     align-items: center;
-    gap: 14px;
-    padding: 14px 16px;
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--glass-border);
-    box-shadow: var(--shadow-card);
-    text-decoration: none;
-    color: inherit;
-    transition: background 0.15s, transform 0.15s;
-    animation: slideUp 0.35s var(--ease-out) both;
+    gap: 6px;
+    font-size: 0.78rem;
+    font-weight: 700;
 }
 
-.insp-row:active { transform: scale(0.99); background: var(--surface-hover); }
-
-/* Stagger animation */
-.insp-row:nth-child(1)  { animation-delay:  0ms; }
-.insp-row:nth-child(2)  { animation-delay: 30ms; }
-.insp-row:nth-child(3)  { animation-delay: 60ms; }
-.insp-row:nth-child(4)  { animation-delay: 90ms; }
-.insp-row:nth-child(5)  { animation-delay:120ms; }
-.insp-row:nth-child(6)  { animation-delay:150ms; }
-.insp-row:nth-child(7)  { animation-delay:180ms; }
-.insp-row:nth-child(8)  { animation-delay:210ms; }
-.insp-row:nth-child(9)  { animation-delay:240ms; }
-.insp-row:nth-child(10) { animation-delay:270ms; }
-
-.insp-indicator {
-    width: 42px; height: 42px;
+.result-dot {
+    width: 7px; height: 7px;
     border-radius: 50%;
-    display: grid;
-    place-items: center;
-    font-size: 1.1rem;
     flex-shrink: 0;
 }
 
-.insp-indicator.ok        { background: rgba(16,185,129,0.1);  color: var(--success); }
-.insp-indicator.warning   { background: rgba(245,158,11,0.1);  color: var(--warning); }
-.insp-indicator.violation { background: rgba(239,68,68,0.1);   color: var(--danger); }
+.result-dot.ok        { background: var(--success); }
+.result-dot.warning   { background: var(--warning); }
+.result-dot.violation { background: var(--danger); }
 
-.insp-body { flex: 1; min-width: 0; }
+.result-cell.ok        { color: var(--success); }
+.result-cell.warning   { color: var(--warning); }
+.result-cell.violation { color: var(--danger); }
 
-.insp-owner {
-    font-size: 0.9rem;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+.stall-name { font-weight: 700; font-size: 0.875rem; }
+.stall-cat  { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
 
-.insp-detail-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-    margin-top: 3px;
-}
-
-.insp-detail-row .d-chip {
+.viol-pill {
     display: inline-flex;
     align-items: center;
-    gap: 3px;
-    font-size: 0.72rem;
-    color: var(--text-muted);
-}
-
-.insp-detail-row .d-chip i { font-size: 0.75rem; }
-
-.dot-sep {
-    width: 3px; height: 3px;
-    border-radius: 50%;
-    background: var(--glass-border);
-}
-
-/* Violations count badge */
-.viol-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 2px 7px;
+    gap: 4px;
+    padding: 2px 8px;
+    background: var(--danger-bg);
+    color: var(--danger);
     border-radius: var(--radius-pill);
     font-size: 0.68rem;
     font-weight: 700;
-    background: rgba(239,68,68,0.1);
-    color: var(--danger);
 }
 
-.insp-arrow {
-    font-size: 1.1rem;
-    color: var(--text-muted);
-    flex-shrink: 0;
+.empty-row td {
+    cursor: default !important;
+    padding: 60px 24px;
 }
 
-/* Date group header */
-.date-group-header {
-    font-size: 0.78rem;
-    font-weight: 700;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 4px 0 8px;
-    margin-top: 8px;
-}
 {% endblock %}
 
 {% block content %}
 
-<div class="list-heading">
-    <h2>سجل التفتيشات</h2>
-    <div class="count-label">{{ inspections|length }} تفتيش مسجل</div>
+<!-- Stats strip -->
+<div class="stat-strip">
+    <div class="stat-card fade-up">
+        <div class="stat-card-label">
+            <i class="ri-checkbox-circle-line" style="color:var(--success)"></i> مطابق
+        </div>
+        <div class="stat-card-num ok" id="stat-ok">—</div>
+    </div>
+    <div class="stat-card fade-up delay-1">
+        <div class="stat-card-label">
+            <i class="ri-error-warning-line" style="color:var(--warning)"></i> تحذير
+        </div>
+        <div class="stat-card-num warn" id="stat-warn">—</div>
+    </div>
+    <div class="stat-card fade-up delay-2">
+        <div class="stat-card-label">
+            <i class="ri-close-circle-line" style="color:var(--danger)"></i> مخالفة
+        </div>
+        <div class="stat-card-num danger" id="stat-viol">—</div>
+    </div>
 </div>
 
-<!-- Quick stats (JS-computed from rendered rows) -->
-<div class="stats-row">
-    <div class="stat-mini s-ok">
-        <div class="s-num" id="stat-ok">—</div>
-        <div class="s-lbl">مطابق</div>
-    </div>
-    <div class="stat-mini s-warn">
-        <div class="s-num" id="stat-warn">—</div>
-        <div class="s-lbl">تحذير</div>
-    </div>
-    <div class="stat-mini s-viol">
-        <div class="s-num" id="stat-viol">—</div>
-        <div class="s-lbl">مخالفة</div>
-    </div>
-</div>
+<!-- Table card -->
+<div class="card fade-up delay-2">
 
-<!-- Filter tabs -->
-<div class="filter-tabs">
-    <button class="filter-tab active-filter" data-filter="all" onclick="filterInsp('all', this)">
-        <i class="ri-list-check-2"></i>
-        الكل
-        <span class="tab-count">{{ inspections|length }}</span>
-    </button>
-    <button class="filter-tab ok-filter" data-filter="ok" onclick="filterInsp('ok', this)">
-        <i class="ri-checkbox-circle-line"></i>
-        مطابق
-    </button>
-    <button class="filter-tab warn-filter" data-filter="warning" onclick="filterInsp('warning', this)">
-        <i class="ri-error-warning-line"></i>
-        تحذير
-    </button>
-    <button class="filter-tab viol-filter" data-filter="violation" onclick="filterInsp('violation', this)">
-        <i class="ri-close-circle-line"></i>
-        مخالفة
-    </button>
-</div>
+    <div class="list-toolbar">
+        <div style="display:flex;align-items:center;gap:10px;">
+            <span style="font-size:0.9rem;font-weight:700;">التفتيشات المسجلة</span>
+            <span style="font-size:0.74rem;color:var(--text-muted);background:var(--base);padding:3px 9px;border-radius:var(--radius-pill);font-weight:600;">
+                {{ inspections|length }}
+            </span>
+        </div>
 
-<!-- Inspection list -->
-<div class="insp-list" id="insp-list">
-    {% for insp in inspections %}
-    <a href="{% url 'officer_portal:inspection_detail' pk=insp.pk %}"
-       class="insp-row"
-       data-result="{{ insp.result }}">
-        <div class="insp-indicator {{ insp.result }}">
-            {% if insp.result == 'ok' %}
+        <div class="filter-tabs">
+            <button class="filter-tab active-filter" data-filter="all" onclick="filterInsp('all', this)">
+                <i class="ri-list-check-2"></i>
+                الكل
+                <span class="tab-count">{{ inspections|length }}</span>
+            </button>
+            <button class="filter-tab ok-filter" data-filter="ok" onclick="filterInsp('ok', this)">
                 <i class="ri-checkbox-circle-line"></i>
-            {% elif insp.result == 'warning' %}
+                مطابق
+                <span class="tab-count">0</span>
+            </button>
+            <button class="filter-tab warn-filter" data-filter="warning" onclick="filterInsp('warning', this)">
                 <i class="ri-error-warning-line"></i>
-            {% else %}
+                تحذير
+                <span class="tab-count">0</span>
+            </button>
+            <button class="filter-tab viol-filter" data-filter="violation" onclick="filterInsp('violation', this)">
                 <i class="ri-close-circle-line"></i>
-            {% endif %}
+                مخالفة
+                <span class="tab-count">0</span>
+            </button>
         </div>
-        <div class="insp-body">
-            <div class="insp-owner">
-                {{ insp.stall.owner.user.get_full_name|default:"صاحب الكشك" }}
-                {% if insp.stall.category %} · {{ insp.stall.category.name }}{% endif %}
-            </div>
-            <div class="insp-detail-row">
-                <span class="d-chip">
-                    <i class="ri-calendar-line"></i>
-                    {{ insp.timestamp|date:"j F" }}
-                </span>
-                <div class="dot-sep"></div>
-                <span class="d-chip">
-                    <i class="ri-time-line"></i>
-                    {{ insp.timestamp|date:"H:i" }}
-                </span>
-                {% if insp.stall.location %}
-                <div class="dot-sep"></div>
-                <span class="d-chip">
-                    <i class="ri-map-pin-line"></i>
-                    {{ insp.stall.location.name }}
-                </span>
-                {% endif %}
-                {% if insp.violations.count %}
-                <div class="dot-sep"></div>
-                <span class="viol-badge">
-                    {{ insp.violations.count }} مخالفة
-                </span>
-                {% endif %}
-            </div>
-        </div>
-        <i class="ri-arrow-left-s-line insp-arrow"></i>
-    </a>
-    {% empty %}
-    <div style="text-align:center;padding:56px 16px;color:var(--text-muted);">
-        <i class="ri-file-search-line" style="font-size:2.5rem;display:block;margin-bottom:12px;opacity:0.35;"></i>
-        <p style="font-size:0.9rem;">لا توجد تفتيشات حتى الآن</p>
-        <a href="{% url 'officer_portal:scan' %}"
-           style="display:inline-flex;align-items:center;gap:6px;margin-top:16px;padding:10px 20px;background:var(--accent);color:white;border-radius:var(--radius-pill);font-size:0.85rem;font-weight:700;">
-            <i class="ri-qr-scan-2-line"></i> ابدأ بمسح QR
-        </a>
     </div>
-    {% endfor %}
+
+    <table class="data-table" id="insp-table">
+        <thead>
+            <tr>
+                <th style="width:50px; text-align:center;">#</th>
+                <th style="width:120px;">النتيجة</th>
+                <th>الكشك</th>
+                <th>الموقع</th>
+                <th>التاريخ والوقت</th>
+                <th style="width:100px; text-align:center;">المخالفات</th>
+            </tr>
+        </thead>
+        <tbody id="insp-tbody">
+            {% for insp in inspections %}
+            <tr data-result="{{ insp.result }}"
+                onclick="window.location='{% url 'officer_portal:inspection_detail' pk=insp.pk %}'">
+                <td class="col-num">{{ forloop.counter }}</td>
+                <td>
+                    <span class="result-cell {{ insp.result }}">
+                        <span class="result-dot {{ insp.result }}"></span>
+                        {% if insp.result == 'ok' %}مطابق
+                        {% elif insp.result == 'warning' %}تحذير
+                        {% else %}مخالفة{% endif %}
+                    </span>
+                </td>
+                <td>
+                    <div class="stall-name">
+                        {{ insp.stall.owner.user.get_full_name|default:"صاحب الكشك" }}
+                    </div>
+                    {% if insp.stall.category %}
+                    <div class="stall-cat">{{ insp.stall.category.name }}</div>
+                    {% endif %}
+                </td>
+                <td style="color:var(--text-muted);font-size:0.82rem;">
+                    {{ insp.stall.location.name|default:"—" }}
+                </td>
+                <td style="color:var(--text-muted);font-size:0.82rem;white-space:nowrap;">
+                    {{ insp.timestamp|date:"j F Y، H:i" }}
+                </td>
+                <td style="text-align:center;">
+                    {% if insp.violations.count %}
+                    <span class="viol-pill">
+                        <i class="ri-alert-line"></i>
+                        {{ insp.violations.count }}
+                    </span>
+                    {% else %}
+                    <span style="color:var(--text-dim);font-size:0.78rem;">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr class="empty-row">
+                <td colspan="6">
+                    <div class="empty-state">
+                        <i class="ri-file-search-line"></i>
+                        <p>لا توجد تفتيشات حتى الآن</p>
+                        <a href="{% url 'officer_portal:scan' %}" class="btn btn-primary" style="margin: 18px auto 0; width:fit-content;">
+                            <i class="ri-qr-scan-2-line"></i>
+                            ابدأ بمسح QR
+                        </a>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
 </div>
 
 {% endblock %}
@@ -338,38 +249,32 @@
 {% block scripts %}
 <script>
 (function () {
-    /* Compute stats from rendered rows */
     var counts = { ok: 0, warning: 0, violation: 0 };
-    document.querySelectorAll('.insp-row[data-result]').forEach(function (row) {
+    document.querySelectorAll('#insp-tbody tr[data-result]').forEach(function (row) {
         var r = row.dataset.result;
         if (counts[r] !== undefined) counts[r]++;
     });
+
     document.getElementById('stat-ok').textContent   = counts.ok;
     document.getElementById('stat-warn').textContent = counts.warning;
     document.getElementById('stat-viol').textContent = counts.violation;
 
     /* Update filter tab counts */
-    document.querySelectorAll('.filter-tab[data-filter]').forEach(function (tab) {
-        var f   = tab.dataset.filter;
-        var cnt = f === 'all' ? (counts.ok + counts.warning + counts.violation) : (counts[f] || 0);
+    var tabs = document.querySelectorAll('.filter-tab[data-filter]');
+    tabs.forEach(function (tab) {
+        var f    = tab.dataset.filter;
+        var cnt  = f === 'all'
+            ? (counts.ok + counts.warning + counts.violation)
+            : (counts[f] || 0);
         var span = tab.querySelector('.tab-count');
         if (span) span.textContent = cnt;
-        else {
-            var s = document.createElement('span');
-            s.className = 'tab-count';
-            s.textContent = cnt;
-            tab.appendChild(s);
-        }
     });
 
-    /* Client-side filter by result */
+    /* Filter rows */
     window.filterInsp = function (filter, clickedTab) {
-        document.querySelectorAll('.filter-tab').forEach(function (t) {
-            t.classList.remove('active-filter');
-        });
+        tabs.forEach(function (t) { t.classList.remove('active-filter'); });
         clickedTab.classList.add('active-filter');
-
-        document.querySelectorAll('.insp-row').forEach(function (row) {
+        document.querySelectorAll('#insp-tbody tr[data-result]').forEach(function (row) {
             row.style.display = (filter === 'all' || row.dataset.result === filter) ? '' : 'none';
         });
     };
