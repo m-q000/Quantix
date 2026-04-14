@@ -41,7 +41,28 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # ── Domain apps ────────────────────────────────
+    'apps.accounts',
+    'apps.stalls',
+    'apps.locations',
+    'apps.subscriptions',
+    'apps.inspections',
+    'apps.notifications',
+
+    # ── Portal apps (MVT per user role) ────────────
+    'apps.public_portal',
+    'apps.vendor_portal',
+    'apps.officer_portal',
+    'apps.municipality_portal',
 ]
+
+# Custom user model — must be set before first migration
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
+# Redirect unauthenticated users to the shared login page
+LOGIN_URL = '/auth/login/'
+LOGIN_REDIRECT_URL = '/'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -58,7 +79,7 @@ ROOT_URLCONF = 'theproject.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -112,7 +133,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Hebron'
 
 USE_I18N = True
 
@@ -122,7 +143,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+# Media files (user uploads: stall images, QR codes, violation evidence)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# Default primary key field type
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # Email (Brevo API)
