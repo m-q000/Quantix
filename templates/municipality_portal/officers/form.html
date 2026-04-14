@@ -18,7 +18,7 @@
         </div>
         {% endif %}
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px">
+        <div class="grid-2">
             <div class="form-group">
                 <label class="form-label" for="id_first_name">الاسم الأول</label>
                 <input type="text" name="first_name" id="id_first_name" class="form-control" placeholder="أدخل اسم المفتش..." value="{{ form.first_name.value|default:'' }}">
@@ -31,8 +31,8 @@
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px">
-            <div class="form-group">
+        <div class="grid-2" style="margin-bottom: 32px">
+            <div class="form-group" style="margin-bottom: 0;">
                 <label class="form-label" for="id_username">اسم المستخدم للولوج (بالإنجليزي)</label>
                 <input type="text" name="username" id="id_username" class="form-control" placeholder="مثلاً: officer_01" value="{{ form.username.value|default:'' }}">
                 <div class="form-help">يستخدم هذا الاسم لتسجيل الدخول في تطبيق التفتيش الميداني.</div>
@@ -45,7 +45,7 @@
             </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px">
+        <div class="grid-2">
             <div class="form-group">
                 <label class="form-label" for="id_phone">رقم الجوال الخاص</label>
                 <input type="text" name="phone" id="id_phone" class="form-control" placeholder="05XXXXXXXX" value="{{ form.phone.value|default:'' }}">
@@ -58,8 +58,8 @@
 
         <div style="margin: 40px 0; padding: 24px; background: #F8FAFC; border-radius: 16px; border: 1px dashed var(--border-light)">
             <h4 style="font-size: 1rem; color: var(--text-heading); margin-bottom: 24px">إعدادات الأمان وسرية البيانات</h4>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 32px">
-                <div class="form-group">
+            <div class="grid-2">
+                <div class="form-group" style="margin-bottom: 0;">
                     <label class="form-label" for="id_password1">كلمة المرور المؤقتة</label>
                     <input type="password" name="password1" id="id_password1" class="form-control">
                     {% if form.password1.errors %}<div class="form-error">{{ form.password1.errors|join:", " }}</div>{% endif %}
@@ -72,7 +72,7 @@
             </div>
         </div>
 
-        <div style="display: flex; gap: 20px; align-items: center; justify-content: flex-start; margin-top: 24px">
+        <div class="flex-mobile-col" style="display: flex; gap: 20px; align-items: center; justify-content: flex-start; margin-top: 24px">
             <button type="submit" class="btn btn-primary" style="padding: 16px 40px; font-size: 1.1rem">اعتماد وتسجيل المفتش</button>
             <a href="{% url 'municipality_portal:officer_list' %}" class="btn btn-white" style="padding: 16px 32px">إلغاء العملية والعودة</a>
         </div>

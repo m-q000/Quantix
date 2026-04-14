@@ -3,363 +3,358 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>{% block title %}بوابة بلدية الخليل الرقمية{% endblock %}</title>
+    <title>{% block title %}بوابة بلدية الخليل الرقمية | القيادة العليا{% endblock %}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200..700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;600;800;900&family=IBM+Plex+Sans+Arabic:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 
     <style>
         :root {
-            /* 10x Palette: Refined Excellence */
-            --brand-primary:   #4F46E5; /* Indigo 600 */
-            --brand-secondary: #0EA5E9; /* Sky 500 */
-            --bg-base:         #F8FAFC; /* Slate 50 */
-            --bg-surface:      #FFFFFF;
-            --text-heading:    #0F172A; /* Slate 900 */
-            --text-body:       #334155; /* Slate 700 */
-            --text-muted:      #64748B; /* Slate 500 */
-            --border-light:    #E2E8F0; /* Slate 200 */
+            /* Distinctive Aesthetic: Editorial Civic Heritage */
+            --paper-base:      #FAF9F6;
+            --paper-surface:   #FFFFFF;
+            --civic-green:     #0B382A;
+            --civic-green-light: #155541;
+            --sand-gold:       #Dca54a;
+            --ink-black:       #121614;
+            --ink-muted:       #6B726B;
+            --border-classic:  #E4E0D1;
+
+            --danger-bold:     #C92A2A;
+            --warning-bold:    #E67700;
+            --success-bold:    #2B8A3E;
+
+            --shadow-sharp:    4px 4px 0px rgba(11, 56, 42, 0.1);
+            --shadow-elegant:  0 10px 40px -10px rgba(11, 56, 42, 0.08);
             
-            --success:         #10B981;
-            --warning:         #F59E0B;
-            --danger:          #EF4444;
-            
-            --sidebar-width:   280px;
-            --header-height:   80px;
-            --radius-lg:       16px;
-            --radius-xl:       24px;
-            
-            --shadow-sm:       0 1px 3px rgba(0,0,0,0.1);
-            --shadow-md:       0 4px 12px -2px rgba(0,0,0,0.08), 0 2px 6px -1px rgba(0,0,0,0.04);
-            --shadow-lg:       0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
-            --transition:      all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --radius-btn:      0px; /* Brutalist/Editorial edge */
+            --radius-card:     0px;
+            --transition-snap: all 0.4s cubic-bezier(0.85, 0, 0.15, 1);
+        }
+
+        /* SVG Noise Texture */
+        body::before {
+            content: "";
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.35;
+            background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'Readex Pro', sans-serif;
-            background: var(--bg-base);
-            color: var(--text-body);
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
+            background: var(--paper-base);
+            color: var(--ink-black);
             line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
         }
 
-        /* ── Advanced Layout ── */
-        .dashboard-shell {
-            display: grid;
-            grid-template-columns: var(--sidebar-width) 1fr;
-            min-height: 100vh;
+        h1, h2, h3, h4, .display-font {
+            font-family: 'Alexandria', sans-serif;
+            font-weight: 800;
+            letter-spacing: -0.02em;
         }
 
-        /* ── Sidebar (Premium Glassmorphism) ── */
+        /* ── Staggered Animations ── */
+        .reveal-up {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: floatUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+
+        @keyframes floatUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Dynamic Layout ── */
+        .app-shell { display: flex; min-height: 100vh; }
+
+        /* ── Asymmetrical Sidebar ── */
         .sidebar {
-            background: #020617; /* Slate 950 */
-            color: #F1F5F9;
-            height: 100vh;
+            width: 320px;
+            background: var(--civic-green);
+            color: var(--paper-base);
             position: sticky;
             top: 0;
-            padding: 40px 24px;
+            height: 100vh;
+            height: 100dvh;
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            border-left: 1px solid rgba(255,255,255,0.05);
+            border-left: 2px solid var(--sand-gold);
             z-index: 1000;
+            padding: 40px 0;
         }
 
-        .brand-section {
+        /* Customize Scrollbar for Sidebar */
+        .sidebar::-webkit-scrollbar { width: 6px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
+        .sidebar::-webkit-scrollbar-thumb { background: rgba(220, 165, 74, 0.3); border-radius: 10px; }
+        .sidebar::-webkit-scrollbar-thumb:hover { background: rgba(220, 165, 74, 0.6); }
+
+        .brand-block {
+            padding: 0 40px;
+            margin-bottom: 60px;
+            border-bottom: 1px solid rgba(220, 165, 74, 0.2);
+            padding-bottom: 30px;
+        }
+
+        .brand-block h1 { 
+            font-size: 2.2rem; 
+            color: var(--sand-gold); 
+            line-height: 1.1; 
+            margin-bottom: 8px;
+        }
+        .brand-block p {
+            font-family: 'IBM Plex Sans Arabic';
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: rgba(250, 249, 246, 0.6);
+            font-weight: 600;
+        }
+
+        .nav-link {
             display: flex;
             align-items: center;
             gap: 16px;
-            margin-bottom: 48px;
-            padding: 0 8px;
-        }
-
-        .brand-circle {
-            width: 44px; height: 44px;
-            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
-            border-radius: 12px;
-            display: grid; place-items: center;
-            color: white; font-weight: 800; font-size: 1.5rem;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
-        }
-
-        .brand-text h1 { font-size: 1.3rem; font-weight: 700; color: white; letter-spacing: -0.01em; }
-        .brand-text p { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
-
-        .nav-section-label {
-            font-size: 0.72rem;
-            font-weight: 700;
-            color: #475569;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            margin: 32px 12px 12px;
-        }
-
-        .sidebar-nav { flex: 1; }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            padding: 12px 16px;
-            border-radius: 12px;
-            color: #94A3B8;
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: var(--transition);
-            margin-bottom: 4px;
+            padding: 16px 40px;
+            color: rgba(250, 249, 246, 0.7);
             text-decoration: none;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: var(--transition-snap);
+            position: relative;
         }
 
-        .nav-item i { font-size: 1.4rem; transition: var(--transition); }
+        .nav-link i { font-size: 1.4rem; }
 
-        .nav-item:hover {
-            background: rgba(255,255,255,0.05);
-            color: white;
+        .nav-link:hover {
+            color: var(--paper-base);
+            background: rgba(255,255,255,0.03);
+            padding-right: 50px;
         }
 
-        .nav-item.active {
-            background: var(--brand-primary);
-            color: white;
-            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+        .nav-link.active {
+            color: var(--civic-green);
+            background: var(--paper-base);
+            font-weight: 700;
         }
 
-        .nav-item.active i { transform: scale(1.1); }
-
-        .sidebar-footer {
-            margin-top: auto;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            padding-top: 24px;
+        .nav-link.active::before {
+            content: "";
+            position: absolute;
+            right: 0; top: 0; bottom: 0; width: 6px;
+            background: var(--sand-gold);
         }
 
-        /* ── Main Panel ── */
+        .section-separator {
+            font-family: 'Alexandria';
+            margin: 32px 40px 12px;
+            font-size: 0.65rem;
+            color: var(--sand-gold);
+            opacity: 0.8;
+        }
+
+        /* ── Editorial Main Panel ── */
         .main-panel {
+            flex: 1;
             min-width: 0;
             display: flex;
             flex-direction: column;
         }
 
         .top-nav {
-            height: var(--header-height);
-            background: var(--bg-surface);
-            border-bottom: 1px solid var(--border-light);
+            padding: 30px 64px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 48px;
+            border-bottom: 1px solid var(--border-classic);
+            background: var(--paper-base);
             position: sticky;
             top: 0;
             z-index: 900;
-            backdrop-filter: blur(8px);
-            background: rgba(255,255,255,0.8);
         }
 
-        .page-header-title { font-size: 1.5rem; font-weight: 700; color: var(--text-heading); }
+        .page-header h2 { font-size: 2rem; color: var(--ink-black); line-height: 1.3; }
 
-        .user-widget {
-            display: flex;
-            align-items: center;
-            gap: 16px;
+        .auth-badge {
+            display: flex; align-items: center; gap: 14px;
+            background: var(--paper-surface);
+            border: 1px solid var(--border-classic);
+            padding: 8px 24px;
+            border-radius: 40px;
+            box-shadow: var(--shadow-sharp);
         }
 
-        .user-avatar {
-            width: 44px; height: 44px;
-            border-radius: 12px;
-            background: #F1F5F9;
-            display: grid; place-items: center;
-            font-weight: 800; color: var(--brand-primary);
-            border: 2px solid var(--border-light);
-        }
+        .auth-badge span { font-weight: 700; font-size: 0.85rem; font-family: 'IBM Plex Sans Arabic'; }
+        
+        .content-container { padding: 48px 64px; max-width: 1700px; margin: 0 auto; width: 100%; }
 
-        .user-meta { text-align: left; line-height: 1.3; }
-        .user-meta .name { font-weight: 700; color: var(--text-heading); font-size: 0.95rem; }
-        .user-meta .role { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
-
-        /* ── Page Wrapper ── */
-        .content-container {
-            padding: 48px;
-            max-width: 1600px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        /* ── Component Primitives ── */
+        /* ── Shared Core Primitives ── */
         .card {
-            background: var(--bg-surface);
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-light);
-            box-shadow: var(--shadow-md);
-            transition: var(--transition);
-            overflow: hidden;
+            background: var(--paper-surface);
+            border: 1px solid var(--border-classic);
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-sharp);
         }
-
-        .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
 
         .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 12px 24px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: var(--transition);
-            cursor: pointer;
-            text-decoration: none;
-            border: none;
+            display: inline-flex; align-items: center; justify-content: center; gap: 12px;
+            padding: 14px 32px;
+            font-family: 'Alexandria', sans-serif;
+            font-weight: 800; font-size: 0.85rem;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            cursor: pointer; text-decoration: none; border: none;
+            transition: var(--transition-snap);
         }
 
         .btn-primary { 
-            background: var(--brand-primary); 
-            color: white;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+            background: var(--civic-green); color: var(--paper-base); 
+            border: 1px solid var(--civic-green);
         }
-        .btn-primary:hover { background: #4338CA; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3); }
+        .btn-primary:hover { background: var(--ink-black); border-color: var(--ink-black); transform: translate(-2px, -2px); box-shadow: 4px 4px 0 var(--sand-gold); }
 
-        .btn-white { background: white; color: var(--text-heading); border: 1px solid var(--border-light); }
-        .btn-white:hover { background: var(--bg-base); }
+        .btn-white { background: var(--paper-surface); color: var(--civic-green); border: 1px solid var(--civic-green); }
+        .btn-white:hover { background: var(--civic-green); color: var(--paper-base); }
 
-        /* ── Tables (High Fidelity) ── */
-        .table-view { width: 100%; border-collapse: separate; border-spacing: 0; }
+        /* ── High-Contrast Badges ── */
+        .badge {
+            padding: 6px 14px; font-family: 'Alexandria', sans-serif; font-size: 0.7rem; font-weight: 800;
+            display: inline-flex; align-items: center; gap: 6px; letter-spacing: 0.05em; border: 1px solid currentColor;
+        }
+        .badge-success { background: #EBFBEE; color: var(--success-bold); border-color: #D3F9D8; }
+        .badge-warning { background: #FFF9DB; color: var(--warning-bold); border-color: #FFF3BF; }
+        .badge-danger  { background: #FFF5F5; color: var(--danger-bold);  border-color: #FFE3E3; }
+        
+        /* ── Fine Tables ── */
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table-view { width: 100%; border-collapse: collapse; min-width: 800px; }
         .table-view th {
-            padding: 20px 24px;
-            text-align: right;
-            background: #F8FAFC;
-            font-size: 0.75rem;
-            font-weight: 800;
-            color: #64748B;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            border-bottom: 1px solid var(--border-light);
+            padding: 24px; text-align: right; font-family: 'Alexandria'; font-size: 0.7rem; color: var(--ink-muted);
+            border-bottom: 2px solid var(--ink-black); text-transform: uppercase; letter-spacing: 0.05em;
         }
         .table-view td {
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--border-light);
-            font-size: 0.95rem;
-            color: var(--text-body);
-            background: white;
+            padding: 24px; border-bottom: 1px solid var(--border-classic); background: transparent; font-weight: 600;
         }
-        .table-view tr:last-child td { border-bottom: none; }
-        .table-view tr:hover td { background: #F8FAFC; }
+        .table-view tr:hover td { background: rgba(255,255,255,0.5); }
 
-        /* ── Badges ── */
-        .badge {
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .badge-success { background: #DCFCE7; color: #166534; }
-        .badge-warning { background: #FEF3C7; color: #92400E; }
-        .badge-danger  { background: #FEE2E2; color: #991B1B; }
-
-        /* ── Form Controls (10x Styling) ── */
-        .form-group { margin-bottom: 24px; }
-        .form-label { display: block; font-weight: 700; color: var(--text-heading); margin-bottom: 8px; font-size: 0.9rem; }
+        /* ── Beautiful Forms ── */
+        .form-group { margin-bottom: 32px; }
+        .form-label { display: block; font-family: 'Alexandria'; font-weight: 800; font-size: 0.85rem; color: var(--civic-green); margin-bottom: 12px; }
         .form-control {
-            width: 100%;
-            padding: 14px 18px;
-            background: #F8FAFC;
-            border: 1.5px solid var(--border-light);
-            border-radius: 12px;
-            font-family: inherit;
-            font-size: 1rem;
-            transition: var(--transition);
+            width: 100%; padding: 18px 24px; font-family: inherit; font-size: 1.05rem; font-weight: 600;
+            background: transparent; border: 1px solid var(--civic-green); color: var(--ink-black);
+            transition: var(--transition-snap); border-radius: 0; box-shadow: 4px 4px 0 rgba(0,0,0,0.03);
         }
-        .form-control:focus {
-            outline: none;
-            border-color: var(--brand-primary);
-            background: white;
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        .form-control:focus { outline: none; box-shadow: 6px 6px 0 var(--sand-gold); transform: translate(-2px, -2px); }
+
+        /* ── Mobile Interactivity ── */
+        .sidebar-overlay {
+            display: none; position: fixed; top: 0; right: 0; bottom: 0; left: 0;
+            background: rgba(11, 56, 42, 0.8); z-index: 1999; backdrop-filter: blur(8px); opacity: 0; transition: opacity 0.4s ease;
+        }
+        .sidebar-overlay.active { display: block; opacity: 1; }
+
+        .mobile-menu-btn { display: none; background: none; border: none; font-size: 2rem; color: var(--ink-black); cursor: pointer; }
+
+        @media (max-width: 1024px) {
+            .sidebar { position: fixed; right: 0; top: 0; bottom: 0; transform: translateX(100%); z-index: 2000; box-shadow: -10px 0 40px rgba(0,0,0,0.5); }
+            .sidebar.mobile-open { transform: translateX(0); }
+            .top-nav { padding: 20px 24px; }
+            .content-container { padding: 32px 24px; }
+            .mobile-menu-btn { display: block; }
+            .auth-badge { display: none; }
+            .flex-mobile-col { flex-direction: column !important; align-items: stretch !important; gap: 20px !important; }
         }
 
-        /* ── Responsive ── */
+        /* Responsive Grids */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 32px; }
+        .responsive-layout { display: grid; gap: 48px; align-items: start; }
+        .responsive-layout.layout-1-2 { grid-template-columns: 1fr 2.5fr; }
+        .responsive-layout.layout-2-1 { grid-template-columns: 2.5fr 1fr; }
+        
         @media (max-width: 1024px) {
-            .dashboard-shell { grid-template-columns: 1fr; }
-            .sidebar { display: none; }
-            .top-nav { padding: 0 24px; }
-            .content-container { padding: 24px 16px; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .responsive-layout { display: flex !important; flex-direction: column !important; align-items: stretch !important; }
         }
 
         {% block extra_css %}{% endblock %}
     </style>
 </head>
 <body>
-    <div class="dashboard-shell">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="brand-section">
-                <div class="brand-circle">Q</div>
-                <div class="brand-text">
-                    <h1>كيو زون</h1>
-                    <p>بلدية الخليل المركزية</p>
-                </div>
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <div class="app-shell">
+        <!-- Editorial Sidebar -->
+        <aside class="sidebar" id="appSidebar">
+            <div class="brand-block reveal-up">
+                <h1>كيو زون</h1>
+                <p>البوابة الإدارية للقيادة المركزية</p>
             </div>
 
-            <nav class="sidebar-nav">
-                <div class="nav-section-label">البوابة الرئيسية</div>
-                <a href="{% url 'municipality_portal:dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-                    <i class="ri-dashboard-fill"></i>
-                    <span>لوحة التحكم</span>
+            <nav class="reveal-up delay-1">
+                <div class="section-separator">قسم المراقبة</div>
+                <a href="{% url 'municipality_portal:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="ri-rhythm-fill"></i> لوحة المتابعة الميدانية
                 </a>
 
-                <div class="nav-section-label">إدارة العمليات</div>
-                <a href="{% url 'municipality_portal:stall_list' %}" class="nav-item {% if 'stall' in request.path %}active{% endif %}">
-                    <i class="ri-store-3-fill"></i>
-                    <span>منظومة البسطات</span>
+                <div class="section-separator">إدارة السجلات المدنية</div>
+                <a href="{% url 'municipality_portal:stall_list' %}" class="nav-link {% if 'stall' in request.path %}active{% endif %}">
+                    <i class="ri-store-2-fill"></i> السجل المركزي للبسطات
                 </a>
-                <a href="{% url 'municipality_portal:location_list' %}" class="nav-item {% if 'location' in request.path %}active{% endif %}">
-                    <i class="ri-map-pin-fill"></i>
-                    <span>المناطق المعتمدة</span>
+                <a href="{% url 'municipality_portal:location_list' %}" class="nav-link {% if 'location' in request.path %}active{% endif %}">
+                    <i class="ri-map-pin-range-fill"></i> الإحداثيات المعتمدة
                 </a>
-                <a href="{% url 'municipality_portal:vendor_list' %}" class="nav-item {% if 'vendor' in request.path %}active{% endif %}">
-                    <i class="ri-user-star-fill"></i>
-                    <span>سجل التجار</span>
+                <a href="{% url 'municipality_portal:vendor_list' %}" class="nav-link {% if 'vendor' in request.path %}active{% endif %}">
+                    <i class="ri-user-star-fill"></i> سجلات التجار
                 </a>
 
-                <div class="nav-section-label">الرقابة والمتابعة</div>
-                <a href="{% url 'municipality_portal:officer_list' %}" class="nav-item {% if 'officer' in request.path %}active{% endif %}">
-                    <i class="ri-shield-user-fill"></i>
-                    <span>فريق الرقابة</span>
+                <div class="section-separator">الأمن والرقابة</div>
+                <a href="{% url 'municipality_portal:officer_list' %}" class="nav-link {% if 'officer' in request.path %}active{% endif %}">
+                    <i class="ri-shield-user-fill"></i> قوة التفتيش
                 </a>
-                <a href="{% url 'municipality_portal:violation_list' %}" class="nav-item {% if 'violation' in request.path %}active{% endif %}">
-                    <i class="ri-alarm-warning-fill"></i>
-                    <span>المخالفات الميدانية</span>
+                <a href="{% url 'municipality_portal:violation_list' %}" class="nav-link {% if 'violation' in request.path %}active{% endif %}">
+                    <i class="ri-file-warning-fill"></i> ضبوطات المخالفات
                 </a>
-                <a href="{% url 'municipality_portal:reports' %}" class="nav-item {% if 'reports' in request.path %}active{% endif %}">
-                    <i class="ri-pie-chart-2-fill"></i>
-                    <span>التقارير التحليلية</span>
+                <a href="{% url 'municipality_portal:reports' %}" class="nav-link {% if 'reports' in request.path %}active{% endif %}">
+                    <i class="ri-bar-chart-box-fill"></i> التحليلات الإحصائية
                 </a>
             </nav>
 
-            <div class="sidebar-footer">
-                <a href="{% url 'accounts:logout' %}" class="nav-item" style="color: #F87171">
-                    <i class="ri-logout-box-r-fill"></i>
-                    <span>تسجيل الخروج الرسمي</span>
+            <div style="margin-top: auto; padding: 0 40px" class="reveal-up delay-2">
+                <a href="{% url 'accounts:logout' %}" class="nav-link" style="color: var(--sand-gold); padding: 16px 0; border-top: 1px solid rgba(220,165,74,0.2);">
+                    <i class="ri-logout-circle-r-fill"></i> مغادرة النظام
                 </a>
             </div>
         </aside>
 
-        <!-- Main Panel -->
+        <!-- Main Workspace -->
         <main class="main-panel">
-            <header class="top-nav">
-                <div class="page-header-title">
-                    {% block page_title %}لوحة القيادة والمتابعة{% endblock %}
+            <header class="top-nav reveal-up">
+                <div style="display: flex; align-items: center; gap: 24px">
+                    <button class="mobile-menu-btn" onclick="toggleSidebar()"><i class="ri-menu-5-line"></i></button>
+                    <div class="page-header">
+                        <h2>{% block page_title %}شاشة القيادة والمتابعة{% endblock %}</h2>
+                    </div>
                 </div>
 
-                <div class="user-widget">
-                    <div class="user-meta desktop-only">
-                        <div class="name">تحية طيبة، {{ user.get_full_name|default:user.username }}</div>
-                        <div class="role">المسؤول الإداري المركزي</div>
-                    </div>
+                <div class="auth-badge">
+                    <i class="ri-shield-keyhole-fill" style="color: var(--civic-green); font-size: 1.2rem"></i>
+                    <span>{{ user.get_full_name|default:user.username }} | صلاحيات عليا</span>
                 </div>
             </header>
 
@@ -372,7 +367,17 @@
     <!-- Leaflet.js -->
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Global logic for dashboard interactions
+        function toggleSidebar() {
+            const sidebar = document.getElementById('appSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            sidebar.classList.toggle('mobile-open');
+            if (sidebar.classList.contains('mobile-open')) {
+                overlay.classList.add('active');
+            } else {
+                overlay.classList.remove('active');
+            }
+        }
     </script>
     {% block extra_js %}{% endblock %}
 </body>

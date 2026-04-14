@@ -3,7 +3,7 @@
 {% block page_title %}إدارة فريق الرقابة والمفتشين الميدانيين{% endblock %}
 
 {% block content %}
-<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px">
+<div class="flex-mobile-col" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px">
     <div>
         <h2 style="font-size: 1.5rem; margin-bottom: 4px">فريق التفتيش الميداني</h2>
         <p style="color: var(--text-muted); font-size: 0.9rem">إدارة الكوادر الرقابية المسؤولة عن متابعة تنظيم البسطات في المحافظة.</p>
@@ -14,65 +14,67 @@
 </div>
 
 <div class="card" style="padding: 0">
-    <table class="table-view">
-        <thead>
-            <tr>
-                <th>اسم المفتش</th>
-                <th>رقم الشارة الوظيفية</th>
-                <th>أرقام التواصل</th>
-                <th>النشاط الميداني</th>
-                <th>تاريخ التعيين</th>
-                <th>الإجراء</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for officer in officers %}
-            <tr>
-                <td>
-                    <div style="display: flex; align-items: center; gap: 14px">
-                        <div class="user-avatar" style="width: 40px; height: 40px; font-size: 0.9rem">
-                            {{ officer.user.first_name|first }}{{ officer.user.last_name|first }}
+    <div class="table-responsive">
+        <table class="table-view">
+            <thead>
+                <tr>
+                    <th>اسم المفتش</th>
+                    <th>رقم الشارة الوظيفية</th>
+                    <th>أرقام التواصل</th>
+                    <th>النشاط الميداني</th>
+                    <th>تاريخ التعيين</th>
+                    <th>الإجراء</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for officer in officers %}
+                <tr>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 14px">
+                            <div class="user-avatar" style="width: 40px; height: 40px; font-size: 0.9rem">
+                                {{ officer.user.first_name|first }}{{ officer.user.last_name|first }}
+                            </div>
+                            <div style="font-weight: 700; color: var(--text-heading)">{{ officer.user.get_full_name }}</div>
                         </div>
-                        <div style="font-weight: 700; color: var(--text-heading)">{{ officer.user.get_full_name }}</div>
-                    </div>
-                </td>
-                <td>
-                    <span style="font-family: 'Inter', sans-serif; font-weight: 800; color: var(--brand-primary); background: rgba(79, 70, 229, 0.05); padding: 4px 10px; border-radius: 6px">
-                        {{ officer.badge_number }}
-                    </span>
-                </td>
-                <td>
-                    <div style="font-weight: 500">{{ officer.user.phone|default:"—" }}</div>
-                </td>
-                <td>
-                    {% if officer.is_active %}
-                    <span class="badge badge-success">
-                        <span style="width: 8px; height: 8px; background: currentColor; border-radius: 50%; display: inline-block"></span>
-                        نشط ميدانياً
-                    </span>
-                    {% else %}
-                    <span class="badge badge-danger">متوقف عن العمل</span>
-                    {% endif %}
-                </td>
-                <td style="color: var(--text-muted); font-size: 0.85rem">{{ officer.created_at|date:"Y/m/d" }}</td>
-                <td>
-                    <button class="btn btn-white" style="padding: 6px 14px; font-size: 0.75rem">تعديل الملف</button>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" style="padding: 80px; text-align: center; color: var(--text-muted)">
-                    <i class="ri-shield-user-line" style="font-size: 3.5rem; display: block; margin-bottom: 20px; opacity: 0.15"></i>
-                    لم يتم تسجيل أي مفتشين رسميين بعد.
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                    </td>
+                    <td>
+                        <span style="font-family: 'Inter', sans-serif; font-weight: 800; color: var(--brand-primary); background: rgba(79, 70, 229, 0.05); padding: 4px 10px; border-radius: 6px">
+                            {{ officer.badge_number }}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="font-weight: 500">{{ officer.user.phone|default:"—" }}</div>
+                    </td>
+                    <td>
+                        {% if officer.is_active %}
+                        <span class="badge badge-success">
+                            <span style="width: 8px; height: 8px; background: currentColor; border-radius: 50%; display: inline-block"></span>
+                            نشط ميدانياً
+                        </span>
+                        {% else %}
+                        <span class="badge badge-danger">متوقف عن العمل</span>
+                        {% endif %}
+                    </td>
+                    <td style="color: var(--text-muted); font-size: 0.85rem">{{ officer.created_at|date:"Y/m/d" }}</td>
+                    <td>
+                        <button class="btn btn-white" style="padding: 6px 14px; font-size: 0.75rem">تعديل الملف</button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="padding: 80px; text-align: center; color: var(--text-muted)">
+                        <i class="ri-shield-user-line" style="font-size: 3.5rem; display: block; margin-bottom: 20px; opacity: 0.15"></i>
+                        لم يتم تسجيل أي مفتشين رسميين بعد.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- Extra: Quick Officer Stats -->
-<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 32px">
+<div class="grid-3" style="margin-top: 32px">
     <div class="card" style="padding: 24px; display: flex; align-items: center; gap: 16px">
         <div style="width: 48px; height: 48px; background: #F8FAFC; border-radius: 12px; display: grid; place-items: center; color: var(--brand-primary)">
             <i class="ri-group-line" style="font-size: 1.5rem"></i>
