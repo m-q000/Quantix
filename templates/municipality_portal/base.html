@@ -3,505 +3,376 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>{% block title %}بوابة بلدية الخليل{% endblock %} | منصة تنظيم البسطات</title>
+    <title>{% block title %}بوابة بلدية الخليل الرقمية{% endblock %}</title>
 
-    <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,700,500,400&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@200..700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 
     <style>
         :root {
-            /* Palette: Civic Authority */
-            --base:          #F0F2F5;
-            --surface:       #FFFFFF;
-            --surface-hover: #F8FAFC;
-            --text-main:     #0F172A;
-            --text-muted:    #64748B;
-            --accent:        #1E293B;
-            --accent-hover:  #334155;
-            --success:       #059669;
-            --warning:       #D97706;
-            --danger:        #DC2626;
-            --primary:       #2563EB;
-            --glass-bg:      rgba(255, 255, 255, 0.9);
-            --glass-border:  rgba(0, 0, 0, 0.08);
+            /* 10x Palette: Refined Excellence */
+            --brand-primary:   #4F46E5; /* Indigo 600 */
+            --brand-secondary: #0EA5E9; /* Sky 500 */
+            --bg-base:         #F8FAFC; /* Slate 50 */
+            --bg-surface:      #FFFFFF;
+            --text-heading:    #0F172A; /* Slate 900 */
+            --text-body:       #334155; /* Slate 700 */
+            --text-muted:      #64748B; /* Slate 500 */
+            --border-light:    #E2E8F0; /* Slate 200 */
             
-            --font-display:  'Cabinet Grotesk', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            --font-body:     'Satoshi', 'Tahoma', sans-serif;
+            --success:         #10B981;
+            --warning:         #F59E0B;
+            --danger:          #EF4444;
             
-            --radius-pill:   100px;
-            --radius-xl:     20px;
-            --radius-lg:     12px;
-            --radius-md:     8px;
+            --sidebar-width:   280px;
+            --header-height:   80px;
+            --radius-lg:       16px;
+            --radius-xl:       24px;
             
-            --shadow-sm:     0 1px 2px rgba(0,0,0,0.05);
-            --shadow-md:     0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-            --shadow-lg:     0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
-            
-            --sidebar-width: 280px;
-            --header-height: 72px;
-            --transition:    all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow-sm:       0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md:       0 4px 12px -2px rgba(0,0,0,0.08), 0 2px 6px -1px rgba(0,0,0,0.04);
+            --shadow-lg:       0 20px 25px -5px rgba(0,0,0,0.1), 0 10px 10px -5px rgba(0,0,0,0.04);
+            --transition:      all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        html, body {
-            height: 100%;
-            font-family: var(--font-body);
-            background: var(--base);
-            color: var(--text-main);
+        body {
+            font-family: 'Readex Pro', sans-serif;
+            background: var(--bg-base);
+            color: var(--text-body);
+            line-height: 1.6;
             -webkit-font-smoothing: antialiased;
             overflow-x: hidden;
         }
 
-        h1, h2, h3, h4 {
-            font-family: var(--font-display);
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            line-height: 1.1;
-        }
-
-        a { text-decoration: none; color: inherit; transition: var(--transition); }
-        button { cursor: pointer; border: none; background: none; font-family: inherit; transition: var(--transition); }
-
-        /* ── Layout ── */
-        .app-container {
-            display: flex;
+        /* ── Advanced Layout ── */
+        .dashboard-shell {
+            display: grid;
+            grid-template-columns: var(--sidebar-width) 1fr;
             min-height: 100vh;
         }
 
-        /* ── Sidebar ── */
+        /* ── Sidebar (Premium Glassmorphism) ── */
         .sidebar {
-            width: var(--sidebar-width);
-            background: var(--accent);
-            color: #E2E8F0;
-            display: flex;
-            flex-direction: column;
+            background: #020617; /* Slate 950 */
+            color: #F1F5F9;
+            height: 100vh;
             position: sticky;
             top: 0;
-            height: 100vh;
+            padding: 40px 24px;
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid rgba(255,255,255,0.05);
             z-index: 1000;
-            transition: var(--transition);
         }
 
-        .sidebar-header {
-            padding: 32px 24px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+        .brand-section {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 48px;
+            padding: 0 8px;
         }
 
-        .brand-box {
+        .brand-circle {
+            width: 44px; height: 44px;
+            background: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+            border-radius: 12px;
+            display: grid; place-items: center;
+            color: white; font-weight: 800; font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+        }
+
+        .brand-text h1 { font-size: 1.3rem; font-weight: 700; color: white; letter-spacing: -0.01em; }
+        .brand-text p { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+
+        .nav-section-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: #475569;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin: 32px 12px 12px;
+        }
+
+        .sidebar-nav { flex: 1; }
+
+        .nav-item {
             display: flex;
             align-items: center;
             gap: 14px;
-        }
-
-        .brand-icon {
-            width: 40px; height: 40px;
-            background: white;
-            border-radius: 10px;
-            display: grid; place-items: center;
-            color: var(--accent);
-            font-weight: 900;
-            font-size: 1.4rem;
-        }
-
-        .brand-text h1 { font-size: 1.25rem; color: white; }
-        .brand-text span { font-size: 0.75rem; color: #94A3B8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
-
-        .sidebar-nav {
-            flex: 1;
-            padding: 24px 16px;
-            overflow-y: auto;
-        }
-
-        .nav-group-label {
-            font-size: 0.7rem;
-            font-weight: 800;
-            color: #64748B;
-            margin: 24px 16px 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
             padding: 12px 16px;
-            border-radius: var(--radius-md);
-            margin-bottom: 4px;
-            font-weight: 600;
-            font-size: 0.95rem;
+            border-radius: 12px;
             color: #94A3B8;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            margin-bottom: 4px;
+            text-decoration: none;
         }
 
-        .nav-link i { font-size: 1.25rem; }
+        .nav-item i { font-size: 1.4rem; transition: var(--transition); }
 
-        .nav-link:hover {
-            color: white;
+        .nav-item:hover {
             background: rgba(255,255,255,0.05);
+            color: white;
         }
 
-        .nav-link.active {
+        .nav-item.active {
+            background: var(--brand-primary);
             color: white;
-            background: var(--primary);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
         }
+
+        .nav-item.active i { transform: scale(1.1); }
 
         .sidebar-footer {
-            padding: 24px 16px;
+            margin-top: auto;
             border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 24px;
         }
 
         /* ── Main Panel ── */
         .main-panel {
-            flex: 1;
+            min-width: 0;
             display: flex;
             flex-direction: column;
-            min-width: 0;
         }
 
-        .top-header {
+        .top-nav {
             height: var(--header-height);
-            background: var(--surface);
-            border-bottom: 1px solid var(--glass-border);
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border-light);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 40px;
+            padding: 0 48px;
             position: sticky;
             top: 0;
             z-index: 900;
-            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(8px);
+            background: rgba(255,255,255,0.8);
         }
 
-        .header-title h2 { font-size: 1.4rem; color: var(--text-main); }
+        .page-header-title { font-size: 1.5rem; font-weight: 700; color: var(--text-heading); }
 
-        .user-profile {
+        .user-widget {
             display: flex;
             align-items: center;
             gap: 16px;
-            padding-right: 16px;
-            border-right: 2px solid var(--base);
         }
 
-        .user-info { text-align: left; }
-        .user-info .name { font-weight: 700; font-size: 0.95rem; display: block; }
-        .user-info .role { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+        .user-avatar {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            background: #F1F5F9;
+            display: grid; place-items: center;
+            font-weight: 800; color: var(--brand-primary);
+            border: 2px solid var(--border-light);
+        }
 
-        /* ── Page Content ── */
-        .page-wrapper {
-            padding: 40px;
-            max-width: 1400px;
-            width: 100%;
+        .user-meta { text-align: left; line-height: 1.3; }
+        .user-meta .name { font-weight: 700; color: var(--text-heading); font-size: 0.95rem; }
+        .user-meta .role { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
+
+        /* ── Page Wrapper ── */
+        .content-container {
+            padding: 48px;
+            max-width: 1600px;
             margin: 0 auto;
+            width: 100%;
         }
 
-        /* ── Mobile UI ── */
-        .mobile-top-bar { display: none; }
-        .mobile-nav { display: none; }
-
-        /* ── Global UI Components ── */
+        /* ── Component Primitives ── */
         .card {
-            background: var(--surface);
-            border-radius: var(--radius-xl);
-            padding: 32px;
+            background: var(--bg-surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-light);
             box-shadow: var(--shadow-md);
-            border: 1px solid var(--glass-border);
-            margin-bottom: 32px;
             transition: var(--transition);
-        }
-
-        .card:hover { box-shadow: var(--shadow-lg); }
-
-        .section-title {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 24px;
-        }
-
-        /* ── Tables ── */
-        .table-container {
-            background: var(--surface);
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--glass-border);
             overflow: hidden;
         }
 
-        .admin-table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: right;
-        }
+        .card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); }
 
-        .admin-table th {
-            padding: 18px 24px;
-            background: #F8FAFC;
-            color: #475569;
-            font-weight: 800;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.02em;
-            border-bottom: 2px solid var(--base);
-        }
-
-        .admin-table td {
-            padding: 18px 24px;
-            border-bottom: 1px solid var(--base);
-            font-size: 0.95rem;
-            vertical-align: middle;
-        }
-
-        .admin-table tr:hover { background: #F1F5F9; }
-        .admin-table tr:last-child td { border-bottom: none; }
-
-        /* ── Buttons ── */
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
             padding: 12px 24px;
-            border-radius: var(--radius-md);
-            font-weight: 700;
+            border-radius: 10px;
+            font-weight: 600;
             font-size: 0.9rem;
             transition: var(--transition);
+            cursor: pointer;
+            text-decoration: none;
+            border: none;
         }
 
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:hover { background: #1D4ED8; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25); }
-
-        .btn-dark { background: var(--accent); color: white; }
-        .btn-dark:hover { background: var(--accent-hover); }
-
-        .btn-outline { border: 2px solid #E2E8F0; color: var(--text-main); }
-        .btn-outline:hover { background: #F1F5F9; border-color: #CBD5E1; }
-
-        .btn-ghost { padding: 8px 12px; color: var(--text-muted); }
-        .btn-ghost:hover { background: #F1F5F9; color: var(--text-main); }
-
-        /* ── Forms ── */
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 24px;
+        .btn-primary { 
+            background: var(--brand-primary); 
+            color: white;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
         }
+        .btn-primary:hover { background: #4338CA; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(79, 70, 229, 0.3); }
 
-        .form-field { margin-bottom: 24px; }
-        
-        .form-label {
-            display: block;
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #475569;
-            margin-bottom: 8px;
-        }
+        .btn-white { background: white; color: var(--text-heading); border: 1px solid var(--border-light); }
+        .btn-white:hover { background: var(--bg-base); }
 
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
-            padding: 14px 16px;
+        /* ── Tables (High Fidelity) ── */
+        .table-view { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .table-view th {
+            padding: 20px 24px;
+            text-align: right;
             background: #F8FAFC;
-            border: 2px solid #E2E8F0;
-            border-radius: var(--radius-md);
-            font-family: inherit;
-            font-size: 1rem;
-            color: var(--text-main);
-            transition: var(--transition);
-        }
-
-        .form-input:focus, .form-select:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: white;
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-        }
-
-        .form-help { font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; }
-        .form-error { font-size: 0.8rem; color: var(--danger); font-weight: 600; margin-top: 6px; }
-
-        /* ── Badges ── */
-        .status-pill {
-            padding: 6px 14px;
-            border-radius: var(--radius-pill);
             font-size: 0.75rem;
             font-weight: 800;
+            color: #64748B;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid var(--border-light);
+        }
+        .table-view td {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border-light);
+            font-size: 0.95rem;
+            color: var(--text-body);
+            background: white;
+        }
+        .table-view tr:last-child td { border-bottom: none; }
+        .table-view tr:hover td { background: #F8FAFC; }
+
+        /* ── Badges ── */
+        .badge {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
             display: inline-flex;
             align-items: center;
             gap: 6px;
         }
+        .badge-success { background: #DCFCE7; color: #166534; }
+        .badge-warning { background: #FEF3C7; color: #92400E; }
+        .badge-danger  { background: #FEE2E2; color: #991B1B; }
 
-        .pill-success { background: #DCFCE7; color: #166534; }
-        .pill-warning { background: #FEF3C7; color: #92400E; }
-        .pill-danger  { background: #FEE2E2; color: #991B1B; }
-        .pill-info    { background: #DBEAFE; color: #1E40AF; }
+        /* ── Form Controls (10x Styling) ── */
+        .form-group { margin-bottom: 24px; }
+        .form-label { display: block; font-weight: 700; color: var(--text-heading); margin-bottom: 8px; font-size: 0.9rem; }
+        .form-control {
+            width: 100%;
+            padding: 14px 18px;
+            background: #F8FAFC;
+            border: 1.5px solid var(--border-light);
+            border-radius: 12px;
+            font-family: inherit;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--brand-primary);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
 
-        /* ── Responsive Hooks ── */
+        /* ── Responsive ── */
         @media (max-width: 1024px) {
-            .sidebar { transform: translateX(100%); position: fixed; height: 100vh; }
-            .sidebar.open { transform: translateX(0); }
-            
-            .mobile-top-bar {
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                height: 64px;
-                padding: 0 20px;
-                background: var(--accent);
-                color: white;
-                position: sticky; top: 0; z-index: 1001;
-            }
-
-            .main-panel { width: 100vw; }
-            .top-header { display: none; }
-            .page-wrapper { padding: 24px 16px; padding-bottom: 100px; }
-            
-            .mobile-nav {
-                display: flex;
-                position: fixed;
-                bottom: 0; left: 0; right: 0;
-                background: white;
-                height: 72px;
-                border-top: 1px solid var(--glass-border);
-                z-index: 1001;
-                justify-content: space-around;
-                align-items: center;
-                box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
-            }
-
-            .mob-nav-item {
-                display: flex; flex-direction: column; align-items: center; gap: 4px;
-                color: #64748B; font-size: 0.7rem; font-weight: 700;
-            }
-            .mob-nav-item i { font-size: 1.5rem; }
-            .mob-nav-item.active { color: var(--primary); }
-
-            .desktop-only { display: none !important; }
+            .dashboard-shell { grid-template-columns: 1fr; }
+            .sidebar { display: none; }
+            .top-nav { padding: 0 24px; }
+            .content-container { padding: 24px 16px; }
         }
 
         {% block extra_css %}{% endblock %}
     </style>
 </head>
 <body>
-    <div class="app-container">
+    <div class="dashboard-shell">
         <!-- Sidebar -->
-        <aside class="sidebar" id="appSidebar">
-            <div class="sidebar-header">
-                <div class="brand-box">
-                    <div class="brand-icon">Q</div>
-                    <div class="brand-text">
-                        <h1>كيو زون</h1>
-                        <span>بلدية الخليل</span>
-                    </div>
+        <aside class="sidebar">
+            <div class="brand-section">
+                <div class="brand-circle">Q</div>
+                <div class="brand-text">
+                    <h1>كيو زون</h1>
+                    <p>بلدية الخليل المركزية</p>
                 </div>
             </div>
 
             <nav class="sidebar-nav">
-                <div class="nav-group-label">الرئيسية</div>
-                <a href="{% url 'municipality_portal:dashboard' %}" class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-                    <i class="ri-dashboard-3-line"></i>
+                <div class="nav-section-label">البوابة الرئيسية</div>
+                <a href="{% url 'municipality_portal:dashboard' %}" class="nav-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="ri-dashboard-fill"></i>
                     <span>لوحة التحكم</span>
                 </a>
 
-                <div class="nav-group-label">إدارة المركز</div>
-                <a href="{% url 'municipality_portal:stall_list' %}" class="nav-link {% if 'stall' in request.path %}active{% endif %}">
-                    <i class="ri-store-2-line"></i>
-                    <span>إدارة البسطات</span>
+                <div class="nav-section-label">إدارة العمليات</div>
+                <a href="{% url 'municipality_portal:stall_list' %}" class="nav-item {% if 'stall' in request.path %}active{% endif %}">
+                    <i class="ri-store-3-fill"></i>
+                    <span>منظومة البسطات</span>
                 </a>
-                <a href="{% url 'municipality_portal:location_list' %}" class="nav-link {% if 'location' in request.path %}active{% endif %}">
-                    <i class="ri-map-pin-user-line"></i>
-                    <span>المواقع المسموحة</span>
+                <a href="{% url 'municipality_portal:location_list' %}" class="nav-item {% if 'location' in request.path %}active{% endif %}">
+                    <i class="ri-map-pin-fill"></i>
+                    <span>المناطق المعتمدة</span>
                 </a>
-
-                <div class="nav-group-label">المستخدمين</div>
-                <a href="{% url 'municipality_portal:vendor_list' %}" class="nav-link {% if 'vendor' in request.path %}active{% endif %}">
-                    <i class="ri-user-star-line"></i>
-                    <span>التجار والشركاء</span>
-                </a>
-                <a href="{% url 'municipality_portal:officer_list' %}" class="nav-link {% if 'officer' in request.path %}active{% endif %}">
-                    <i class="ri-shield-user-line"></i>
-                    <span>فريق الرقابة التفتيش</span>
+                <a href="{% url 'municipality_portal:vendor_list' %}" class="nav-item {% if 'vendor' in request.path %}active{% endif %}">
+                    <i class="ri-user-star-fill"></i>
+                    <span>سجل التجار</span>
                 </a>
 
-                <div class="nav-group-label">الرقابة والتقارير</div>
-                <a href="{% url 'municipality_portal:violation_list' %}" class="nav-link {% if 'violation' in request.path %}active{% endif %}">
-                    <i class="ri-error-warning-line"></i>
-                    <span>سجل المخالفات</span>
+                <div class="nav-section-label">الرقابة والمتابعة</div>
+                <a href="{% url 'municipality_portal:officer_list' %}" class="nav-item {% if 'officer' in request.path %}active{% endif %}">
+                    <i class="ri-shield-user-fill"></i>
+                    <span>فريق الرقابة</span>
                 </a>
-                <a href="{% url 'municipality_portal:reports' %}" class="nav-link {% if 'reports' in request.path %}active{% endif %}">
-                    <i class="ri-bar-chart-2-line"></i>
+                <a href="{% url 'municipality_portal:violation_list' %}" class="nav-item {% if 'violation' in request.path %}active{% endif %}">
+                    <i class="ri-alarm-warning-fill"></i>
+                    <span>المخالفات الميدانية</span>
+                </a>
+                <a href="{% url 'municipality_portal:reports' %}" class="nav-item {% if 'reports' in request.path %}active{% endif %}">
+                    <i class="ri-pie-chart-2-fill"></i>
                     <span>التقارير التحليلية</span>
                 </a>
             </nav>
 
             <div class="sidebar-footer">
-                <a href="{% url 'accounts:logout' %}" class="nav-link" style="color: #F87171">
-                    <i class="ri-logout-box-line"></i>
-                    <span>تسجيل الخروج</span>
+                <a href="{% url 'accounts:logout' %}" class="nav-item" style="color: #F87171">
+                    <i class="ri-logout-box-r-fill"></i>
+                    <span>تسجيل الخروج الرسمي</span>
                 </a>
             </div>
         </aside>
 
         <!-- Main Panel -->
         <main class="main-panel">
-            <!-- Desktop Header -->
-            <header class="top-header">
-                <div class="header-title">
-                    <h2>{% block page_title %}لوحة القيادة{% endblock %}</h2>
+            <header class="top-nav">
+                <div class="page-header-title">
+                    {% block page_title %}لوحة القيادة والمتابعة{% endblock %}
                 </div>
-                
-                <div style="display: flex; align-items: center; gap: 24px">
-                    <div class="user-profile">
-                        <div class="user-info">
-                            <span class="name">{{ user.get_full_name|default:user.username }}</span>
-                            <span class="role">مسؤول البلدية المركزية</span>
-                        </div>
+
+                <div class="user-widget">
+                    <div class="user-meta desktop-only">
+                        <div class="name">تحية طيبة، {{ user.get_full_name|default:user.username }}</div>
+                        <div class="role">المسؤول الإداري المركزي</div>
                     </div>
                 </div>
             </header>
 
-            <!-- Mobile Bar -->
-            <header class="mobile-top-bar">
-                <div class="brand-box">
-                    <div class="brand-icon" style="background: white; color: black; scale: 0.8">Q</div>
-                    <h1 style="font-size: 1.1rem">كيو زون</h1>
-                </div>
-                <button onclick="toggleSidebar()"><i class="ri-menu-3-line" style="font-size: 1.5rem"></i></button>
-            </header>
-
-            <div class="page-wrapper">
+            <div class="content-container">
                 {% block content %}{% endblock %}
             </div>
-
-            <!-- Mobile Navigation -->
-            <nav class="mobile-nav">
-                <a href="{% url 'municipality_portal:dashboard' %}" class="mob-nav-item active">
-                    <i class="ri-home-5-line"></i>
-                    <span>الرئيسية</span>
-                </a>
-                <a href="{% url 'municipality_portal:stall_list' %}" class="mob-nav-item">
-                    <i class="ri-store-2-line"></i>
-                    <span>البسطات</span>
-                </a>
-                <a href="{% url 'municipality_portal:location_list' %}" class="mob-nav-item">
-                    <i class="ri-map-pin-2-line"></i>
-                    <span>المواقع</span>
-                </a>
-                <a href="{% url 'municipality_portal:violation_list' %}" class="mob-nav-item">
-                    <i class="ri-alarm-warning-line"></i>
-                    <span>مخالفات</span>
-                </a>
-            </nav>
         </main>
     </div>
 
     <!-- Leaflet.js -->
     <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        function toggleSidebar() {
-            document.getElementById('appSidebar').classList.toggle('open');
-        }
+        // Global logic for dashboard interactions
     </script>
     {% block extra_js %}{% endblock %}
 </body>

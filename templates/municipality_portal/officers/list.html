@@ -3,24 +3,24 @@
 {% block page_title %}إدارة فريق الرقابة والمفتشين الميدانيين{% endblock %}
 
 {% block content %}
-<div class="section-title">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px">
     <div>
-        <h3 style="font-size: 1.15rem; color: var(--text-muted)">قائمة الفريق الحالي</h3>
-        <p style="font-size: 0.9rem; color: #64748B">إجمالي عدد المفتشين النشطين: {{ officers.count }}</p>
+        <h2 style="font-size: 1.5rem; margin-bottom: 4px">فريق التفتيش الميداني</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem">إدارة الكوادر الرقابية المسؤولة عن متابعة تنظيم البسطات في المحافظة.</p>
     </div>
     <a href="{% url 'municipality_portal:officer_create' %}" class="btn btn-primary">
-        <i class="ri-user-add-line"></i> إضافة مفتش جديد
+        <i class="ri-user-add-line"></i> إضافة مفتش جديد للنظام
     </a>
 </div>
 
-<div class="table-container">
-    <table class="admin-table desktop-only">
+<div class="card" style="padding: 0">
+    <table class="table-view">
         <thead>
             <tr>
-                <th style="padding-right: 32px">اسم المفتش</th>
-                <th>رقم الشارة</th>
-                <th>رقم التواصل</th>
-                <th>الحالة التشغيلية</th>
+                <th>اسم المفتش</th>
+                <th>رقم الشارة الوظيفية</th>
+                <th>أرقام التواصل</th>
+                <th>النشاط الميداني</th>
                 <th>تاريخ التعيين</th>
                 <th>الإجراء</th>
             </tr>
@@ -28,61 +28,60 @@
         <tbody>
             {% for officer in officers %}
             <tr>
-                <td style="padding-right: 32px">
-                    <div style="display: flex; align-items: center; gap: 12px">
-                        <div style="width: 36px; height: 36px; background: #F1F5F9; border-radius: 50%; display: grid; place-items: center; color: var(--accent); font-weight: 800">
+                <td>
+                    <div style="display: flex; align-items: center; gap: 14px">
+                        <div class="user-avatar" style="width: 40px; height: 40px; font-size: 0.9rem">
                             {{ officer.user.first_name|first }}{{ officer.user.last_name|first }}
                         </div>
-                        <div style="font-weight: 700">{{ officer.user.get_full_name }}</div>
+                        <div style="font-weight: 700; color: var(--text-heading)">{{ officer.user.get_full_name }}</div>
                     </div>
                 </td>
                 <td>
-                    <span style="font-family: monospace; font-weight: 800; color: var(--primary); background: rgba(37,99,235,0.05); padding: 4px 8px; border-radius: 4px">
+                    <span style="font-family: 'Inter', sans-serif; font-weight: 800; color: var(--brand-primary); background: rgba(79, 70, 229, 0.05); padding: 4px 10px; border-radius: 6px">
                         {{ officer.badge_number }}
                     </span>
                 </td>
-                <td>{{ officer.user.phone|default:"—" }}</td>
+                <td>
+                    <div style="font-weight: 500">{{ officer.user.phone|default:"—" }}</div>
+                </td>
                 <td>
                     {% if officer.is_active %}
-                    <span class="status-pill pill-success">نشط ميدانياً</span>
+                    <span class="badge badge-success">
+                        <span style="width: 8px; height: 8px; background: currentColor; border-radius: 50%; display: inline-block"></span>
+                        نشط ميدانياً
+                    </span>
                     {% else %}
-                    <span class="status-pill pill-danger">متوقف</span>
+                    <span class="badge badge-danger">متوقف عن العمل</span>
                     {% endif %}
                 </td>
-                <td style="color: var(--text-muted)">{{ officer.created_at|date:"Y/m/d" }}</td>
+                <td style="color: var(--text-muted); font-size: 0.85rem">{{ officer.created_at|date:"Y/m/d" }}</td>
                 <td>
-                    <button class="btn btn-ghost" title="تعديل البيانات"><i class="ri-edit-line"></i></button>
+                    <button class="btn btn-white" style="padding: 6px 14px; font-size: 0.75rem">تعديل الملف</button>
                 </td>
             </tr>
             {% empty %}
             <tr>
-                <td colspan="6" style="text-align: center; padding: 64px; color: var(--text-muted)">
-                    <i class="ri-shield-user-line" style="font-size: 3rem; display: block; margin-bottom: 16px; opacity: 0.2"></i>
-                    لم يتم تسجيل أي مفتشين في النظام بعد.
+                <td colspan="6" style="padding: 80px; text-align: center; color: var(--text-muted)">
+                    <i class="ri-shield-user-line" style="font-size: 3.5rem; display: block; margin-bottom: 20px; opacity: 0.15"></i>
+                    لم يتم تسجيل أي مفتشين رسميين بعد.
                 </td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
+</div>
 
-    <!-- Mobile View -->
-    <div class="mobile-only" style="padding: 16px">
-        {% for officer in officers %}
-        <div class="card" style="padding: 20px; margin-bottom: 12px">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px">
-                <div style="font-weight: 800">{{ officer.user.get_full_name }}</div>
-                {% if officer.is_active %}
-                <span class="status-pill pill-success">نشط</span>
-                {% else %}
-                <span class="status-pill pill-danger">متوقف</span>
-                {% endif %}
-            </div>
-            <div style="font-size: 0.85rem; color: var(--text-muted); display: grid; gap: 8px">
-                <div>رقم الشارة: <strong>{{ officer.badge_number }}</strong></div>
-                <div>الهاتف: {{ officer.user.phone|default:"—" }}</div>
-            </div>
+<!-- Extra: Quick Officer Stats -->
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 32px">
+    <div class="card" style="padding: 24px; display: flex; align-items: center; gap: 16px">
+        <div style="width: 48px; height: 48px; background: #F8FAFC; border-radius: 12px; display: grid; place-items: center; color: var(--brand-primary)">
+            <i class="ri-group-line" style="font-size: 1.5rem"></i>
         </div>
-        {% endfor %}
+        <div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600">إجمالي الفريق</div>
+            <div style="font-size: 1.25rem; font-weight: 800">{{ officers.count }} مفتش</div>
+        </div>
     </div>
+    <!-- ... More stats as needed -->
 </div>
 {% endblock %}

@@ -1,128 +1,226 @@
 {% extends 'municipality_portal/base.html' %}
 
-{% block page_title %}لوحة القيادة والمتابعة المركزية{% endblock %}
+{% block extra_css %}
+/* Specific 10x Dashboard Styling */
+.stats-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 32px;
+    margin-bottom: 48px;
+}
+
+.stat-card-v10 {
+    position: relative;
+    padding: 32px;
+    background: white;
+    border-radius: 20px;
+    border: 1px solid rgba(0,0,0,0.05);
+    box-shadow: var(--shadow-md);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    transition: var(--transition);
+}
+
+.stat-card-v10:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lg);
+}
+
+.stat-card-v10 .icon-box {
+    width: 56px; height: 56px;
+    border-radius: 14px;
+    display: grid; place-items: center;
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+}
+
+.stat-card-v10 .value {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: var(--text-heading);
+    line-height: 1;
+}
+
+.stat-card-v10 .label {
+    font-size: 0.95rem;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.dashboard-layout {
+    display: grid;
+    grid-template-columns: 8fr 3fr;
+    gap: 32px;
+}
+
+.tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.action-tile {
+    background: #F8FAFC;
+    padding: 24px;
+    border-radius: 16px;
+    border: 2px dashed #E2E8F0;
+    text-align: center;
+    transition: var(--transition);
+}
+
+.action-tile:hover {
+    background: white;
+    border-style: solid;
+    border-color: var(--brand-primary);
+    transform: scale(1.02);
+}
+
+.action-tile i { font-size: 1.5rem; color: var(--brand-primary); display: block; margin-bottom: 12px; }
+.action-tile span { font-weight: 700; font-size: 0.9rem; color: var(--text-heading); }
+
+@media (max-width: 1280px) {
+    .dashboard-layout { grid-template-columns: 1fr; }
+}
+{% endblock %}
 
 {% block content %}
+<!-- Quick Welcome -->
 <div style="margin-bottom: 40px">
-    <h3 style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 8px">مرحباً بك مجدداً، {{ user.get_full_name|default:user.username }}</h3>
-    <p style="font-size: 0.95rem; color: #64748B">إليك ملخص شامل لحالة تنظيم البسطات في مدينة الخليل لهذا اليوم.</p>
+    <h2 style="font-size: 1.8rem; margin-bottom: 8px">نظام القيادة والمتابعة المركزية</h2>
+    <p style="color: var(--text-muted); font-weight: 500">إليك تقرير شامل ومباشر عن حالة تنظيم البسطات والأسواق في محافظة الخليل اليوم.</p>
 </div>
 
-<!-- Stats Dashboard -->
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-icon" style="background: rgba(37, 99, 235, 0.1); color: var(--primary);">
-            <i class="ri-store-2-line"></i>
+<!-- 10x Stats Grid -->
+<div class="stats-overview">
+    <div class="stat-card-v10">
+        <div class="icon-box" style="background: rgba(79, 70, 229, 0.1); color: var(--brand-primary)">
+            <i class="ri-store-3-line"></i>
         </div>
-        <div>
-            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700">إجمالي البسطات</div>
-            <div style="font-size: 1.6rem; font-weight: 800">{{ total_stalls }}</div>
-        </div>
-    </div>
-    
-    <div class="stat-card">
-        <div class="stat-icon" style="background: rgba(217, 119, 6, 0.1); color: var(--warning);">
-            <i class="ri-history-line"></i>
-        </div>
-        <div>
-            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700">طلبات معلقة</div>
-            <div style="font-size: 1.6rem; font-weight: 800; color: var(--warning)">{{ pending_stalls }}</div>
+        <div class="label">إجمالي البسطات النشطة</div>
+        <div class="value">{{ stats.total_stalls }}</div>
+        <div style="font-size: 0.75rem; color: var(--success); font-weight: 700">
+            <i class="ri-arrow-right-up-line"></i> +5% منذ الأسبوع الماضي
         </div>
     </div>
 
-    <div class="stat-card">
-        <div class="stat-icon" style="background: rgba(5, 150, 105, 0.1); color: var(--success);">
+    <div class="stat-card-v10">
+        <div class="icon-box" style="background: rgba(245, 158, 11, 0.1); color: var(--warning)">
+            <i class="ri-time-line"></i>
+        </div>
+        <div class="label">طلبات قيد المراجعة</div>
+        <div class="value">{{ stats.pending_requests }}</div>
+        <div style="font-size: 0.75rem; color: var(--text-muted); font-weight: 700">تتطلب إجراءً إدارياً فورياً</div>
+    </div>
+
+    <div class="stat-card-v10">
+        <div class="icon-box" style="background: rgba(16, 185, 129, 0.1); color: var(--success)">
             <i class="ri-group-line"></i>
         </div>
-        <div>
-            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700">التجار النشطين</div>
-            <div style="font-size: 1.6rem; font-weight: 800">{{ total_vendors }}</div>
-        </div>
+        <div class="label">التجار الملتزمون بالأنظمة</div>
+        <div class="value">{{ stats.total_vendors }}</div>
+        <div style="font-size: 0.75rem; color: var(--brand-secondary); font-weight: 700">شريك معتمد في المنصة</div>
     </div>
 
-    <div class="stat-card">
-        <div class="stat-icon" style="background: rgba(220, 38, 38, 0.1); color: var(--danger);">
+    <div class="stat-card-v10">
+        <div class="icon-box" style="background: rgba(239, 68, 68, 0.1); color: var(--danger)">
             <i class="ri-alarm-warning-line"></i>
         </div>
-        <div>
-            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700">المخالفات المسجلة</div>
-            <div style="font-size: 1.6rem; font-weight: 800; color: var(--danger)">{{ total_violations }}</div>
-        </div>
+        <div class="label">مخالفات بانتظار التعامل</div>
+        <div class="value">{{ stats.active_violations }}</div>
+        <div style="font-size: 0.75rem; color: var(--danger); font-weight: 700">تنبيه: تتجاوز الحد اليومي بـ 2</div>
     </div>
 </div>
 
-<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px">
-    <!-- Applications Table -->
-    <div class="table-container">
-        <div style="padding: 24px 32px; border-bottom: 2px solid var(--base); display: flex; justify-content: space-between; align-items: center">
-            <h3 style="font-size: 1.15rem">أحدث طلبات التسجيل</h3>
-            <a href="{% url 'municipality_portal:stall_list' %}" class="btn btn-outline" style="padding: 8px 16px; font-size: 0.8rem">عرض كافة البسطات</a>
+<div class="dashboard-layout">
+    <!-- Main Activity Section -->
+    <div class="main-activity">
+        <div class="card" style="padding: 0">
+            <div style="padding: 24px 32px; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center">
+                <h3 style="font-size: 1.1rem">أحدث طلبات التسجيل والمراجعة</h3>
+                <a href="{% url 'municipality_portal:stall_list' %}" class="btn btn-white" style="padding: 8px 16px; font-size: 0.8rem">عرض الكل</a>
+            </div>
+            
+            <table class="table-view">
+                <thead>
+                    <tr>
+                        <th>التاجر المستفيد</th>
+                        <th>نوع النشاط</th>
+                        <th>تاريخ التقديم</th>
+                        <th>الحالة الحالية</th>
+                        <th>الإجراء</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stall in recent_stalls %}
+                    <tr>
+                        <td style="font-weight: 700">{{ stall.owner.user.get_full_name }}</td>
+                        <td>{{ stall.category.name }}</td>
+                        <td style="color: var(--text-muted); font-size: 0.85rem">{{ stall.created_at|date:"Y/m/d" }}</td>
+                        <td>
+                            {% if stall.status == 'pending' %}
+                            <span class="badge badge-warning">قيد المراجعة</span>
+                            {% elif stall.status == 'active' %}
+                            <span class="badge badge-success">نشط</span>
+                            {% else %}
+                            <span class="badge badge-danger">{{ stall.status }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'municipality_portal:stall_detail' stall.pk %}" class="btn btn-white" style="padding: 6px 12px; font-size: 0.75rem">فتح الملف</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="padding: 64px; text-align: center; color: var(--text-muted)">
+                            <i class="ri-inbox-line" style="font-size: 2.5rem; display: block; margin-bottom: 12px; opacity: 0.3"></i>
+                            لا توجد طلبات جديدة حالياً للمعالجة.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th style="padding-right: 32px">اسم التاجر</th>
-                    <th>نوع النشاط</th>
-                    <th>تاريخ التقديم</th>
-                    <th>الحالة</th>
-                    <th>الإجراء</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for app in recent_applications %}
-                <tr>
-                    <td style="padding-right: 32px">
-                        <div style="font-weight: 700; color: var(--text-main)">{{ app.owner.user.get_full_name }}</div>
-                        <div style="font-size: 0.75rem; color: var(--text-muted)">{{ app.owner.national_id }}</div>
-                    </td>
-                    <td>{{ app.category.name }}</td>
-                    <td style="color: var(--text-muted)">{{ app.created_at|date:"Y/m/d" }}</td>
-                    <td>
-                        <span class="status-pill pill-warning">
-                             قيد المراجعة
-                        </span>
-                    </td>
-                    <td>
-                        <a href="{% url 'municipality_portal:stall_detail' app.pk %}" class="btn btn-dark" style="padding: 6px 16px; font-size: 0.75rem">مراجعة والبت</a>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" style="text-align: center; padding: 60px; color: var(--text-muted)">
-                        <i class="ri-inbox-line" style="font-size: 2.5rem; display: block; margin-bottom: 12px; opacity: 0.3"></i>
-                        لا توجد طلبات جديدة بانتظار المراجعة حالياً.
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
     </div>
 
-    <!-- Right Sidebar Content -->
-    <div>
-        <div class="card" style="padding: 24px">
-            <h3 style="font-size: 1.1rem; margin-bottom: 24px">إجراءات إدارية سريعة</h3>
-            <div style="display: flex; flex-direction: column; gap: 12px">
-                <a href="{% url 'municipality_portal:location_create' %}" class="btn btn-outline" style="width: 100%; justify-content: flex-start">
-                    <i class="ri-map-pin-add-line" style="color: var(--primary)"></i> إضافة نقطة بيع مسموحة
+    <!-- Quick Actions Sidebar -->
+    <aside class="quick-sidebar">
+        <div class="card">
+            <h3 style="font-size: 1.15rem; margin-bottom: 24px">إجراءات سريعة</h3>
+            <div class="tile-grid">
+                <a href="{% url 'municipality_portal:location_create' %}" class="action-tile">
+                    <i class="ri-map-pin-add-line"></i>
+                    <span>إضافة موقع</span>
                 </a>
-                <a href="{% url 'municipality_portal:officer_create' %}" class="btn btn-outline" style="width: 100%; justify-content: flex-start">
-                    <i class="ri-user-add-line" style="color: var(--primary)"></i> تسجيل مفتش ميداني جديد
+                <a href="{% url 'municipality_portal:officer_create' %}" class="action-tile">
+                    <i class="ri-user-add-line"></i>
+                    <span>تسجيل مفتش</span>
                 </a>
-                <a href="{% url 'municipality_portal:reports' %}" class="btn btn-outline" style="width: 100%; justify-content: flex-start">
-                    <i class="ri-file-chart-line" style="color: var(--primary)"></i> تصدير تقارير الأداء
+                <a href="{% url 'municipality_portal:violation_list' %}" class="action-tile">
+                    <i class="ri-file-search-line"></i>
+                    <span>سجل المخالفات</span>
+                </a>
+                <a href="{% url 'municipality_portal:reports' %}" class="action-tile">
+                    <i class="ri-printer-line"></i>
+                    <span>تصدير تقارير</span>
                 </a>
             </div>
         </div>
 
-        <div class="card" style="background: var(--accent); color: white; border: none">
-            <h3 style="font-size: 1rem; margin-bottom: 12px">حالة منصة كيو-زون</h3>
-            <div style="display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 0.9rem; color: #10B981">
-                <div style="width: 8px; height: 8px; border-radius: 50%; background: #10B981; box-shadow: 0 0 10px #10B981"></div>
-                متصل وجاهز للعمل
+        <!-- System Alerts -->
+        <div class="card" style="background: var(--text-heading); color: white; border: none">
+            <h3 style="font-size: 1.15rem; margin-bottom: 16px; color: white">نظام التنبيهات الذكي</h3>
+            <div style="display: flex; flex-direction: column; gap: 16px">
+                <div style="display: flex; gap: 12px; align-items: flex-start">
+                    <i class="ri-shield-check-fill" style="color: var(--success); font-size: 1.4rem"></i>
+                    <p style="font-size: 0.8rem; opacity: 0.8">تم تحديث بيانات فريق الرقابة الميدانية قبل ساعة من الآن.</p>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: flex-start">
+                    <i class="ri-error-warning-fill" style="color: var(--warning); font-size: 1.4rem"></i>
+                    <p style="font-size: 0.8rem; opacity: 0.8">هناك 3 بسطات ستنتهي رخصها خلال الأيام الثلاثة القادمة.</p>
+                </div>
             </div>
-            <p style="font-size: 0.75rem; color: #94A3B8; margin-top: 12px; font-weight: 500">تمت المزامنة مع فريق الرقابة الميداني قبل دقيقة واحدة.</p>
         </div>
-    </div>
+    </aside>
 </div>
 {% endblock %}

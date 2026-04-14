@@ -4,121 +4,149 @@
 
 {% block extra_css %}
 #map {
-    height: 500px;
-    border-radius: var(--radius-xl);
-    border: 2px solid var(--glass-border);
-    margin-bottom: 24px;
-    z-index: 10;
+    height: 550px;
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--border-light);
     box-shadow: var(--shadow-md);
+    z-index: 10;
 }
-.map-coords {
+.multi-column-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 40px;
+    align-items: start;
 }
-.form-section-header {
-    margin-bottom: 24px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--base);
+.days-checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+}
+.day-check-item {
+    position: relative;
+    cursor: pointer;
+}
+.day-check-item input {
+    position: absolute; opacity: 0; cursor: pointer;
+}
+.day-check-box {
+    padding: 10px;
+    background: #F8FAFC;
+    border: 2px solid #E2E8F0;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    transition: var(--transition);
+}
+.day-check-item input:checked + .day-check-box {
+    background: var(--brand-primary);
+    border-color: var(--brand-primary);
+    color: white;
+    box-shadow: 0 4px 8px rgba(79, 70, 229, 0.2);
+}
+
+@media (max-width: 1280px) {
+    .multi-column-grid { grid-template-columns: 1fr; }
 }
 {% endblock %}
 
 {% block content %}
-<div style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 32px; align-items: start;">
-    <!-- Map Picker -->
+<div class="multi-column-grid">
+    <!-- Map Picker (Interaction Focused) -->
     <div class="card" style="padding: 24px">
-        <div class="form-section-header" style="display: flex; justify-content: space-between; align-items: center">
-            <div>
-                <h3 style="font-size: 1.15rem">تحديد الموقع الجغرافي</h3>
-                <p style="font-size: 0.85rem; color: var(--text-muted)">انقر على الخريطة لتغيير موقع النقطة المسموحة.</p>
-            </div>
-            <div class="status-pill pill-info">
-                <i class="ri-gps-line"></i> دقة GPS عالية
-            </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px">
+            <h3 style="font-size: 1.25rem">تحديد النطاق الجغرافي</h3>
+            <div class="badge badge-info"><i class="ri-gps-line"></i> نظام تحديد المواقع النشط</div>
         </div>
-
+        
         <div id="map"></div>
         
-        <div class="map-coords">
-            <div class="form-field" style="margin-bottom: 0">
-                <label class="form-label" style="font-size: 0.75rem">خط العرض (Latitude)</label>
-                <input type="text" id="map_lat_display" class="form-input" readonly style="background: #F1F5F9; font-family: monospace; font-size: 0.9rem">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px">
+            <div class="form-group">
+                <label class="form-label" style="font-size: 0.75rem; color: var(--text-muted)">خط العرض</label>
+                <input type="text" id="map_lat_display" class="form-control" readonly style="background: #F1F5F9; font-family: 'Inter', monospace; border: none; font-weight: 700">
             </div>
-            <div class="form-field" style="margin-bottom: 0">
-                <label class="form-label" style="font-size: 0.75rem">خط الطول (Longitude)</label>
-                <input type="text" id="map_lng_display" class="form-input" readonly style="background: #F1F5F9; font-family: monospace; font-size: 0.9rem">
+            <div class="form-group">
+                <label class="form-label" style="font-size: 0.75rem; color: var(--text-muted)">خط الطول</label>
+                <input type="text" id="map_lng_display" class="form-control" readonly style="background: #F1F5F9; font-family: 'Inter', monospace; border: none; font-weight: 700">
             </div>
         </div>
     </div>
 
-    <!-- Configuration Form -->
-    <form method="post" class="card" style="padding: 32px">
-        <div class="form-section-header">
-            <h3 style="font-size: 1.15rem">إعدادات الموقع والقواعد</h3>
+    <!-- Data Form (Configuration Focused) -->
+    <form method="post" class="card" style="padding: 40px">
+        <div style="margin-bottom: 32px; padding-bottom: 16px; border-bottom: 2px solid var(--bg-base)">
+            <h3 style="font-size: 1.25rem">إعدادات الموقع والقواعد</h3>
         </div>
-        
+
         {% csrf_token %}
 
-        <div class="form-field">
-            <label class="form-label" for="id_name">تسمية الموقع</label>
-            <input type="text" name="name" id="id_name" class="form-input" placeholder="مثال: باب الزاوية - المنطقة أ" value="{{ form.name.value|default:'' }}">
-            <div class="form-help">اسم تعريفي يظهر للمفتشين والجمهور.</div>
+        <div class="form-group">
+            <label class="form-label" for="id_name">تسمية الموقع الرسمية</label>
+            <input type="text" name="name" id="id_name" class="form-control" placeholder="مثال: باب الزاوية - القطاع الجنوبي" value="{{ form.name.value|default:'' }}">
             {% if form.name.errors %}<div class="form-error">{{ form.name.errors|join:", " }}</div>{% endif %}
         </div>
 
-        <div class="form-grid" style="grid-template-columns: 1fr 1fr">
-            <div class="form-field">
-                <label class="form-label">النطاق الجغرافي (متر)</label>
-                <input type="number" name="radius_meters" id="id_radius_meters" class="form-input" value="{{ form.radius_meters.value|default:'15' }}">
-                <div class="form-help">نطاق التغطية حول النقطة.</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+            <div class="form-group">
+                <label class="form-label">نطاق التغطية (متر)</label>
+                <input type="number" name="radius_meters" id="id_radius_meters" class="form-control" value="{{ form.radius_meters.value|default:'15' }}">
             </div>
-            <div class="form-field">
-                <label class="form-label">السعة القصوى</label>
-                <input type="number" name="max_stalls" id="id_max_stalls" class="form-input" value="{{ form.max_stalls.value|default:'1' }}">
-            </div>
-        </div>
-
-        <div class="form-grid" style="grid-template-columns: 1fr 1fr">
-            <div class="form-field">
-                <label class="form-label">وقت البدء</label>
-                <input type="time" name="start_time" id="id_start_time" class="form-input" value="{{ form.start_time.value|time:'H:i'|default:'' }}">
-            </div>
-            <div class="form-field">
-                <label class="form-label">وقت الانتهاء</label>
-                <input type="time" name="end_time" id="id_end_time" class="form-input" value="{{ form.end_time.value|time:'H:i'|default:'' }}">
+            <div class="form-group">
+                <label class="form-label">السعة الاستيعابية</label>
+                <input type="number" name="max_stalls" id="id_max_stalls" class="form-control" value="{{ form.max_stalls.value|default:'1' }}">
             </div>
         </div>
 
-        <div class="form-field">
-            <label class="form-label">الأيام المسموح بها</label>
-            <input type="text" name="allowed_days" id="id_allowed_days" class="form-input" placeholder='["monday", "tuesday"]' value="{{ form.allowed_days.value|default:'' }}">
-            <div class="form-help">أدخل أسماء الأيام بالإنجليزية كمصفوفة JSON.</div>
+        <div class="form-group">
+            <label class="form-label">أيام العمل الأسبوعية المسموحة</label>
+            <div class="days-checkbox-grid">
+                {% for value, label in form.fields.allowed_days.choices %}
+                <label class="day-check-item">
+                    <input type="checkbox" name="allowed_days" value="{{ value }}" {% if value in form.allowed_days.value %}checked{% endif %}>
+                    <div class="day-check-box">{{ label }}</div>
+                </label>
+                {% endfor %}
+            </div>
+            {% if form.allowed_days.errors %}<div class="form-error">{{ form.allowed_days.errors|join:", " }}</div>{% endif %}
         </div>
 
-        <div class="form-field">
-            <label class="form-label">ملاحظات توجيهية</label>
-            <textarea name="notes" id="id_notes" class="form-textarea" rows="2">{{ form.notes.value|default:'' }}</textarea>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px">
+            <div class="form-group">
+                <label class="form-label">وقت بدء النشاط</label>
+                <input type="time" name="start_time" id="id_start_time" class="form-control" value="{{ form.start_time.value|time:'H:i'|default:'' }}">
+            </div>
+            <div class="form-group">
+                <label class="form-label">وقت انتهاء النشاط</label>
+                <input type="time" name="end_time" id="id_end_time" class="form-control" value="{{ form.end_time.value|time:'H:i'|default:'' }}">
+            </div>
         </div>
 
-        <!-- Hidden inputs for Lat/Lng synced from map -->
+        <div class="form-group">
+            <label class="form-label">تعليمات إدارية للمفتشين</label>
+            <textarea name="notes" id="id_notes" class="form-control" rows="2" placeholder="ملاحظات إضافية حول طبيعة الموقع...">{{ form.notes.value|default:'' }}</textarea>
+        </div>
+
+        <!-- Hidden Coordination Inputs -->
         <input type="hidden" name="latitude" id="id_latitude" value="{{ form.latitude.value|default:'' }}">
         <input type="hidden" name="longitude" id="id_longitude" value="{{ form.longitude.value|default:'' }}">
 
-        <div style="margin: 24px 0">
-            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-weight: 700; color: var(--text-main)">
-                <input type="checkbox" name="is_active" {% if form.is_active.value %}checked{% endif %} style="width: 20px; height: 20px; accent-color: var(--primary)">
-                تفعيل الموقع واستقبال الطلبات
+        <div style="margin: 32px 0">
+            <label style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-weight: 700; color: var(--text-heading)">
+                <input type="checkbox" name="is_active" {% if form.is_active.value %}checked{% endif %} style="width: 20px; height: 20px; accent-color: var(--brand-primary)">
+                تنشيط الموقع لاستقبال الطلبات فوراً
             </label>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 32px">
-            <button type="submit" class="btn btn-primary" style="width: 100%">حفظ الإعدادات</button>
-            <a href="{% url 'municipality_portal:location_list' %}" class="btn btn-outline" style="width: 100%">رجوع</a>
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-top: 40px">
+            <button type="submit" class="btn btn-primary">حفظ إعدادات الموقع</button>
+            <a href="{% url 'municipality_portal:location_list' %}" class="btn btn-white">رجوع</a>
         </div>
     </form>
 </div>
 
-<!-- Raw data for existing markers -->
+<!-- Raw data for markers -->
 <script id="existing-locations" type="application/json">
 [
     {% for loc in locations %}
@@ -156,7 +184,6 @@
             maxZoom: 20
         }).addTo(map);
 
-        // Reference existing locations
         const existingData = JSON.parse(document.getElementById('existing-locations').textContent || '[]');
         const currentId = {{ form.instance.pk|default:0 }};
 
@@ -170,11 +197,10 @@
             }).addTo(map);
         });
 
-        // Current Marker
         let marker = L.marker([initialLat, initialLng], { draggable: true }).addTo(map);
         let circle = L.circle([initialLat, initialLng], {
             radius: parseInt(radiusInput.value) || 15,
-            color: '#2563EB',
+            color: '#4F46E5',
             fillOpacity: 0.1,
             weight: 2
         }).addTo(map);
