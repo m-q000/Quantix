@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 
@@ -52,3 +53,46 @@ class LocationCategory(models.Model):
 
     def __str__(self):
         return f"{self.location.name} → {self.category.name}"
+
+
+class Reservation(models.Model):
+    """
+    A vendor reserves a specific municipality-defined location for a time period.
+    """
+    STATUS_PENDING = 'pending'
+    STATUS_APPROVED = 'approved'
+    STATUS_REJECTED = 'rejected'
+    STATUS_ACTIVE = 'active'
+    STATUS_EXPIRED = 'expired'
+    STATUS_CANCELLED = 'cancelled'
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_APPROVED, 'Approved'),
+        (STATUS_REJECTED, 'Rejected'),
+        (STATUS_ACTIVE, 'Active'),
+        (STATUS_EXPIRED, 'Expired'),
+        (STATUS_CANCELLED, 'Cancelled'),
+    ]
+
+    vendor = models.ForeignKey(
+        'accounts.VendorProfile', on_delete=models.CASCADE,
+        related_name='reservations'
+    )
+    location = models.ForeignKey(
+        Location, on_delete=models.CASCADE, related_name='reservations'
+    )
+    start_date = models.DateField()
+    end_date = models.DateField()
+    status = models.CharField(
+        max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING
+    )
+    notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.vendor} → {self.location.name} ({self.start_date} – {self.end_date})"

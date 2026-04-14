@@ -265,6 +265,7 @@
                 <i class="ri-home-5-{% block nav_home_icon %}line{% endblock %}"></i>
                 <span>الرئيسية</span>
             </a>
+<<<<<<< HEAD
             <a href="{% url 'vendor_portal:apply' %}" class="nav-item nav-apply {% block nav_apply %}{% endblock %}">
                 <div class="apply-circle"><i class="ri-store-3-line"></i></div>
                 <span>ملف البسطة</span>
@@ -272,6 +273,21 @@
             <a href="{% url 'vendor_portal:qr_code' %}" class="nav-item {% block nav_qr %}{% endblock %}">
                 <i class="ri-qr-code-{% block nav_qr_icon %}line{% endblock %}"></i>
                 <span>الهوية الرقمية</span>
+=======
+
+            <a href="{% url 'vendor_portal:reserve' %}"
+               class="nav-item nav-apply {% block nav_reserve %}{% endblock %}">
+                <div class="apply-circle">
+                    <i class="ri-map-pin-add-line"></i>
+                </div>
+                <span>احجز موقع</span>
+            </a>
+
+            <a href="{% url 'vendor_portal:my_reservations' %}"
+               class="nav-item {% block nav_reservations %}{% endblock %}">
+                <i class="ri-calendar-check-{% block nav_reservations_icon %}line{% endblock %}"></i>
+                <span>حجوزاتي</span>
+>>>>>>> 5036e7ae5f8811cc10abfd872516dc1b7e4289da
             </a>
         </nav>
 

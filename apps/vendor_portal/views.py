@@ -1,26 +1,36 @@
 import json
 
+from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 
-from apps.locations.models import Location
+from apps.locations.models import Location, Reservation
 from apps.stalls.models import Stall, StallImage
 from apps.subscriptions.models import Subscription
 from apps.inspections.models import Violation
 
-from .forms import StallApplicationForm, StallImageForm
+from .forms import ReservationForm, StallApplicationForm, StallImageForm
 
 
 def _vendor_required(view_func):
     """Decorator: user must be authenticated and have role=vendor."""
     from functools import wraps
-    from apps.accounts.models import CustomUser
+    from apps.accounts.models import CustomUser, VendorProfile
 
     @wraps(view_func)
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated or request.user.role != CustomUser.ROLE_VENDOR:
             return redirect('accounts:login')
+<<<<<<< HEAD
         if not hasattr(request.user, 'vendor_profile'):
             return redirect('accounts:login') # Safety check if profile is missing
+=======
+        # Ensure VendorProfile exists (e.g. demo users created before profile was seeded)
+        VendorProfile.objects.get_or_create(
+            user=request.user,
+            defaults={'national_id': f'AUTO-{request.user.pk}', 'status': VendorProfile.STATUS_PENDING},
+        )
+>>>>>>> 5036e7ae5f8811cc10abfd872516dc1b7e4289da
         return view_func(request, *args, **kwargs)
     return wrapper
 
@@ -156,3 +166,84 @@ def violations(request):
         'violations': all_violations,
         'violations_count': all_violations.count(),
     })
+
+
+@_vendor_required
+def reserve_location(request):
+    """Browse municipality-defined map points and reserve one for a time period."""
+    vendor = request.user.vendor_profile
+    today = timezone.now().date()
+
+    # Active reservations count per location (pending/approved/active that overlap future)
+    active_statuses = [
+        Reservation.STATUS_PENDING,
+        Reservation.STATUS_APPROVED,
+        Reservation.STATUS_ACTIVE,
+    ]
+
+    locations = Location.objects.filter(is_active=True)
+
+    # Build per-location reservation counts
+    reserved_counts = (
+        Reservation.objects
+        .filter(
+            location__is_active=True,
+            status__in=active_statuses,
+            end_date__gte=today,
+        )
+        .values('location_id')
+        .annotate(count=Count('id'))
+    )
+    reserved_map = {r['location_id']: r['count'] for r in reserved_counts}
+
+    locations_data = []
+    for loc in locations:
+        reserved = reserved_map.get(loc.id, 0)
+        available = max(0, loc.max_stalls - reserved)
+        locations_data.append({
+            'id': loc.id,
+            'name': loc.name,
+            'lat': float(loc.latitude),
+            'lng': float(loc.longitude),
+            'days': loc.allowed_days,
+            'start': str(loc.start_time)[:5],
+            'end': str(loc.end_time)[:5],
+            'max_stalls': loc.max_stalls,
+            'reserved': reserved,
+            'available': available,
+            'notes': loc.notes,
+        })
+
+    form = ReservationForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        reservation = form.save(commit=False)
+        reservation.vendor = vendor
+        reservation.status = Reservation.STATUS_PENDING
+        reservation.save()
+        return redirect('vendor_portal:my_reservations')
+
+    return render(request, 'vendor_portal/reserve.html', {
+        'form': form,
+        'locations_json': json.dumps(locations_data, ensure_ascii=False),
+    })
+
+
+@_vendor_required
+def my_reservations(request):
+    """View all reservations made by the vendor."""
+    vendor = request.user.vendor_profile
+    reservations = Reservation.objects.filter(vendor=vendor).select_related('location')
+    return render(request, 'vendor_portal/my_reservations.html', {
+        'reservations': reservations,
+    })
+
+
+@_vendor_required
+def cancel_reservation(request, pk):
+    """Cancel a pending reservation."""
+    vendor = request.user.vendor_profile
+    reservation = get_object_or_404(Reservation, pk=pk, vendor=vendor)
+    if request.method == 'POST' and reservation.status == Reservation.STATUS_PENDING:
+        reservation.status = Reservation.STATUS_CANCELLED
+        reservation.save()
+    return redirect('vendor_portal:my_reservations')

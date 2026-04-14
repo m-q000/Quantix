@@ -181,6 +181,26 @@
         <i class="ri-secure-payment-line"></i>
         <span>منصة المدفوعات والاشتراكات</span>
     </a>
+
+    <a href="{% url 'vendor_portal:reserve' %}" class="action-card">
+        <div class="action-icon" style="background:rgba(16,185,129,0.1); color:var(--success);">
+            <i class="ri-map-pin-add-line"></i>
+        </div>
+        <div>
+            <div class="action-label">حجز موقع</div>
+            <div class="action-sub">احجز مكانك على الخريطة</div>
+        </div>
+    </a>
+
+    <a href="{% url 'vendor_portal:my_reservations' %}" class="action-card">
+        <div class="action-icon" style="background:rgba(124,58,237,0.1); color:#7C3AED;">
+            <i class="ri-calendar-check-line"></i>
+        </div>
+        <div>
+            <div class="action-label">حجوزاتي</div>
+            <div class="action-sub">عرض وإدارة الحجوزات</div>
+        </div>
+    </a>
 </div>
 
 {% if recent_violations %}
@@ -219,6 +239,7 @@
 {% endif %}
 
 {% else %}
+<<<<<<< HEAD
 <!-- CTA No Stall -->
 <div class="cta-box reveal-up delay-1">
     <i class="ri-store-2-line" style="font-size: 4rem; color: var(--civic-green); margin-bottom: 24px; display: block; opacity: 0.5"></i>
@@ -227,6 +248,19 @@
     
     <a href="{% url 'vendor_portal:apply' %}" class="btn-primary" style="padding: 20px 48px; font-size: 1.1rem">
         بدء عملية التسجيل <i class="ri-arrow-left-line"></i>
+=======
+<!-- No stall yet — CTA -->
+<div class="cta-card">
+    <i class="ri-map-pin-add-line"></i>
+    <h3>احجز موقعك الآن</h3>
+    <p>تصفّح المواقع المتاحة من البلدية على الخريطة واحجز مكانك لفترة محددة</p>
+    <a href="{% url 'vendor_portal:reserve' %}" class="btn-primary" style="text-decoration:none; border-radius:var(--radius-pill);">
+        <i class="ri-map-pin-add-line"></i>
+        احجز موقع
+    </a>
+    <a href="{% url 'vendor_portal:my_reservations' %}" style="display:inline-block; margin-top:12px; font-size:0.85rem; color:var(--text-muted); font-weight:600;">
+        عرض حجوزاتي <i class="ri-arrow-left-s-line"></i>
+>>>>>>> 5036e7ae5f8811cc10abfd872516dc1b7e4289da
     </a>
 </div>
 {% endif %}
