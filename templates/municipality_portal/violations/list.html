@@ -1,52 +1,81 @@
 {% extends 'municipality_portal/base.html' %}
 
-{% block page_title %}إدارة وسجل المخالفات الميدانية{% endblock %}
+{% block page_title %}سجل الرقابة والمخالفات الميدانية{% endblock %}
 
 {% block content %}
-<div class="data-table-wrapper">
-    <table class="data-table desktop-only">
-        <thead>
-            <tr>
-                <th>التاريخ</th>
-                <th>البسطة / التاجر</th>
-                <th>نوع المخالفة</th>
-                <th>بواسطة المفتش</th>
-                <th>الوصف</th>
-                <th>الإجراء</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for v in violations %}
-            <tr>
-                <td style="color: var(--text-muted)">{{ v.created_at|date:"Y-m-d H:i" }}</td>
-                <td style="font-weight: 700">{{ v.stall.owner.user.get_full_name }}</td>
-                <td>
-                    <span class="badge badge-danger">{{ v.get_violation_type_display }}</span>
-                </td>
-                <td>{{ v.officer.user.get_full_name }}</td>
-                <td style="max-width: 300px; font-size: 0.85rem; color: var(--text-muted)">{{ v.description|truncatechars:100 }}</td>
-                <td>
-                    <a href="{% url 'municipality_portal:stall_detail' v.stall.pk %}" class="btn btn-outline" style="padding: 6px 12px; font-size: 0.75rem">البسطة</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="6" style="text-align: center; padding: 48px; color: var(--text-muted)">سجل المخالفات فارغ حالياً</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="flex-mobile-col" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px">
+    <div>
+        <h2 style="font-size: 1.5rem; margin-bottom: 4px">المخالفات المسجلة من قبل فرق التفتيش</h2>
+        <p style="color: var(--text-muted); font-size: 0.9rem">إجمالي عدد المخالفات: {{ violations.count }}</p>
+    </div>
+    <div class="flex-mobile-col" style="display: flex; gap: 12px">
+        <button class="btn btn-white" style="padding: 10px 16px"><i class="ri-filter-3-line"></i> تصفية النتائج</button>
+        <button class="btn btn-primary" style="padding: 10px 16px"><i class="ri-download-2-line"></i> تصدير السجل</button>
+    </div>
+</div>
 
-    <div class="mobile-cards" style="padding: 16px">
-        {% for v in violations %}
-        <div class="card" style="padding: 16px; margin-bottom: 12px">
-            <div style="display: flex; justify-content: space-between; margin-bottom: 8px">
-                <span class="badge badge-danger">{{ v.get_violation_type_display }}</span>
-                <span style="font-size: 0.75rem; color: var(--text-muted)">{{ v.created_at|date:"Y-m-d" }}</span>
-            </div>
-            <h4 style="margin-bottom: 4px">{{ v.stall.owner.user.get_full_name }}</h4>
-            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px">{{ v.description }}</p>
-            <div style="font-size: 0.75rem; font-weight: 700">بواسطة: {{ v.officer.user.get_full_name }}</div>
-        </div>
-        {% endfor %}
+<div class="card" style="padding: 0">
+    <div class="table-responsive">
+        <table class="table-view">
+            <thead>
+                <tr>
+                    <th style="padding-right: 32px">التاريخ والوقت</th>
+                    <th>البسطة / التاجر</th>
+                    <th>نوع المخالفة</th>
+                    <th>المفتش المسؤول</th>
+                    <th>ملاحظات الميدان</th>
+                    <th>الموقع</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in violations %}
+                <tr>
+                    <td style="padding-right: 32px">
+                        <div style="font-weight: 700; color: var(--text-heading)">{{ v.created_at|date:"Y/m/d" }}</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted)">{{ v.created_at|date:"H:i" }}</div>
+                    </td>
+                    <td>
+                        <div style="font-weight: 700">{{ v.stall.owner.user.get_full_name }}</div>
+                        <div style="font-size: 0.75rem; color: var(--brand-primary)">#{{ v.stall.pk }}</div>
+                    </td>
+                    <td>
+                        {% if v.violation_type == 'out_of_location' %}
+                            <span class="badge badge-danger">خارج النطاق المسموح</span>
+                        {% elif v.violation_type == 'out_of_time' %}
+                            <span class="badge badge-warning">خارج ساعات العمل</span>
+                        {% elif v.violation_type == 'expired_subscription' %}
+                            <span class="badge badge-danger">رخصة منتهية</span>
+                        {% else %}
+                            <span class="badge badge-warning">{{ v.get_violation_type_display }}</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px">
+                            <div style="width: 24px; height: 24px; background: #F1F5F9; border-radius: 4px; display: grid; place-items: center; font-size: 0.6rem; font-weight: 800; color: var(--brand-primary)">
+                                {{ v.officer.user.first_name|first }}
+                            </div>
+                            <span style="font-size: 0.9rem; font-weight: 600">{{ v.officer.user.get_full_name }}</span>
+                        </div>
+                    </td>
+                    <td style="max-width: 300px">
+                        <div style="font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis" title="{{ v.description }}">
+                            {{ v.description|default:"لا يوجد ملاحظات إضافية" }}
+                        </div>
+                    </td>
+                    <td>
+                        <button class="btn btn-white" style="padding: 6px 14px"><i class="ri-map-pin-2-line"></i></button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 80px; color: var(--text-muted)">
+                        <i class="ri-check-double-line" style="font-size: 3rem; display: block; margin-bottom: 20px; opacity: 0.15"></i>
+                        السجل نظيف، لا يوجد مخالفات مسجلة حالياً.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
 </div>
 {% endblock %}

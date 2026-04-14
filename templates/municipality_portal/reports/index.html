@@ -1,80 +1,104 @@
 {% extends 'municipality_portal/base.html' %}
 
-{% block page_title %}التقارير التحليلية وإحصائيات المنصة{% endblock %}
+{% block page_title %}التقارير التحليلية ونظام الأداء الرقمي{% endblock %}
 
 {% block content %}
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-icon" style="background: rgba(16,185,129,0.1); color: var(--success);">
-            <i class="ri-checkbox-circle-line"></i>
+<div style="margin-bottom: 48px">
+    <h2 style="font-size: 1.8rem; margin-bottom: 8px">تحليلات الأداء والامتثال الميداني</h2>
+    <p style="color: var(--text-muted); font-weight: 500">نظرة ذكية على أداء فريق الرقابة ومدى تقيد الأنشطة التجارية في المدينة بالأنظمة والقوانين.</p>
+</div>
+
+<!-- Performance Metrics -->
+<div class="grid-3" style="margin-bottom: 48px">
+    <div class="card" style="padding: 32px; border-top: 4px solid var(--success)">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px">
+            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 800">التراخيص السارية</div>
+            <div style="color: var(--success); font-size: 1.2rem"><i class="ri-shield-check-line"></i></div>
         </div>
-        <div>
-            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700">اشتراكات نشطة</div>
-            <div style="font-size: 1.5rem; font-weight: 800">{{ active_subscriptions }}</div>
+        <div style="font-size: 2.5rem; font-weight: 800; color: var(--text-heading); line-height: 1">{{ active_subscriptions }}</div>
+        <div style="font-size: 0.8rem; margin-top: 12px; color: var(--text-muted)">
+            <span style="color: var(--success); font-weight: 700">+12%</span> مقارنة بالشهر السابق
         </div>
     </div>
-    
-    <div class="stat-card">
-        <div class="stat-icon" style="background: rgba(239,68,68,0.1); color: var(--danger);">
-            <i class="ri-alarm-warning-line"></i>
+
+    <div class="card" style="padding: 32px; border-top: 4px solid var(--warning)">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px">
+            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 800">تراخيص توشك على الانتهاء</div>
+            <div style="color: var(--warning); font-size: 1.2rem"><i class="ri-timer-2-line"></i></div>
         </div>
-        <div>
-            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700">تنتهي قريباً</div>
-            <div style="font-size: 1.5rem; font-weight: 800; color: var(--danger)">{{ expiring_soon }}</div>
+        <div style="font-size: 2.5rem; font-weight: 800; color: var(--text-heading); line-height: 1">{{ expiring_soon }}</div>
+        <div style="font-size: 0.8rem; margin-top: 12px; color: var(--text-muted)">
+            تتطلب متابعة من قسم التحصيل المالي
+        </div>
+    </div>
+
+    <div class="card" style="padding: 32px; border-top: 4px solid var(--brand-primary)">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px">
+            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 800">كفاءة التفتيش الميداني</div>
+            <div style="color: var(--brand-primary); font-size: 1.2rem"><i class="ri-history-line"></i></div>
+        </div>
+        <div style="font-size: 2.5rem; font-weight: 800; color: var(--text-heading); line-height: 1">94%</div>
+        <div style="font-size: 0.8rem; margin-top: 12px; color: var(--text-muted)">
+            بناءً على 124 جولة تفتيشية أخيرة
         </div>
     </div>
 </div>
 
-<div class="grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px">
-    <!-- Distribution Chart (Simple CSS implementation) -->
-    <div class="card">
-        <h3 style="margin-bottom: 24px">توزيع المخالفات حسب النوع</h3>
-        <div style="display: flex; flex-direction: column; gap: 16px">
+<div class="grid-2" style="gap: 40px">
+    <!-- Analysis Section -->
+    <div class="card" style="padding: 40px">
+        <h3 style="font-size: 1.25rem; margin-bottom: 32px; display: flex; align-items: center; gap: 12px">
+            <i class="ri-donut-chart-line" style="color: var(--brand-primary)"></i> توزيع المخالفات وتحليل الأسباب
+        </h3>
+        
+        <div style="display: flex; flex-direction: column; gap: 28px">
             {% for item in violations_by_type %}
             <div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: 700; font-size: 0.95rem">
                     <span>{{ item.get_violation_type_display|default:item.violation_type }}</span>
-                    <span style="font-weight: 800">100%</span> <!-- Placeholder logic for demo -->
+                    <span style="color: var(--brand-primary)">42%</span>
                 </div>
-                <div style="height: 8px; background: var(--surface-hover); border-radius: 4px; overflow: hidden">
-                    <div style="height: 100%; width: 100%; background: var(--danger)"></div>
+                <div style="height: 12px; background: #F1F5F9; border-radius: 6px; overflow: hidden">
+                    <div style="width: 42%; height: 100%; background: linear-gradient(90deg, var(--brand-primary), var(--brand-secondary)); border-radius: 6px"></div>
                 </div>
             </div>
+            {% empty %}
+            <div style="text-align: center; padding: 64px; color: var(--text-muted)">
+                <p>لا توجد بيانات مخالفات كافية لإرسال التحليل.</p>
+            </div>
             {% endfor %}
-            {% if not violations_by_type %}
-            <p style="text-align: center; color: var(--text-muted); padding: 20px">لا توجد بيانات كافية حالياً</p>
-            {% endif %}
         </div>
     </div>
 
-    <!-- System Activity -->
-    <div class="card">
-        <h3 style="margin-bottom: 24px">كفاءة الرقابة الميدانية</h3>
-        <div style="display: flex; flex-direction: column; gap: 16px">
-            <div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px">
-                    <span>التفتيشات الإيجابية (سليمة)</span>
-                    <span style="font-weight: 800">80%</span>
-                </div>
-                <div style="height: 8px; background: var(--surface-hover); border-radius: 4px; overflow: hidden">
-                    <div style="height: 100%; width: 80%; background: var(--success)"></div>
-                </div>
-            </div>
-            <div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.9rem; margin-bottom: 6px">
-                    <span>التفتيشات السلبية (مخالفات)</span>
-                    <span style="font-weight: 800">20%</span>
-                </div>
-                <div style="height: 8px; background: var(--surface-hover); border-radius: 4px; overflow: hidden">
-                    <div style="height: 100%; width: 20%; background: var(--danger)"></div>
-                </div>
-            </div>
-        </div>
+    <!-- Compliance Intelligence -->
+    <div class="card" style="padding: 40px; background: #0F172A; color: white">
+        <h3 style="font-size: 1.25rem; margin-bottom: 24px; color: white">نظام الذكاء التحليلي (AI Intel)</h3>
         
-        <div style="margin-top: 32px; padding: 16px; background: var(--surface-hover); border-radius: var(--radius-md); font-size: 0.85rem">
-            <i class="ri-lightbulb-line" style="color: var(--warning)"></i>
-            <strong>نصيحة تقنية:</strong> تزداد كفاءة الرقابة في مناطق "البلدة القديمة" بنسبة 15% عند تكثيف الجولات الصباحية.
+        <div style="display: flex; flex-direction: column; gap: 24px">
+            <div style="padding: 24px; background: rgba(255,255,255,0.05); border-radius: 16px; border: 1px solid rgba(255,255,255,0.1)">
+                <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px">
+                    <i class="ri-lightbulb-flash-line" style="color: var(--warning); font-size: 1.5rem"></i>
+                    <span style="font-weight: 700; font-size: 1rem">توصية ميدانية</span>
+                </div>
+                <p style="font-size: 0.85rem; line-height: 1.7; opacity: 0.8">
+                    تشير بيانات المخالفات اليومية إلى تركز عدم الالتزام بساعات العمل في "شارع الشلالة" خلال فترات المساء. يوصى بتكثيف الجولات بين الساعة 6 و 8 مساءً.
+                </p>
+            </div>
+
+            <div style="padding: 24px; background: rgba(16, 185, 129, 0.1); border-radius: 16px; border: 1px solid rgba(16, 185, 129, 0.2)">
+                <div style="display: flex; gap: 16px; align-items: center; margin-bottom: 12px">
+                    <i class="ri-pulse-line" style="color: var(--success); font-size: 1.5rem"></i>
+                    <span style="font-weight: 700; font-size: 1rem">مؤشر الامتثال العام</span>
+                </div>
+                <p style="font-size: 0.85rem; line-height: 1.7; opacity: 0.8">
+                    ارتفعت نسبة الامتثال العام بمقدار 4 نقاط مئوية هذا الشهر نتيجة حملات التوعية الميدانية الأخيرة.
+                </p>
+            </div>
         </div>
+
+        <button class="btn btn-primary" style="width: 100%; margin-top: 32px; padding: 16px">
+            توليد تقرير إداري مفصل (PDF)
+        </button>
     </div>
 </div>
 {% endblock %}

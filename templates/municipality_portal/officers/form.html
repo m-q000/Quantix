@@ -1,10 +1,81 @@
 {% extends 'municipality_portal/base.html' %}
+
+{% block page_title %}تسجيل مفتش ميداني جديد{% endblock %}
+
 {% block content %}
-<h2>{{ title }}</h2>
-<br>
-<form method="post" class="card">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn" style="width:100%">حفظ</button>
-</form>
+<div style="max-width: 900px; margin: 0 auto">
+    <form method="post" class="card" style="padding: 48px">
+        <div style="margin-bottom: 40px; padding-bottom: 24px; border-bottom: 2px solid var(--bg-base)">
+            <h3 style="font-size: 1.5rem; color: var(--text-heading); margin-bottom: 8px">بطاقة التعريف الوظيفية للمفتش</h3>
+            <p style="color: var(--text-muted); font-weight: 500">يرجى تسجيل كافة البيانات الأساسية والمهنية المطلوبة لإتمام عملية الربط بالنظام الميداني.</p>
+        </div>
+
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div style="background: rgba(239, 68, 68, 0.05); border: 1.5px solid var(--danger); color: var(--danger); padding: 16px; border-radius: 12px; margin-bottom: 32px; font-weight: 700; font-size: 0.9rem">
+            {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label class="form-label" for="id_first_name">الاسم الأول</label>
+                <input type="text" name="first_name" id="id_first_name" class="form-control" placeholder="أدخل اسم المفتش..." value="{{ form.first_name.value|default:'' }}">
+                {% if form.first_name.errors %}<div class="form-error">{{ form.first_name.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="id_last_name">اسم العائلة</label>
+                <input type="text" name="last_name" id="id_last_name" class="form-control" placeholder="أدخل اسم العائلة..." value="{{ form.last_name.value|default:'' }}">
+                {% if form.last_name.errors %}<div class="form-error">{{ form.last_name.errors|join:", " }}</div>{% endif %}
+            </div>
+        </div>
+
+        <div class="grid-2" style="margin-bottom: 32px">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label class="form-label" for="id_username">اسم المستخدم للولوج (بالإنجليزي)</label>
+                <input type="text" name="username" id="id_username" class="form-control" placeholder="مثلاً: officer_01" value="{{ form.username.value|default:'' }}">
+                <div class="form-help">يستخدم هذا الاسم لتسجيل الدخول في تطبيق التفتيش الميداني.</div>
+                {% if form.username.errors %}<div class="form-error">{{ form.username.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="id_badge_number">رقم الشارة الوظيفية الرسمي</label>
+                <input type="text" name="badge_number" id="id_badge_number" class="form-control" placeholder="HMC-9999" value="{{ form.badge_number.value|default:'' }}">
+                {% if form.badge_number.errors %}<div class="form-error">{{ form.badge_number.errors|join:", " }}</div>{% endif %}
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label class="form-label" for="id_phone">رقم الجوال الخاص</label>
+                <input type="text" name="phone" id="id_phone" class="form-control" placeholder="05XXXXXXXX" value="{{ form.phone.value|default:'' }}">
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="id_email">البريد الإلكتروني الرسمي</label>
+                <input type="email" name="email" id="id_email" class="form-control" placeholder="name@hebron.ps" value="{{ form.email.value|default:'' }}">
+            </div>
+        </div>
+
+        <div style="margin: 40px 0; padding: 24px; background: #F8FAFC; border-radius: 16px; border: 1px dashed var(--border-light)">
+            <h4 style="font-size: 1rem; color: var(--text-heading); margin-bottom: 24px">إعدادات الأمان وسرية البيانات</h4>
+            <div class="grid-2">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" for="id_password1">كلمة المرور المؤقتة</label>
+                    <input type="password" name="password1" id="id_password1" class="form-control">
+                    {% if form.password1.errors %}<div class="form-error">{{ form.password1.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="id_password2">تأكيد كلمة المرور</label>
+                    <input type="password" name="password2" id="id_password2" class="form-control">
+                    {% if form.password2.errors %}<div class="form-error">{{ form.password2.errors|join:", " }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-mobile-col" style="display: flex; gap: 20px; align-items: center; justify-content: flex-start; margin-top: 24px">
+            <button type="submit" class="btn btn-primary" style="padding: 16px 40px; font-size: 1.1rem">اعتماد وتسجيل المفتش</button>
+            <a href="{% url 'municipality_portal:officer_list' %}" class="btn btn-white" style="padding: 16px 32px">إلغاء العملية والعودة</a>
+        </div>
+    </form>
+</div>
 {% endblock %}

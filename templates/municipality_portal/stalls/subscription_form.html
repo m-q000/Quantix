@@ -1,10 +1,60 @@
 {% extends 'municipality_portal/base.html' %}
+
+{% block page_title %}تجديد وإصدار اشتراكات البسطات{% endblock %}
+
 {% block content %}
-<h2>إضافة اشتراك</h2>
-<br>
-<form method="post" class="card">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success" style="width:100%">حفظ</button>
-</form>
+<div style="max-width: 800px; margin: 0 auto">
+    <div class="card">
+        <div style="margin-bottom: 32px">
+            <h3 style="font-size: 1.25rem; margin-bottom: 8px">إدارة اشتراك البسطة</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem">تحديد خطة الاشتراك، القيمة المالية، وتواريخ الصلاحية التشغيلية.</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-grid">
+                <!-- Plan Type -->
+                <div class="form-field">
+                    <label class="form-label" for="id_plan_type">نوع خطة الاشتراك</label>
+                    <select name="plan_type" id="id_plan_type" class="form-select">
+                        {% for value, label in form.plan_type.field.choices %}
+                            <option value="{{ value }}" {% if form.plan_type.value == value %}selected{% endif %}>{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Amount -->
+                <div class="form-field">
+                    <label class="form-label" for="id_amount">القيمة المالية (بالشيكل)</label>
+                    <input type="number" step="0.01" name="amount" id="id_amount" class="form-input" value="{{ form.amount.value|default:'0' }}">
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <!-- Start Date -->
+                <div class="form-field">
+                    <label class="form-label" for="id_start_date">تاريخ البدء</label>
+                    <input type="date" name="start_date" id="id_start_date" class="form-input" value="{{ form.start_date.value|default:'' }}">
+                </div>
+
+                <!-- Expiry Date -->
+                <div class="form-field">
+                    <label class="form-label" for="id_expiry_date">تاريخ الانتهاء</label>
+                    <input type="date" name="expiry_date" id="id_expiry_date" class="form-input" value="{{ form.expiry_date.value|default:'' }}">
+                </div>
+            </div>
+
+            <div class="form-field">
+                <label class="form-label" for="id_notes">ملاحظات التحصيل المالي</label>
+                <textarea name="notes" id="id_notes" class="form-textarea" rows="3" placeholder="رقم السند، ملاحظات الدفع، إلخ...">{{ form.notes.value|default:'' }}</textarea>
+            </div>
+
+            <div style="margin-top: 40px; display: flex; gap: 16px">
+                <button type="submit" class="btn btn-primary" style="flex: 2">حفظ وتفعيل الاشتراك</button>
+                <a href="{% url 'municipality_portal:stall_detail' stall_pk %}" class="btn btn-outline" style="flex: 1">إلغاء</a>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
