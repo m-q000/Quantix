@@ -1,381 +1,232 @@
 {% extends 'vendor_portal/base.html' %}
 
 {% block title %}الرئيسية{% endblock %}
+{% block nav_home_d %}active{% endblock %}
 {% block nav_home %}active{% endblock %}
 {% block nav_home_icon %}fill{% endblock %}
 
 {% block extra_styles %}
-.welcome-card {
-    background: var(--accent);
-    color: white;
-    border-radius: var(--radius-xl);
-    padding: 24px 20px;
-    margin-bottom: 12px;
-    animation: slideUp 0.35s var(--ease-out) both;
+.welcome-hero {
+    background: var(--civic-green);
+    color: var(--paper-base);
+    padding: 64px 48px;
     position: relative;
     overflow: hidden;
+    margin-bottom: 40px;
+    box-shadow: 8px 8px 0 var(--sand-gold);
 }
-
-.welcome-card::before {
-    content: '';
-    position: absolute;
-    top: -30px; left: -30px;
-    width: 160px; height: 160px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.04);
+.welcome-hero::after {
+    content: "مرحباً";
+    position: absolute; left: -40px; bottom: -80px;
+    font-size: 20rem; font-family: 'Alexandria'; font-weight: 900;
+    color: var(--sand-gold); opacity: 0.05; line-height: 1; pointer-events: none;
 }
+.welcome-hero h2 { font-size: 2.5rem; color: var(--sand-gold); margin-bottom: 8px; }
+.welcome-hero p { font-size: 1.1rem; opacity: 0.9; margin-bottom: 32px; font-family: 'IBM Plex Sans Arabic'; }
 
-.welcome-card::after {
-    content: '';
-    position: absolute;
-    bottom: -20px; right: -20px;
-    width: 120px; height: 120px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.03);
-}
-
-.welcome-card .greeting {
-    font-size: 0.85rem;
-    color: rgba(255,255,255,0.55);
-    margin-bottom: 4px;
-}
-
-.welcome-card h2 {
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: white;
-    margin-bottom: 16px;
-}
-
-.welcome-card .vendor-status {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: var(--radius-pill);
-    padding: 6px 14px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-/* Quick actions grid */
-.actions-grid {
+.editorial-bento {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 12px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    margin-bottom: 48px;
 }
+.bento-stat {
+    background: var(--paper-surface);
+    border: 2px solid var(--border-classic);
+    padding: 32px;
+    position: relative;
+    transition: var(--transition-snap);
+}
+.bento-stat:hover { transform: translate(-4px, -4px); box-shadow: 8px 8px 0 var(--sand-gold); border-color: var(--civic-green); }
 
+.quick-actions-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 48px;
+}
 .action-card {
-    background: var(--surface);
-    border-radius: var(--radius-lg);
-    padding: 18px 16px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-    box-shadow: var(--shadow-card);
-    border: 1px solid var(--glass-border);
-    text-decoration: none;
-    color: var(--text-main);
-    transition: transform 0.2s var(--spring), box-shadow 0.2s;
-    animation: slideUp 0.4s var(--ease-out) both;
+    background: var(--paper-surface); border: 1px solid var(--civic-green);
+    padding: 24px; display: flex; flex-direction: column; align-items: flex-start; gap: 16px;
+    text-decoration: none; color: var(--civic-green); transition: var(--transition-snap);
 }
+.action-card i { font-size: 2rem; }
+.action-card span { font-family: 'Alexandria'; font-weight: 800; font-size: 1rem; }
+.action-card:hover { background: var(--civic-green); color: var(--sand-gold); box-shadow: 4px 4px 0 var(--sand-gold); transform: translate(-2px, -2px); }
 
-.action-card:nth-child(1) { animation-delay: 0.12s; }
-.action-card:nth-child(2) { animation-delay: 0.16s; }
-.action-card:nth-child(3) { animation-delay: 0.20s; }
-.action-card:nth-child(4) { animation-delay: 0.24s; }
-
-.action-card:active { transform: scale(0.96); }
-
-.action-icon {
-    width: 42px; height: 42px;
-    border-radius: var(--radius-md);
-    display: grid;
-    place-items: center;
-    font-size: 1.25rem;
-}
-
-.action-card .action-label {
-    font-size: 0.88rem;
-    font-weight: 700;
-    line-height: 1.3;
-}
-
-.action-card .action-sub {
-    font-size: 0.73rem;
-    color: var(--text-muted);
-    margin-top: -6px;
-}
-
-/* Stall status card */
-.stall-status-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-}
-
-.stall-category-icon {
-    width: 44px; height: 44px;
-    background: var(--surface-hover);
-    border-radius: var(--radius-md);
-    display: grid;
-    place-items: center;
-    font-size: 1.4rem;
-}
-
-/* CTA card (no stall yet) */
-.cta-card {
-    background: linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(16,185,129,0.03) 100%);
-    border: 1.5px dashed rgba(16,185,129,0.3);
-    border-radius: var(--radius-xl);
-    padding: 28px 20px;
-    text-align: center;
-    margin-bottom: 12px;
-    animation: slideUp 0.35s var(--ease-out) both;
-}
-
-.cta-card i {
-    font-size: 2.2rem;
-    color: var(--success);
-    display: block;
-    margin-bottom: 12px;
-}
-
-.cta-card h3 {
-    font-size: 1.1rem;
-    margin-bottom: 6px;
-}
-
-.cta-card p {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-bottom: 20px;
-    line-height: 1.6;
-}
-
-/* Violation mini row */
 .violation-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--glass-border);
+    display: flex; align-items: center; justify-content: space-between; padding: 24px;
+    border-bottom: 1px solid var(--border-classic); transition: var(--transition-snap);
 }
-
+.violation-row:hover { background: var(--paper-surface); }
 .violation-row:last-child { border-bottom: none; }
 
-.violation-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
+.cta-box {
+    background: var(--paper-base); border: 2px dashed var(--civic-green); padding: 64px 32px;
+    text-align: center; margin-bottom: 48px;
 }
 
-.violation-dot.warning  { background: var(--warning); }
-.violation-dot.fine     { background: var(--danger); }
-.violation-dot.suspension { background: #7C3AED; }
-
-.violation-info { flex: 1; }
-.violation-type { font-size: 0.85rem; font-weight: 600; }
-.violation-date { font-size: 0.75rem; color: var(--text-muted); margin-top: 1px; }
-
-.violation-action {
-    font-size: 0.75rem;
-    font-weight: 700;
-    padding: 3px 10px;
-    border-radius: var(--radius-pill);
+@media (max-width: 1024px) {
+    .editorial-bento { grid-template-columns: 1fr; }
+    .quick-actions-grid { grid-template-columns: 1fr 1fr; }
+    .welcome-hero { padding: 40px 24px; }
+    .welcome-hero h2 { font-size: 1.8rem; }
 }
-
-.action-warning    { background: rgba(245,158,11,0.1); color: var(--warning); }
-.action-fine       { background: rgba(239,68,68,0.1);  color: var(--danger); }
-.action-suspension { background: rgba(124,58,237,0.1); color: #7C3AED; }
+@media (max-width: 768px) {
+    .quick-actions-grid { grid-template-columns: 1fr; }
+}
 {% endblock %}
 
 {% block content %}
 
-<!-- Welcome card -->
-<div class="welcome-card">
-    <p class="greeting">أهلاً بك،</p>
-    <h2>{{ user.get_full_name|default:user.username }}</h2>
-    <div class="vendor-status">
-        <i class="ri-shield-check-line"></i>
-        {% if vendor.status == 'approved' %}
-            بائع معتمد
-        {% elif vendor.status == 'pending' %}
-            قيد المراجعة
-        {% elif vendor.status == 'rejected' %}
-            مرفوض
+<!-- Welcome Hero -->
+<div class="welcome-hero reveal-up">
+    <div style="position: relative; z-index: 10">
+        <h2>{{ user.get_full_name|default:user.username }}</h2>
+        <p>مرحباً بك في بوابة الشريك التجاري لبلدية الخليل.</p>
+        
+        <div style="display: inline-flex; align-items: center; gap: 12px; background: var(--paper-surface); color: var(--civic-green); padding: 12px 24px; font-family: 'Alexandria'; font-weight: 800; font-size: 0.9rem; box-shadow: 4px 4px 0 var(--sand-gold);">
+            <i class="ri-shield-check-fill" style="font-size: 1.2rem; color: var(--success)"></i>
+            {% if vendor.status == 'approved' %}شريك تجاري معتمد
+            {% elif vendor.status == 'pending' %}الملف قيد المراجعة الإدارية
+            {% elif vendor.status == 'rejected' %}الطلب مرفوض
+            {% else %}الحساب موقوف{% endif %}
+        </div>
+    </div>
+</div>
+
+{% if stall %}
+<div class="editorial-bento reveal-up delay-1">
+    <!-- Stall Status -->
+    <div class="bento-stat" style="border-top: 4px solid var(--civic-green)">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 24px">
+            <span style="font-family: 'Alexandria'; font-size: 0.85rem; color: var(--ink-muted); font-weight: 800">حالة البسطة التجارية</span>
+            <i class="ri-store-2-fill" style="color: var(--civic-green); font-size: 1.5rem"></i>
+        </div>
+        <div style="font-family: 'Alexandria'; font-size: 1.8rem; color: var(--civic-green); font-weight: 900; margin-bottom: 8px">{{ stall.category.name }}</div>
+        
+        <div style="margin-top: 16px">
+            <span class="status-badge status-{{ stall.status }}">
+                {% if stall.status == 'pending' %}قيد المراجعة
+                {% elif stall.status == 'active' %}نشطة ومُعتمدة
+                {% elif stall.status == 'expired' %}رخصة منتهية
+                {% elif stall.status == 'suspended' %}موقوفة مؤقتاً
+                {% elif stall.status == 'rejected' %}مرفوضة{% endif %}
+            </span>
+        </div>
+
+        {% if stall.status == 'rejected' and stall.rejection_reason %}
+        <div style="background: #FFF5F5; border: 1px solid #FFE3E3; padding: 16px; margin-top: 24px">
+            <div style="color: var(--danger); font-size: 0.75rem; font-family: 'Alexandria'; font-weight: 800; margin-bottom: 8px">سبب الرفض</div>
+            <div style="font-size: 0.85rem">{{ stall.rejection_reason }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Location -->
+    <div class="bento-stat" style="border-top: 4px solid var(--sand-gold)">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 24px">
+            <span style="font-family: 'Alexandria'; font-size: 0.85rem; color: var(--ink-muted); font-weight: 800">النطاق الجغرافي</span>
+            <i class="ri-map-pin-2-fill" style="color: var(--sand-gold); font-size: 1.5rem"></i>
+        </div>
+        {% if stall.location %}
+        <div style="font-family: 'Alexandria'; font-size: 1.5rem; color: var(--civic-green); font-weight: 900; line-height: 1.3">{{ stall.location.name }}</div>
+        <div style="margin-top: 16px; font-family: 'IBM Plex Sans Arabic'; font-size: 0.85rem; font-weight: 600; color: var(--ink-muted)">
+            تم تحديد الإحداثيات رسمياً
+        </div>
         {% else %}
-            موقوف
+        <div style="font-family: 'Alexandria'; font-size: 1.5rem; color: var(--ink-muted); font-weight: 900; line-height: 1.3">غير محدد</div>
+        <div style="margin-top: 16px; font-family: 'IBM Plex Sans Arabic'; font-size: 0.85rem; font-weight: 600; color: var(--warning)">
+            بانتظار تعيين موقع من قبل البلدية
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Subscription -->
+    <div class="bento-stat" style="border-top: 4px solid var(--success)">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 24px">
+            <span style="font-family: 'Alexandria'; font-size: 0.85rem; color: var(--ink-muted); font-weight: 800">حالة الاشتراك المالي</span>
+            <i class="ri-bank-card-fill" style="color: var(--success); font-size: 1.5rem"></i>
+        </div>
+        {% if subscription %}
+        <div style="font-family: 'Alexandria'; font-size: 1.8rem; color: var(--civic-green); font-weight: 900; margin-bottom: 8px">
+            {% if subscription.plan_type == 'daily' %}دفع يومي
+            {% elif subscription.plan_type == 'monthly' %}دفع شهري
+            {% else %}دفع موسمي{% endif %}
+        </div>
+        <div style="margin-top: 16px; font-family: 'IBM Plex Sans Arabic'; font-size: 0.85rem; font-weight: 700; color: var(--success)">
+            صالح لغاية: {{ subscription.expiry_date }}
+        </div>
+        {% else %}
+        <div style="font-family: 'Alexandria'; font-size: 1.8rem; color: var(--ink-muted); font-weight: 900; margin-bottom: 8px">لا يوجد اشتراك فعال</div>
         {% endif %}
     </div>
 </div>
 
-<!-- Stall status or CTA -->
-{% if stall %}
-
-<div class="card">
-    <div class="stall-status-row">
-        <div style="display:flex; align-items:center; gap:12px;">
-            <div class="stall-category-icon">
-                {% if stall.category.icon %}{{ stall.category.icon }}{% else %}<i class="ri-store-2-line"></i>{% endif %}
-            </div>
-            <div>
-                <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:2px;">فئة البسطة</div>
-                <div style="font-weight:700; font-size:0.95rem;">{{ stall.category.name }}</div>
-            </div>
-        </div>
-        <span class="status-badge status-{{ stall.status }}">
-            {% if stall.status == 'pending' %}
-                <i class="ri-time-line"></i> قيد المراجعة
-            {% elif stall.status == 'active' %}
-                <i class="ri-checkbox-circle-line"></i> نشطة
-            {% elif stall.status == 'expired' %}
-                <i class="ri-time-line"></i> منتهية
-            {% elif stall.status == 'suspended' %}
-                <i class="ri-forbid-line"></i> موقوفة
-            {% elif stall.status == 'rejected' %}
-                <i class="ri-close-circle-line"></i> مرفوضة
-            {% endif %}
-        </span>
-    </div>
-
-    {% if stall.location %}
-    <div class="detail-row" style="border-bottom:none; padding-top:0;">
-        <i class="ri-map-pin-2-line"></i>
-        <div>
-            <div class="detail-label">الموقع المخصص</div>
-            <div class="detail-value">{{ stall.location.name }}</div>
-        </div>
-    </div>
-    {% elif stall.status == 'pending' %}
-    <div style="font-size:0.82rem; color:var(--text-muted); border-top:1px solid var(--glass-border); padding-top:12px; margin-top:4px;">
-        <i class="ri-information-line"></i> في انتظار تخصيص موقع من البلدية
-    </div>
-    {% endif %}
-
-    {% if stall.status == 'rejected' and stall.rejection_reason %}
-    <div style="background:rgba(239,68,68,0.06); border-radius:var(--radius-md); padding:12px; margin-top:12px;">
-        <div style="font-size:0.78rem; color:var(--danger); font-weight:600; margin-bottom:4px;">سبب الرفض</div>
-        <div style="font-size:0.85rem; color:var(--text-main);">{{ stall.rejection_reason }}</div>
-    </div>
-    {% endif %}
+<div class="section-header reveal-up delay-2">
+    <h3>بوابة الخدمات السريعة</h3>
 </div>
 
-<!-- Subscription mini card -->
-{% if subscription %}
-<div class="card" style="padding:16px 20px;">
-    <div style="display:flex; align-items:center; justify-content:space-between;">
-        <div style="display:flex; align-items:center; gap:10px;">
-            <i class="ri-bank-card-line" style="font-size:1.2rem; color:var(--success);"></i>
-            <div>
-                <div style="font-size:0.78rem; color:var(--text-muted);">الاشتراك الحالي</div>
-                <div style="font-weight:700; font-size:0.9rem;">
-                    {% if subscription.plan_type == 'daily' %}يومي
-                    {% elif subscription.plan_type == 'monthly' %}شهري
-                    {% else %}موسمي{% endif %}
-                </div>
-            </div>
-        </div>
-        <div style="text-align:left;">
-            <div style="font-size:0.72rem; color:var(--text-muted);">ينتهي في</div>
-            <div style="font-weight:700; font-size:0.85rem; color:var(--success);">{{ subscription.expiry_date }}</div>
-        </div>
-    </div>
-</div>
-{% endif %}
-
-<!-- Quick action grid -->
-<div class="section-header">
-    <h3>الإجراءات السريعة</h3>
-</div>
-
-<div class="actions-grid">
+<div class="quick-actions-grid reveal-up delay-2">
     <a href="{% url 'vendor_portal:my_stall' %}" class="action-card">
-        <div class="action-icon" style="background:rgba(59,130,246,0.1); color:#3B82F6;">
-            <i class="ri-store-2-line"></i>
-        </div>
-        <div>
-            <div class="action-label">بسطتي</div>
-            <div class="action-sub">تفاصيل وحالة البسطة</div>
-        </div>
+        <i class="ri-store-3-line"></i>
+        <span>استعراض الملف الشامل للبسطة</span>
     </a>
-
     <a href="{% url 'vendor_portal:upload_images' %}" class="action-card">
-        <div class="action-icon" style="background:rgba(139,92,246,0.1); color:#8B5CF6;">
-            <i class="ri-image-add-line"></i>
-        </div>
-        <div>
-            <div class="action-label">الصور</div>
-            <div class="action-sub">إضافة صور المنتجات</div>
-        </div>
+        <i class="ri-image-add-line"></i>
+        <span>توثيق مساحة العمل (صور)</span>
     </a>
-
     <a href="{% url 'vendor_portal:qr_code' %}" class="action-card">
-        <div class="action-icon" style="background:rgba(16,185,129,0.1); color:var(--success);">
-            <i class="ri-qr-code-line"></i>
-        </div>
-        <div>
-            <div class="action-label">رمز QR</div>
-            <div class="action-sub">عرض وتحميل الرمز</div>
-        </div>
+        <i class="ri-qr-code-line"></i>
+        <span>بطاقة الهوية الرقمية (QR)</span>
     </a>
-
     <a href="{% url 'vendor_portal:subscription' %}" class="action-card">
-        <div class="action-icon" style="background:rgba(245,158,11,0.1); color:var(--warning);">
-            <i class="ri-bank-card-line"></i>
-        </div>
-        <div>
-            <div class="action-label">الاشتراك</div>
-            <div class="action-sub">سجل الاشتراكات</div>
-        </div>
+        <i class="ri-secure-payment-line"></i>
+        <span>منصة المدفوعات والاشتراكات</span>
     </a>
 </div>
 
-<!-- Recent violations -->
 {% if recent_violations %}
-<div class="section-header" style="margin-top:8px;">
-    <h3>آخر المخالفات</h3>
-    <a href="{% url 'vendor_portal:violations' %}">عرض الكل</a>
+<div class="section-header reveal-up delay-3">
+    <h3>سجل الرقابة الميدانية (أحدث القيود)</h3>
+    <a href="{% url 'vendor_portal:violations' %}" style="font-size: 0.85rem; font-weight: 800; font-family: 'Alexandria'; color: var(--sand-gold); text-decoration: underline">تصفح السجل الكامل</a>
 </div>
 
-<div class="card">
+<div class="card reveal-up delay-3" style="padding: 0; overflow: hidden">
     {% for v in recent_violations %}
     <div class="violation-row">
-        <div class="violation-dot {{ v.action }}"></div>
-        <div class="violation-info">
-            <div class="violation-type">
-                {% if v.violation_type == 'out_of_location' %}خارج الموقع
-                {% elif v.violation_type == 'out_of_time' %}خارج أوقات العمل
-                {% elif v.violation_type == 'wrong_activity' %}نشاط غير مرخص
-                {% elif v.violation_type == 'no_qr' %}غياب رمز QR
-                {% elif v.violation_type == 'expired_subscription' %}اشتراك منتهي
+        <div>
+            <div style="font-family: 'Alexandria'; font-weight: 800; font-size: 1.1rem; color: var(--civic-green); margin-bottom: 4px">
+                {% if v.violation_type == 'out_of_location' %}تجاوز النطاق الجغرافي
+                {% elif v.violation_type == 'out_of_time' %}العمل خارج الأوقات المسموحة
+                {% elif v.violation_type == 'wrong_activity' %}مخالفة طبيعة النشاط
+                {% elif v.violation_type == 'no_qr' %}عدم إبراز الرمز الرقمي
+                {% elif v.violation_type == 'expired_subscription' %}انتهاء صلاحية الاشتراك
                 {% else %}{{ v.get_violation_type_display }}{% endif %}
             </div>
-            <div class="violation-date">{{ v.created_at|date:"d/m/Y" }}</div>
+            <div style="font-family: 'IBM Plex Sans Arabic'; font-size: 0.85rem; color: var(--ink-muted); font-weight: 600">{{ v.created_at|date:"Y/m/d" }}</div>
         </div>
-        <span class="violation-action action-{{ v.action }}">
-            {% if v.action == 'warning' %}تنبيه
-            {% elif v.action == 'fine' %}غرامة
-            {% else %}إيقاف{% endif %}
-        </span>
+        <div>
+            <span class="status-badge" style="
+                {% if v.action == 'warning' %}background: #FFF9DB; color: var(--warning); border-color: #FFF3BF;
+                {% elif v.action == 'fine' %}background: #FFF5F5; color: var(--danger); border-color: #FFE3E3;
+                {% else %}background: #F3F0FF; color: #7C3AED; border-color: #E5DBFF;{% endif %}">
+                {% if v.action == 'warning' %}تنبيه شفوي
+                {% elif v.action == 'fine' %}غرامة مالية
+                {% else %}إجراء إيقاف{% endif %}
+            </span>
+        </div>
     </div>
     {% endfor %}
 </div>
 {% endif %}
 
 {% else %}
-<!-- No stall yet — CTA -->
-<div class="cta-card">
-    <i class="ri-map-pin-add-line"></i>
-    <h3>لا توجد بسطة بعد</h3>
-    <p>قدّم طلبك الآن واختر موقعك المناسب على الخريطة ليتم مراجعته من البلدية</p>
-    <a href="{% url 'vendor_portal:apply' %}" class="btn-primary" style="text-decoration:none; border-radius:var(--radius-pill);">
-        <i class="ri-map-pin-add-line"></i>
-        تقديم طلب جديد
+<!-- CTA No Stall -->
+<div class="cta-box reveal-up delay-1">
+    <i class="ri-store-2-line" style="font-size: 4rem; color: var(--civic-green); margin-bottom: 24px; display: block; opacity: 0.5"></i>
+    <h3 style="font-family: 'Alexandria'; font-size: 1.8rem; color: var(--civic-green); margin-bottom: 16px">لم تقم بتسجيل بسطتك بعد</h3>
+    <p style="font-family: 'IBM Plex Sans Arabic'; font-size: 1.1rem; color: var(--ink-muted); max-width: 600px; margin: 0 auto 32px">يجب عليك تقديم طلب تسجيل بسطة تجارية وتحديد الموقع المرغوب لتبدأ العمل رسمياً تحت مظلة بلدية الخليل.</p>
+    
+    <a href="{% url 'vendor_portal:apply' %}" class="btn-primary" style="padding: 20px 48px; font-size: 1.1rem">
+        بدء عملية التسجيل <i class="ri-arrow-left-line"></i>
     </a>
 </div>
 {% endif %}

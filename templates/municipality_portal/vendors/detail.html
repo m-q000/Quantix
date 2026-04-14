@@ -1,87 +1,119 @@
 {% extends 'municipality_portal/base.html' %}
 
-{% block page_title %}ملف الشريك التاجر: {{ vendor.user.get_full_name }}{% endblock %}
+{% block page_title %}ملف المعالجة والتحكم: التاجر الشريك{% endblock %}
+
+{% block extra_css %}
+.dossier-tab-header {
+    background: var(--ink-black);
+    color: var(--paper-base);
+    padding: 32px 40px;
+    border-bottom: 4px solid var(--sand-gold);
+}
+.dossier-tab-header h3 { font-size: 2rem; margin-bottom: 8px; color: var(--paper-base); line-height: 1.2; }
+.dossier-meta-block {
+    padding: 24px 40px;
+    border-bottom: 1px solid var(--border-classic);
+    display: flex; justify-content: space-between; align-items: center;
+}
+.meta-label { font-size: 0.75rem; color: var(--ink-muted); font-weight: 800; font-family: 'Alexandria'; text-transform: uppercase; margin-bottom: 4px; display: block; }
+.meta-value { font-size: 1.2rem; font-weight: 800; font-family: 'IBM Plex Sans Arabic', monospace; color: var(--civic-green); }
+
+.activity-card {
+    padding: 32px;
+    background: var(--paper-base);
+    border: 2px solid var(--border-classic);
+    display: flex; justify-content: space-between; align-items: center;
+    transition: var(--transition-snap);
+}
+.activity-card:hover { border-color: var(--civic-green); transform: translateX(-8px); box-shadow: 8px 8px 0 var(--sand-gold); background: var(--paper-surface); }
+{% endblock %}
 
 {% block content %}
 <div class="responsive-layout layout-1-2">
     
-    <!-- Profile Sidebar -->
-    <aside>
-        <div class="card" style="padding: 40px; text-align: center">
-            <div style="width: 120px; height: 120px; background: #F8FAFC; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 24px; font-size: 3rem; color: var(--brand-primary); border: 4px solid white; box-shadow: var(--shadow-md)">
-                <i class="ri-user-star-fill"></i>
+    <!-- Profile Dossier Sidebar -->
+    <aside class="reveal-up">
+        <div class="card" style="padding: 0; overflow: hidden; border: 2px solid var(--civic-green); border-radius: 0; box-shadow: 6px 6px 0 rgba(11,56,42,0.1)">
+            
+            <div class="dossier-tab-header">
+                <h3>{{ vendor.user.get_full_name }}</h3>
+                <p style="font-size: 0.95rem; color: rgba(250,249,246,0.7); font-family: 'IBM Plex Sans Arabic'">معتمد لدى بلدية الخليل</p>
             </div>
-            <h3 style="font-size: 1.5rem; margin-bottom: 4px">{{ vendor.user.get_full_name }}</h3>
-            <p style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600; margin-bottom: 32px">تاجر معتمد لدى بلدية الخليل</p>
 
-            <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 40px">
-                <div style="padding: 16px; background: #F8FAFC; border-radius: 16px; text-align: right">
-                    <label style="font-size: 0.72rem; color: var(--text-muted); font-weight: 800; display: block; margin-bottom: 4px">رقم القيد الوطني (ID)</label>
-                    <span style="font-weight: 800; font-family: 'Inter', sans-serif; font-size: 1.1rem">{{ vendor.national_id }}</span>
+            <div class="dossier-meta-block">
+                <div>
+                    <span class="meta-label">رقم القيد الوطني</span>
+                    <span class="meta-value">{{ vendor.national_id }}</span>
                 </div>
-                <div style="padding: 16px; background: #F8FAFC; border-radius: 16px; text-align: right">
-                    <label style="font-size: 0.72rem; color: var(--text-muted); font-weight: 800; display: block; margin-bottom: 4px">تاريخ الانضمام للنظام</label>
-                    <span style="font-weight: 800; font-size: 1.1rem">{{ vendor.created_at|date:"Y/m/d" }}</span>
+                <i class="ri-fingerprint-line" style="font-size: 2rem; color: var(--sand-gold)"></i>
+            </div>
+            
+            <div class="dossier-meta-block">
+                <div>
+                    <span class="meta-label">تاريخ الانضمام للنظام</span>
+                    <span class="meta-value">{{ vendor.created_at|date:"Y/m/d" }}</span>
                 </div>
+                <i class="ri-calendar-event-line" style="font-size: 2rem; color: var(--ink-muted); opacity: 0.5"></i>
             </div>
 
-            <div style="display: flex; flex-direction: column; gap: 16px">
-                <button class="btn btn-primary" style="width: 100%; padding: 16px">تحديث بيانات الملف</button>
-                <button class="btn btn-white" style="width: 100%; color: var(--danger); border-color: #FEE2E2">إلغاء تفعيل حساب التاجر</button>
+            <div class="dossier-meta-block" style="background: var(--paper-base); display: block">
+                <span class="meta-label">حالة الالتزام المالي</span>
+                <div style="font-size: 1.5rem; font-weight: 800; color: var(--success-bold); margin-top: 8px"><i class="ri-verified-badge-fill"></i> لا يوجد متأخرات</div>
             </div>
-        </div>
 
-        <div class="card" style="padding: 24px; margin-top: 24px; background: #0F172A; color: white; text-align: center">
-            <div style="font-size: 0.8rem; opacity: 0.7; margin-bottom: 12px">حالة الالتزام المالي</div>
-            <div style="font-size: 1.5rem; font-weight: 800; color: var(--success)">لا يوجد متأخرات</div>
+            <div style="padding: 32px 40px; display: flex; flex-direction: column; gap: 16px; background: var(--paper-surface)">
+                <button class="btn btn-primary" style="width: 100%; padding: 18px">تحديث بيانات الملف</button>
+                <button class="btn btn-white" style="width: 100%; color: var(--danger-bold); border-color: var(--danger-bold)">إلغاء تفعيل حساب التاجر</button>
+            </div>
         </div>
     </aside>
 
     <!-- Content Area -->
-    <div class="vendor-activity">
-        <div class="card" style="padding: 0; margin-bottom: 32px">
-            <div style="padding: 32px; border-bottom: 1px solid var(--border-light)">
-                <h4 style="font-size: 1.3rem">البسطات والأنشطة التجارية النشطة</h4>
+    <div class="vendor-activity reveal-up delay-1">
+        <div class="card" style="padding: 0; margin-bottom: 48px; border: 2px solid var(--civic-green); border-radius: 0; box-shadow: 8px 8px 0 rgba(11,56,42,0.1)">
+            <div style="padding: 40px; border-bottom: 2px solid var(--civic-green); background: var(--paper-base)">
+                <h4 style="font-family: 'Alexandria'; font-size: 1.5rem; color: var(--civic-green)">البسطات والأصول التجارية النشطة</h4>
             </div>
             
-            <div style="padding: 32px">
-                <div style="display: grid; gap: 20px">
+            <div style="padding: 40px; background: var(--paper-surface)">
+                <div style="display: flex; flex-direction: column; gap: 24px">
                     {% for stall in vendor.user.stalls.all %}
-                    <div style="padding: 24px; background: white; border: 2px solid var(--bg-base); border-radius: 20px; display: flex; justify-content: space-between; align-items: center; transition: var(--transition)" onmouseover="this.style.borderColor='var(--brand-primary)'" onmouseout="this.style.borderColor='var(--bg-base)'">
-                        <div style="display: flex; align-items: center; gap: 20px">
-                            <div style="width: 52px; height: 52px; background: rgba(79, 70, 229, 0.05); border-radius: 14px; display: grid; place-items: center; color: var(--brand-primary)">
-                                <i class="ri-store-3-line" style="font-size: 1.6rem"></i>
+                    <div class="activity-card">
+                        <div style="display: flex; align-items: center; gap: 24px">
+                            <div style="width: 64px; height: 64px; background: var(--civic-green); color: var(--sand-gold); display: grid; place-items: center; border-radius: 0">
+                                <i class="ri-store-3-line" style="font-size: 2rem"></i>
                             </div>
                             <div>
-                                <div style="font-weight: 800; font-size: 1.1rem">{{ stall.category.name }}</div>
-                                <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600">الموقع: {{ stall.location.name|default:"بانتظار التعيين" }}</div>
+                                <div style="font-family: 'Alexandria'; font-weight: 800; font-size: 1.25rem; color: var(--civic-green)">{{ stall.category.name }}</div>
+                                <div style="font-size: 0.9rem; color: var(--ink-muted); font-weight: 600; font-family: 'IBM Plex Sans Arabic'; margin-top: 4px"><i class="ri-map-pin-2-fill"></i> الإحداثية: {{ stall.location.name|default:"بانتظار التعيين الرسمي" }}</div>
                             </div>
                         </div>
-                        <div style="display: flex; align-items: center; gap: 24px">
+                        <div style="display: flex; align-items: center; gap: 32px">
                             {% if stall.status == 'active' or stall.status == 'approved' %}
-                            <span class="badge badge-success">نشط</span>
+                            <span class="badge badge-success" style="font-size: 0.8rem; padding: 8px 16px">نشط نظامياً</span>
                             {% else %}
-                            <span class="badge badge-warning">قيد المراجعة</span>
+                            <span class="badge badge-warning" style="font-size: 0.8rem; padding: 8px 16px">قيد المراجعة</span>
                             {% endif %}
-                            <a href="{% url 'municipality_portal:stall_detail' stall.pk %}" class="btn btn-white" style="padding: 8px"><i class="ri-arrow-left-s-line"></i></a>
+                            <a href="{% url 'municipality_portal:stall_detail' stall.pk %}" class="btn btn-white" style="padding: 12px; border-radius: 0"><i class="ri-arrow-left-s-line" style="font-size: 1.2rem"></i></a>
                         </div>
                     </div>
                     {% empty %}
-                    <div style="text-align: center; padding: 48px; color: var(--text-muted)">
-                        <i class="ri-history-line" style="font-size: 3rem; display: block; margin-bottom: 16px; opacity: 0.1"></i>
-                        <p>لا يوجد سجل أنشطة نشطة لهذا التاجر حالياً.</p>
+                    <div style="text-align: center; padding: 64px; border: 2px dashed var(--border-classic); background: var(--paper-base)">
+                        <i class="ri-folder-reduce-line" style="font-size: 3rem; display: block; margin-bottom: 24px; color: var(--ink-muted); opacity: 0.3"></i>
+                        <h5 style="font-family: 'Alexandria'; font-size: 1.2rem; color: var(--civic-green); margin-bottom: 8px">الملف فارغ</h5>
+                        <p style="color: var(--ink-muted)">لا يوجد سجل أنشطة أو أصول تجارية نشطة معتمدة لهذا التاجر حالياً.</p>
                     </div>
                     {% endfor %}
                 </div>
             </div>
         </div>
 
-        <div class="card" style="padding: 32px">
-            <h4 style="font-size: 1.3rem; margin-bottom: 24px">سجل المخالفات والتقييم الميداني</h4>
-            <div style="padding: 64px; text-align: center; background: #F8FAFC; border-radius: 20px; border: 2px dashed var(--border-light)">
-                <i class="ri-shield-check-line" style="font-size: 3rem; display: block; margin-bottom: 16px; color: var(--success); opacity: 0.5"></i>
-                <p style="font-weight: 700; color: var(--text-muted)">السجل نظيف تماماً</p>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 8px">لم يتم تسجيل أي مخالفات بحق هذا التاجر منذ انضمامه للنظام.</p>
+        <div class="card reveal-up delay-2" style="padding: 40px; border: 2px solid var(--civic-green); border-radius: 0; box-shadow: 8px 8px 0 rgba(11,56,42,0.1)">
+            <h4 style="font-family: 'Alexandria'; font-size: 1.5rem; color: var(--civic-green); margin-bottom: 32px">سجل المخالفات الميدانية والصلاحية</h4>
+            <div style="padding: 64px; text-align: center; background: var(--paper-base); border: 1px solid var(--border-classic)">
+                <i class="ri-shield-check-fill" style="font-size: 4rem; display: block; margin-bottom: 24px; color: var(--success-bold)"></i>
+                <p style="font-family: 'Alexandria'; font-size: 1.5rem; font-weight: 800; color: var(--civic-green)">السجل نظيف تماماً</p>
+                <p style="font-size: 1rem; color: var(--ink-muted); margin-top: 12px; max-width: 400px; margin-inline: auto">تظهر بيانات الرقابة الميدانية التزام الشريك التام بالأنظمة والتعليمات الإدارية منذ انضمامه للنظام.</p>
             </div>
         </div>
     </div>

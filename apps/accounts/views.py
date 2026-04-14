@@ -100,6 +100,12 @@ def demo_login(request, role):
             user=user,
             defaults={'badge_number': 'OFC-001'},
         )
+    elif role == CustomUser.ROLE_VENDOR:
+        from apps.accounts.models import VendorProfile
+        VendorProfile.objects.get_or_create(
+            user=user,
+            defaults={'national_id': '999999999'},
+        )
 
     login(request, user, backend='django.contrib.auth.backends.ModelBackend')
     return _redirect_by_role(user)

@@ -19,6 +19,8 @@ def _vendor_required(view_func):
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated or request.user.role != CustomUser.ROLE_VENDOR:
             return redirect('accounts:login')
+        if not hasattr(request.user, 'vendor_profile'):
+            return redirect('accounts:login') # Safety check if profile is missing
         return view_func(request, *args, **kwargs)
     return wrapper
 
