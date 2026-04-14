@@ -1,0 +1,480 @@
+{% extends "officer_portal/base.html" %}
+
+{% block title %}مسح رمز QR{% endblock %}
+{% block nav_scan %}active{% endblock %}
+
+{% block extra_styles %}
+/* Scan page overrides — camera takes full space */
+.content-area {
+    padding: 0 !important;
+    display: flex;
+    flex-direction: column;
+}
+
+.scanner-section {
+    position: relative;
+    flex: 1;
+    background: #0a0a0a;
+    overflow: hidden;
+    min-height: 0;
+}
+
+#qr-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 0;
+    transition: opacity 0.6s;
+}
+
+#qr-video.ready { opacity: 1; }
+
+/* Scan overlay */
+.scan-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+/* Dark vignette around scan frame */
+.scan-vignette {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, transparent 30%),
+        linear-gradient(to top,    rgba(0,0,0,0.55) 0%, transparent 30%),
+        linear-gradient(to right,  rgba(0,0,0,0.4)  0%, transparent 25%),
+        linear-gradient(to left,   rgba(0,0,0,0.4)  0%, transparent 25%);
+}
+
+/* The four-corner frame */
+.scan-frame {
+    position: relative;
+    width: 220px;
+    height: 220px;
+}
+
+.scan-frame::before,
+.scan-frame::after,
+.corner-br, .corner-bl {
+    content: '';
+    position: absolute;
+    width: 28px; height: 28px;
+    border-color: white;
+    border-style: solid;
+}
+
+/* Top-right (RTL: top-start) */
+.scan-frame::before {
+    top: 0; right: 0;
+    border-width: 3px 3px 0 0;
+    border-radius: 0 6px 0 0;
+}
+
+/* Top-left (RTL: top-end) */
+.scan-frame::after {
+    top: 0; left: 0;
+    border-width: 3px 0 0 3px;
+    border-radius: 6px 0 0 0;
+}
+
+.corner-br {
+    bottom: 0; right: 0;
+    border-width: 0 3px 3px 0;
+    border-radius: 0 0 6px 0;
+}
+
+.corner-bl {
+    bottom: 0; left: 0;
+    border-width: 0 0 3px 3px;
+    border-radius: 0 0 0 6px;
+}
+
+/* Animated scan line */
+.scan-line {
+    position: absolute;
+    left: 4px; right: 4px;
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--success) 30%, var(--success) 70%, transparent);
+    box-shadow: 0 0 8px rgba(16,185,129,0.8);
+    border-radius: 2px;
+    animation: scanMove 2s ease-in-out infinite;
+    top: 4px;
+}
+
+@keyframes scanMove {
+    0%   { top: 4px; opacity: 1; }
+    50%  { top: calc(100% - 6px); opacity: 1; }
+    100% { top: 4px; opacity: 1; }
+}
+
+/* Paused state when QR detected */
+.scan-frame.detected .scan-line {
+    animation-play-state: paused;
+    background: linear-gradient(to right, transparent, #10B981 30%, #10B981 70%, transparent);
+}
+
+.scan-frame.detected::before,
+.scan-frame.detected::after,
+.scan-frame.detected .corner-br,
+.scan-frame.detected .corner-bl {
+    border-color: var(--success);
+}
+
+/* Instruction text */
+.scan-hint {
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 24px;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+    text-align: center;
+    padding: 0 16px;
+}
+
+/* Status indicator */
+.scan-status {
+    position: absolute;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: white;
+    padding: 7px 16px;
+    border-radius: var(--radius-pill);
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background 0.3s;
+}
+
+.scan-status.detecting {
+    background: rgba(16,185,129,0.4);
+    border-color: rgba(16,185,129,0.5);
+}
+
+.status-dot-anim {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.7);
+    animation: blink 1.2s ease-in-out infinite;
+}
+
+.scan-status.detecting .status-dot-anim {
+    background: var(--success);
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.3; }
+}
+
+/* Bottom panel (manual entry) */
+.scan-bottom-panel {
+    background: var(--surface);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    padding: 20px 20px 8px;
+    box-shadow: var(--shadow-sheet);
+    flex-shrink: 0;
+}
+
+.manual-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    padding: 4px 0;
+}
+
+.manual-toggle h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-main);
+}
+
+.manual-toggle h3 i {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+}
+
+.toggle-arrow {
+    color: var(--text-muted);
+    font-size: 1.2rem;
+    transition: transform 0.3s var(--ease-out);
+}
+
+.toggle-arrow.open { transform: rotate(180deg); }
+
+.manual-entry-form {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.35s var(--ease-out), opacity 0.3s;
+    opacity: 0;
+}
+
+.manual-entry-form.open {
+    max-height: 140px;
+    opacity: 1;
+}
+
+.manual-input-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+    padding-bottom: 4px;
+}
+
+.manual-input-row .form-control {
+    flex: 1;
+    direction: ltr;
+    text-align: left;
+    font-size: 0.85rem;
+    padding: 11px 12px;
+}
+
+.manual-go-btn {
+    padding: 11px 18px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.2s var(--spring), background 0.2s;
+}
+
+.manual-go-btn:hover  { background: var(--accent-hover); }
+.manual-go-btn:active { transform: scale(0.95); }
+
+/* Permission denied state */
+.camera-denied {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 32px 24px;
+    color: white;
+    gap: 12px;
+}
+
+.camera-denied i { font-size: 3rem; opacity: 0.5; }
+.camera-denied h3 { font-size: 1rem; }
+.camera-denied p  { font-size: 0.82rem; opacity: 0.6; }
+
+.camera-denied.visible { display: flex; }
+{% endblock %}
+
+{% block content %}
+<!-- Camera viewport -->
+<div class="scanner-section">
+    <video id="qr-video" playsinline autoplay muted></video>
+
+    <!-- QR not-available fallback -->
+    <div class="camera-denied" id="camera-denied">
+        <i class="ri-camera-off-line"></i>
+        <h3>لا يمكن الوصول للكاميرا</h3>
+        <p>استخدم حقل الإدخال اليدوي أدناه</p>
+    </div>
+
+    <div class="scan-overlay" id="scan-overlay">
+        <div class="scan-vignette"></div>
+
+        <!-- Status pill -->
+        <div class="scan-status" id="scan-status">
+            <div class="status-dot-anim"></div>
+            <span id="scan-status-text">جارٍ البحث عن رمز QR…</span>
+        </div>
+
+        <!-- Corner frame -->
+        <div class="scan-frame" id="scan-frame">
+            <div class="scan-line"></div>
+            <div class="corner-br"></div>
+            <div class="corner-bl"></div>
+        </div>
+
+        <p class="scan-hint">ضع رمز QR الخاص بالكشك داخل الإطار</p>
+    </div>
+</div>
+
+<!-- Bottom panel -->
+<div class="scan-bottom-panel">
+    <div class="manual-toggle" id="manual-toggle" onclick="toggleManual()">
+        <h3>
+            <i class="ri-keyboard-line"></i>
+            إدخال الرمز يدوياً
+        </h3>
+        <i class="ri-arrow-down-s-line toggle-arrow" id="toggle-arrow"></i>
+    </div>
+
+    <div class="manual-entry-form" id="manual-form">
+        <div class="manual-input-row">
+            <input
+                type="text"
+                id="manual-token"
+                class="form-control"
+                placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                maxlength="36"
+                pattern="[0-9a-fA-F\-]+"
+            >
+            <button class="manual-go-btn" onclick="manualVerify()">تحقق</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script>
+(function () {
+    'use strict';
+
+    const video      = document.getElementById('qr-video');
+    const statusEl   = document.getElementById('scan-status');
+    const statusText = document.getElementById('scan-status-text');
+    const frame      = document.getElementById('scan-frame');
+    const denied     = document.getElementById('camera-denied');
+    const overlay    = document.getElementById('scan-overlay');
+
+    let scanning    = true;
+    let stream      = null;
+    let raf         = null;
+    const canvas    = document.createElement('canvas');
+    const ctx       = canvas.getContext('2d');
+
+    /* UUID regex ─ matches any 8-4-4-4-12 group */
+    const UUID_RE = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+
+    function handleQR(rawData) {
+        if (!scanning) return;
+        scanning = false;
+        cancelAnimationFrame(raf);
+
+        /* Try to extract UUID from raw data */
+        const match = rawData.match(UUID_RE);
+        if (match) {
+            const token = match[0];
+            frame.classList.add('detected');
+            statusEl.classList.add('detecting');
+            statusText.textContent = 'تم اكتشاف الكشك! جارٍ التحقق…';
+
+            /* Short visual feedback, then navigate */
+            setTimeout(() => {
+                if (stream) stream.getTracks().forEach(t => t.stop());
+                window.location.href = '/officer/verify/' + token + '/';
+            }, 600);
+        } else {
+            /* QR found but not a valid stall token */
+            statusText.textContent = 'رمز QR غير صالح، حاول مجدداً';
+            setTimeout(() => {
+                scanning = true;
+                statusText.textContent = 'جارٍ البحث عن رمز QR…';
+                raf = requestAnimationFrame(tick);
+            }, 1500);
+        }
+    }
+
+    function tick() {
+        if (!scanning) return;
+        if (video.readyState >= video.HAVE_ENOUGH_DATA) {
+            canvas.width  = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code    = jsQR(imgData.data, imgData.width, imgData.height, {
+                inversionAttempts: 'dontInvert'
+            });
+            if (code) handleQR(code.data);
+        }
+        raf = requestAnimationFrame(tick);
+    }
+
+    async function startCamera() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: {
+                    facingMode:  { ideal: 'environment' },
+                    width:  { ideal: 1280 },
+                    height: { ideal: 720 }
+                }
+            });
+            video.srcObject = stream;
+            video.addEventListener('canplay', () => {
+                video.classList.add('ready');
+                raf = requestAnimationFrame(tick);
+            }, { once: true });
+        } catch (err) {
+            video.style.display  = 'none';
+            overlay.style.display = 'none';
+            denied.classList.add('visible');
+            /* Auto-open manual entry on camera failure */
+            toggleManual(true);
+        }
+    }
+
+    /* Stop camera when page hidden (battery / privacy) */
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            if (stream) stream.getTracks().forEach(t => t.stop());
+            cancelAnimationFrame(raf);
+        } else {
+            startCamera();
+        }
+    });
+
+    startCamera();
+
+    /* Manual entry */
+    window.toggleManual = function (forceOpen) {
+        const form  = document.getElementById('manual-form');
+        const arrow = document.getElementById('toggle-arrow');
+        const isOpen = form.classList.contains('open');
+
+        if (forceOpen !== undefined) {
+            if (forceOpen && !isOpen)  { form.classList.add('open');    arrow.classList.add('open');    }
+            if (!forceOpen && isOpen)  { form.classList.remove('open'); arrow.classList.remove('open'); }
+        } else {
+            form.classList.toggle('open');
+            arrow.classList.toggle('open');
+        }
+    };
+
+    window.manualVerify = function () {
+        const input = document.getElementById('manual-token');
+        const raw   = input.value.trim();
+        if (!raw) { input.focus(); return; }
+
+        /* Accept full URL or just the UUID */
+        const match = raw.match(UUID_RE) || (raw.length === 36 ? [raw] : null);
+        if (!match) {
+            input.style.borderColor = 'var(--danger)';
+            input.placeholder = 'صيغة غير صحيحة — مثال: xxxxxxxx-xxxx-…';
+            setTimeout(() => { input.style.borderColor = ''; }, 2000);
+            return;
+        }
+        window.location.href = '/officer/verify/' + match[0] + '/';
+    };
+
+    /* Allow pressing Enter in manual input */
+    document.getElementById('manual-token').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') window.manualVerify();
+    });
+})();
+</script>
+{% endblock %}

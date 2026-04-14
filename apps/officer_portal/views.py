@@ -126,7 +126,7 @@ def verify_stall(request, token):
 @_officer_required
 def inspection_detail(request, pk):
     inspection = get_object_or_404(Inspection, pk=pk, officer=request.user)
-    violation_form = ViolationForm(request.POST or None)
+    violation_form = ViolationForm(request.POST or None, request.FILES or None)
     if request.method == 'POST' and violation_form.is_valid():
         v = violation_form.save(commit=False)
         v.inspection = inspection

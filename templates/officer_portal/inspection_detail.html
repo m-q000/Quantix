@@ -1,0 +1,618 @@
+{% extends "officer_portal/base.html" %}
+
+{% block title %}تفتيش #{{ inspection.pk }}{% endblock %}
+{% block nav_inspections %}active{% endblock %}
+{% block nav_inspections_icon %}fill{% endblock %}
+
+{% block extra_styles %}
+
+.back-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+}
+
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-pill);
+    padding: 7px 14px;
+    transition: color 0.2s, background 0.2s;
+}
+.back-btn:hover { color: var(--text-main); background: var(--surface-hover); }
+
+/* Result hero banner */
+.result-banner {
+    border-radius: var(--radius-xl);
+    padding: 24px 20px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    animation: slideUp 0.35s var(--ease-out) both;
+    position: relative;
+    overflow: hidden;
+}
+
+.result-banner::after {
+    content: '';
+    position: absolute;
+    bottom: -24px; left: -24px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.07);
+    pointer-events: none;
+}
+
+.result-banner.ok        { background: var(--success); }
+.result-banner.warning   { background: var(--warning); }
+.result-banner.violation { background: var(--danger); }
+
+.banner-icon {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    display: grid;
+    place-items: center;
+    font-size: 1.5rem;
+    color: white;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+}
+
+.banner-text {
+    position: relative;
+    z-index: 1;
+}
+
+.banner-text h3 {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: white;
+}
+
+.banner-text .banner-sub {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.7);
+    margin-top: 3px;
+}
+
+/* Inspection metadata card */
+.meta-card {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-card);
+    margin-bottom: 14px;
+    animation: slideUp 0.35s var(--ease-out) 0.05s both;
+}
+
+.meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+}
+
+.meta-item {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.meta-item:nth-child(odd)  { padding-left: 0;  padding-right: 0; border-left: none; }
+.meta-item:nth-child(even) { padding-right: 16px; border-right: 1px solid var(--glass-border); }
+
+.meta-item:nth-last-child(-n+2) { border-bottom: none; }
+
+.meta-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+}
+
+.meta-value {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* Flags strip */
+.flags-card {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-card);
+    margin-bottom: 14px;
+    animation: slideUp 0.35s var(--ease-out) 0.08s both;
+}
+
+.flags-card .card-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 14px;
+}
+
+.flags-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.flag-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.flag-chip.pass {
+    background: rgba(16,185,129,0.08);
+    border: 1px solid rgba(16,185,129,0.15);
+    color: var(--success);
+}
+
+.flag-chip.fail {
+    background: rgba(239,68,68,0.07);
+    border: 1px solid rgba(239,68,68,0.12);
+    color: var(--danger);
+}
+
+.flag-chip i { font-size: 1rem; }
+
+/* Notes card */
+.notes-card {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-card);
+    margin-bottom: 14px;
+    animation: slideUp 0.35s var(--ease-out) 0.10s both;
+}
+
+.notes-card .card-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+}
+
+.notes-text {
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--text-main);
+}
+
+.notes-empty {
+    font-size: 0.88rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+/* Violations section */
+.violations-card {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-card);
+    margin-bottom: 14px;
+    animation: slideUp 0.35s var(--ease-out) 0.12s both;
+}
+
+.violations-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.violations-header h3 {
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.viol-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px; height: 22px;
+    background: var(--danger);
+    color: white;
+    border-radius: var(--radius-pill);
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0 6px;
+}
+
+.viol-count.zero {
+    background: var(--surface-hover);
+    color: var(--text-muted);
+}
+
+/* Violation item */
+.viol-item {
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    margin-bottom: 10px;
+    background: var(--surface-hover);
+}
+
+.viol-item:last-child { margin-bottom: 0; }
+
+.viol-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.viol-type {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.viol-type i { color: var(--danger); }
+
+.action-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.action-warning   { background: rgba(245,158,11,0.1); color: var(--warning); }
+.action-fine      { background: rgba(239,68,68,0.1);  color: var(--danger); }
+.action-suspension{ background: rgba(16,16,16,0.08);  color: var(--accent); }
+
+.viol-desc {
+    font-size: 0.84rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.viol-evidence {
+    margin-top: 10px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    max-height: 180px;
+}
+
+.viol-evidence img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Add violation form */
+.add-viol-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px;
+    background: rgba(239,68,68,0.07);
+    color: var(--danger);
+    border: 1px dashed rgba(239,68,68,0.25);
+    border-radius: var(--radius-md);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 12px;
+}
+.add-viol-toggle:hover { background: rgba(239,68,68,0.12); }
+
+.add-viol-form {
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height 0.4s var(--ease-out), opacity 0.3s;
+    opacity: 0;
+}
+
+.add-viol-form.open {
+    max-height: 700px;
+    opacity: 1;
+}
+
+.form-divider {
+    height: 1px;
+    background: var(--glass-border);
+    margin: 16px 0;
+}
+{% endblock %}
+
+{% block content %}
+<!-- Back button -->
+<div class="back-row">
+    <a href="{% url 'officer_portal:inspections' %}" class="back-btn">
+        <i class="ri-arrow-right-s-line"></i>
+        كل التفتيشات
+    </a>
+</div>
+
+<!-- Result banner -->
+<div class="result-banner {{ inspection.result }}">
+    <div class="banner-icon">
+        {% if inspection.result == 'ok' %}
+            <i class="ri-checkbox-circle-line"></i>
+        {% elif inspection.result == 'warning' %}
+            <i class="ri-error-warning-line"></i>
+        {% else %}
+            <i class="ri-close-circle-line"></i>
+        {% endif %}
+    </div>
+    <div class="banner-text">
+        <h3>
+            {% if inspection.result == 'ok' %}مطابق
+            {% elif inspection.result == 'warning' %}تحذير
+            {% else %}مخالفة
+            {% endif %}
+        </h3>
+        <div class="banner-sub">تفتيش #{{ inspection.pk }} · {{ inspection.timestamp|date:"j F Y، H:i" }}</div>
+    </div>
+</div>
+
+<!-- Metadata -->
+<div class="meta-card">
+    <div class="meta-grid">
+        <div class="meta-item">
+            <div class="meta-label">الكشك</div>
+            <div class="meta-value">{{ inspection.stall.owner.user.get_full_name|default:"غير معروف" }}</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">الفئة</div>
+            <div class="meta-value">
+                {% if inspection.stall.category %}{{ inspection.stall.category.name }}{% else %}—{% endif %}
+            </div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">الموقع</div>
+            <div class="meta-value">
+                {% if inspection.stall.location %}{{ inspection.stall.location.name }}{% else %}—{% endif %}
+            </div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">وقت التفتيش</div>
+            <div class="meta-value">{{ inspection.timestamp|date:"H:i" }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- Validation flags -->
+<div class="flags-card">
+    <div class="card-title">نتائج الفحص التلقائي</div>
+    <div class="flags-grid">
+        <div class="flag-chip {% if inspection.valid_time %}pass{% else %}fail{% endif %}">
+            <i class="ri-{% if inspection.valid_time %}checkbox-circle{% else %}close-circle{% endif %}-line"></i>
+            <span>التوقيت</span>
+        </div>
+        <div class="flag-chip {% if inspection.valid_activity %}pass{% else %}fail{% endif %}">
+            <i class="ri-{% if inspection.valid_activity %}checkbox-circle{% else %}close-circle{% endif %}-line"></i>
+            <span>النشاط</span>
+        </div>
+        <div class="flag-chip {% if inspection.valid_subscription %}pass{% else %}fail{% endif %}">
+            <i class="ri-{% if inspection.valid_subscription %}checkbox-circle{% else %}close-circle{% endif %}-line"></i>
+            <span>الاشتراك</span>
+        </div>
+        <div class="flag-chip {% if inspection.valid_location %}pass{% else %}fail{% endif %}">
+            <i class="ri-{% if inspection.valid_location %}checkbox-circle{% else %}close-circle{% endif %}-line"></i>
+            <span>الموقع</span>
+        </div>
+    </div>
+</div>
+
+<!-- Notes -->
+{% if inspection.notes %}
+<div class="notes-card">
+    <div class="card-title">الملاحظات</div>
+    <p class="notes-text">{{ inspection.notes }}</p>
+</div>
+{% endif %}
+
+<!-- Violations -->
+<div class="violations-card">
+    <div class="violations-header">
+        <h3>المخالفات المسجلة</h3>
+        <span class="viol-count {% if not inspection.violations.count %}zero{% endif %}">
+            {{ inspection.violations.count }}
+        </span>
+    </div>
+
+    {% for v in inspection.violations.all %}
+    <div class="viol-item">
+        <div class="viol-top">
+            <div class="viol-type">
+                {% if v.violation_type == 'out_of_location' %}
+                    <i class="ri-map-pin-user-line"></i> خارج الموقع المحدد
+                {% elif v.violation_type == 'out_of_time' %}
+                    <i class="ri-time-line"></i> خارج أوقات العمل
+                {% elif v.violation_type == 'wrong_activity' %}
+                    <i class="ri-store-line"></i> نشاط غير مسموح
+                {% elif v.violation_type == 'no_qr' %}
+                    <i class="ri-qr-code-line"></i> غياب رمز QR
+                {% elif v.violation_type == 'expired_subscription' %}
+                    <i class="ri-calendar-close-line"></i> اشتراك منتهٍ
+                {% else %}
+                    <i class="ri-error-warning-line"></i> {{ v.get_violation_type_display }}
+                {% endif %}
+            </div>
+            <span class="action-badge action-{{ v.action }}">
+                {% if v.action == 'warning' %}⚠ تحذير
+                {% elif v.action == 'fine' %}💰 غرامة
+                {% else %}🚫 إيقاف
+                {% endif %}
+            </span>
+        </div>
+        {% if v.description %}
+        <p class="viol-desc">{{ v.description }}</p>
+        {% endif %}
+        {% if v.evidence_image %}
+        <div class="viol-evidence">
+            <img src="{{ v.evidence_image.url }}" alt="صورة الدليل" loading="lazy">
+        </div>
+        {% endif %}
+    </div>
+    {% empty %}
+    <div style="text-align:center;padding:20px 0;color:var(--text-muted);font-size:0.88rem;">
+        لا توجد مخالفات مسجلة
+    </div>
+    {% endfor %}
+
+    <!-- Add violation button -->
+    <button type="button" class="add-viol-toggle" id="viol-toggle-btn" onclick="toggleViolForm()">
+        <i class="ri-add-circle-line"></i>
+        إضافة مخالفة
+    </button>
+
+    <!-- Add violation form -->
+    <div class="add-viol-form" id="add-viol-form">
+        <div class="form-divider"></div>
+
+        <form method="post" enctype="multipart/form-data" id="violation-form">
+            {% csrf_token %}
+
+            {% if violation_form.non_field_errors %}
+            <div class="form-errors-banner">{{ violation_form.non_field_errors|join:", " }}</div>
+            {% endif %}
+
+            <div class="form-group">
+                <label class="form-label">نوع المخالفة <span style="color:var(--danger)">*</span></label>
+                <select name="{{ violation_form.violation_type.html_name }}"
+                        class="form-control"
+                        id="{{ violation_form.violation_type.id_for_label }}">
+                    <option value="">— اختر النوع —</option>
+                    {% for val, lbl in violation_form.fields.violation_type.choices %}
+                    {% if val %}
+                    <option value="{{ val }}"
+                        {% if violation_form.violation_type.value == val %}selected{% endif %}>
+                        {% if val == 'out_of_location' %}خارج الموقع المحدد
+                        {% elif val == 'out_of_time' %}خارج أوقات العمل
+                        {% elif val == 'wrong_activity' %}نشاط غير مسموح
+                        {% elif val == 'no_qr' %}غياب رمز QR
+                        {% elif val == 'expired_subscription' %}اشتراك منتهٍ
+                        {% else %}{{ lbl }}{% endif %}
+                    </option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+                {% if violation_form.violation_type.errors %}
+                <div class="field-error">{{ violation_form.violation_type.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">الإجراء <span style="color:var(--danger)">*</span></label>
+                <select name="{{ violation_form.action.html_name }}"
+                        class="form-control"
+                        id="{{ violation_form.action.id_for_label }}">
+                    <option value="">— اختر الإجراء —</option>
+                    {% for val, lbl in violation_form.fields.action.choices %}
+                    {% if val %}
+                    <option value="{{ val }}"
+                        {% if violation_form.action.value == val %}selected{% endif %}>
+                        {% if val == 'warning' %}تحذير
+                        {% elif val == 'fine' %}غرامة مالية
+                        {% elif val == 'suspension' %}إيقاف الكشك
+                        {% else %}{{ lbl }}{% endif %}
+                    </option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+                {% if violation_form.action.errors %}
+                <div class="field-error">{{ violation_form.action.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">وصف المخالفة <span style="color:var(--danger)">*</span></label>
+                <textarea
+                    name="{{ violation_form.description.html_name }}"
+                    id="{{ violation_form.description.id_for_label }}"
+                    class="form-control"
+                    placeholder="اكتب وصفاً تفصيلياً للمخالفة…"
+                    rows="3">{{ violation_form.description.value|default:'' }}</textarea>
+                {% if violation_form.description.errors %}
+                <div class="field-error">{{ violation_form.description.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">صورة الدليل (اختياري)</label>
+                <input
+                    type="file"
+                    name="{{ violation_form.evidence_image.html_name }}"
+                    id="{{ violation_form.evidence_image.id_for_label }}"
+                    class="form-control"
+                    accept="image/*"
+                    capture="environment"
+                    style="padding: 10px 14px; font-size: 0.84rem;"
+                >
+                {% if violation_form.evidence_image.errors %}
+                <div class="field-error">{{ violation_form.evidence_image.errors|join:", " }}</div>
+                {% endif %}
+            </div>
+
+            <button type="submit" class="btn-danger" style="background:var(--danger);color:white;border:none;">
+                <i class="ri-save-line"></i>
+                تسجيل المخالفة
+            </button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+window.toggleViolForm = function () {
+    const form = document.getElementById('add-viol-form');
+    const btn  = document.getElementById('viol-toggle-btn');
+    const open = form.classList.toggle('open');
+    btn.innerHTML = open
+        ? '<i class="ri-close-line"></i> إلغاء'
+        : '<i class="ri-add-circle-line"></i> إضافة مخالفة';
+    if (open) {
+        /* Scroll to form */
+        setTimeout(() => form.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+    }
+};
+
+/* Auto-open if form has validation errors */
+{% if violation_form.errors %}
+window.addEventListener('load', function () {
+    window.toggleViolForm();
+});
+{% endif %}
+</script>
+{% endblock %}
