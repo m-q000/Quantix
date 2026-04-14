@@ -1,55 +1,86 @@
 {% extends 'municipality_portal/base.html' %}
 
-{% block page_title %}إدارة فريق المفتشين القيدانيين{% endblock %}
+{% block page_title %}إدارة فريق الرقابة والمفتشين الميدانيين{% endblock %}
 
 {% block content %}
-<div style="margin-bottom: 24px; display: flex; justify-content: flex-end">
+<div class="section-title">
+    <div>
+        <h3 style="font-size: 1.15rem; color: var(--text-muted)">قائمة الفريق الحالي</h3>
+        <p style="font-size: 0.9rem; color: #64748B">إجمالي عدد المفتشين النشطين: {{ officers.count }}</p>
+    </div>
     <a href="{% url 'municipality_portal:officer_create' %}" class="btn btn-primary">
         <i class="ri-user-add-line"></i> إضافة مفتش جديد
     </a>
 </div>
 
-<div class="data-table-wrapper">
-    <table class="data-table desktop-only">
+<div class="table-container">
+    <table class="admin-table desktop-only">
         <thead>
             <tr>
-                <th>المفتش</th>
+                <th style="padding-right: 32px">اسم المفتش</th>
                 <th>رقم الشارة</th>
-                <th>رقم الهاتف</th>
-                <th>الحالة</th>
+                <th>رقم التواصل</th>
+                <th>الحالة التشغيلية</th>
                 <th>تاريخ التعيين</th>
+                <th>الإجراء</th>
             </tr>
         </thead>
         <tbody>
             {% for officer in officers %}
             <tr>
-                <td style="font-weight: 700">{{ officer.user.get_full_name }}</td>
-                <td><span style="font-family: monospace; font-weight: 800">{{ officer.badge_number }}</span></td>
-                <td>{{ officer.user.phone|default:"—" }}</td>
+                <td style="padding-right: 32px">
+                    <div style="display: flex; align-items: center; gap: 12px">
+                        <div style="width: 36px; height: 36px; background: #F1F5F9; border-radius: 50%; display: grid; place-items: center; color: var(--accent); font-weight: 800">
+                            {{ officer.user.first_name|first }}{{ officer.user.last_name|first }}
+                        </div>
+                        <div style="font-weight: 700">{{ officer.user.get_full_name }}</div>
+                    </div>
+                </td>
                 <td>
-                    <span class="badge {% if officer.is_active %}badge-success{% else %}badge-danger{% endif %}">
-                        {% if officer.is_active %}نشط{% else %}غير نشط{% endif %}
+                    <span style="font-family: monospace; font-weight: 800; color: var(--primary); background: rgba(37,99,235,0.05); padding: 4px 8px; border-radius: 4px">
+                        {{ officer.badge_number }}
                     </span>
                 </td>
-                <td style="color: var(--text-muted)">{{ officer.created_at|date:"Y-m-d" }}</td>
+                <td>{{ officer.user.phone|default:"—" }}</td>
+                <td>
+                    {% if officer.is_active %}
+                    <span class="status-pill pill-success">نشط ميدانياً</span>
+                    {% else %}
+                    <span class="status-pill pill-danger">متوقف</span>
+                    {% endif %}
+                </td>
+                <td style="color: var(--text-muted)">{{ officer.created_at|date:"Y/m/d" }}</td>
+                <td>
+                    <button class="btn btn-ghost" title="تعديل البيانات"><i class="ri-edit-line"></i></button>
+                </td>
             </tr>
             {% empty %}
-            <tr><td colspan="5" style="text-align: center; padding: 48px; color: var(--text-muted)">لم يتم تسجيل مفتشين بعد</td></tr>
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 64px; color: var(--text-muted)">
+                    <i class="ri-shield-user-line" style="font-size: 3rem; display: block; margin-bottom: 16px; opacity: 0.2"></i>
+                    لم يتم تسجيل أي مفتشين في النظام بعد.
+                </td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <div class="mobile-cards" style="padding: 16px">
+    <!-- Mobile View -->
+    <div class="mobile-only" style="padding: 16px">
         {% for officer in officers %}
-        <div class="card" style="padding: 16px; margin-bottom: 12px">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px">
-                <h4 style="margin: 0">{{ officer.user.get_full_name }}</h4>
-                <span class="badge {% if officer.is_active %}badge-success{% else %}badge-danger{% endif %}">
-                    {% if officer.is_active %}نشط{% else %}غير نشط{% endif %}
-                </span>
+        <div class="card" style="padding: 20px; margin-bottom: 12px">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px">
+                <div style="font-weight: 800">{{ officer.user.get_full_name }}</div>
+                {% if officer.is_active %}
+                <span class="status-pill pill-success">نشط</span>
+                {% else %}
+                <span class="status-pill pill-danger">متوقف</span>
+                {% endif %}
             </div>
-            <div style="font-size: 0.85rem; color: var(--text-muted)">رقم الشارة: {{ officer.badge_number }}</div>
-            <div style="font-size: 0.85rem; color: var(--text-muted)">الهاتف: {{ officer.user.phone|default:"—" }}</div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); display: grid; gap: 8px">
+                <div>رقم الشارة: <strong>{{ officer.badge_number }}</strong></div>
+                <div>الهاتف: {{ officer.user.phone|default:"—" }}</div>
+            </div>
         </div>
         {% endfor %}
     </div>

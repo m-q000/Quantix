@@ -1,108 +1,139 @@
 {% extends 'municipality_portal/base.html' %}
 
-{% block page_title %}مراجعة تفاصيل البسطة #{{ stall.pk }}{% endblock %}
+{% block page_title %}مراجعة تفاصيل طلب البسطة #{{ stall.pk }}{% endblock %}
 
 {% block content %}
 <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 32px; align-items: start;">
     
-    <!-- Main Info -->
+    <!-- Main Content Area -->
     <div>
-        <div class="card">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px">
-                <h3 style="font-size: 1.4rem">معلومات البسطة</h3>
-                <span class="badge 
-                    {% if stall.status == 'approved' or stall.status == 'active' %}badge-success
-                    {% elif stall.status == 'pending' %}badge-warning
-                    {% else %}badge-danger{% endif %}">
-                    {{ stall.get_status_display }}
-                </span>
+        <!-- Profile Card -->
+        <div class="card" style="padding: 40px">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px">
+                <div style="display: flex; align-items: center; gap: 20px">
+                    <div style="width: 64px; height: 64px; border-radius: 16px; background: #F1F5F9; display: grid; place-items: center; font-size: 1.5rem; color: var(--accent)">
+                        <i class="ri-store-2-line"></i>
+                    </div>
+                    <div>
+                        <h3 style="font-size: 1.5rem; margin-bottom: 4px">{{ stall.owner.user.get_full_name }}</h3>
+                        <div style="font-weight: 600; color: var(--text-muted)">تصنيف النشاط: <span style="color: var(--primary)">{{ stall.category.name }}</span></div>
+                    </div>
+                </div>
+                <div style="text-align: left">
+                    {% if stall.status == 'pending' %}
+                        <span class="status-pill pill-warning" style="font-size: 0.9rem; padding: 8px 20px">بانتظار المراجعة والتدقيق</span>
+                    {% elif stall.status == 'active' or stall.status == 'approved' %}
+                        <span class="status-pill pill-success" style="font-size: 0.9rem; padding: 8px 20px">بسطة معتمدة ونشطة</span>
+                    {% else %}
+                        <span class="status-pill pill-danger" style="font-size: 0.9rem; padding: 8px 20px">{{ stall.get_status_display }}</span>
+                    {% endif %}
+                </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px">
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; padding: 32px 0; border-top: 1px solid var(--base); border-bottom: 1px solid var(--base); margin-bottom: 32px">
                 <div>
-                    <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700">التاجر / المالك</label>
-                    <div style="font-weight: 800; font-size: 1.1rem">{{ stall.owner.user.get_full_name }}</div>
+                    <label style="font-size: 0.8rem; font-weight: 800; color: #64748B; display: block; margin-bottom: 6px; text-transform: uppercase">تاريخ التقديم</label>
+                    <span style="font-weight: 700; font-size: 1.1rem">{{ stall.created_at|date:"Y/m/d" }}</span>
                 </div>
                 <div>
-                    <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700">التصنيف</label>
-                    <div style="font-weight: 800; font-size: 1.1rem">{{ stall.category.name }}</div>
+                    <label style="font-size: 0.8rem; font-weight: 800; color: #64748B; display: block; margin-bottom: 6px; text-transform: uppercase">رقم الهوية / الوطنية</label>
+                    <span style="font-weight: 700; font-size: 1.1rem">{{ stall.owner.national_id }}</span>
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; font-weight: 800; color: #64748B; display: block; margin-bottom: 6px; text-transform: uppercase">رقم الجوال</label>
+                    <span style="font-weight: 700; font-size: 1.1rem">{{ stall.owner.user.phone|default:"غير متوفر" }}</span>
                 </div>
             </div>
 
-            <div style="margin-bottom: 32px">
-                <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700">وصف النشاط</label>
-                <p style="font-size: 1rem; line-height: 1.6; margin-top: 8px">{{ stall.description }}</p>
+            <div style="margin-bottom: 40px">
+                <h4 style="font-size: 1.1rem; margin-bottom: 12px">وصف النشاط التجاري</h4>
+                <p style="font-size: 1rem; line-height: 1.7; color: #475569; background: #F8FAFC; padding: 20px; border-radius: var(--radius-lg); border-right: 4px solid var(--primary)">
+                    {{ stall.description|default:"لا يوجد وصف تفصيلي متوفر حالياً لهذا الطلب." }}
+                </p>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px">
-                <div>
-                    <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700">تاريخ البدء</label>
-                    <div style="font-weight: 700">{{ stall.start_date|default:"لم يحدد" }}</div>
-                </div>
-                <div>
-                    <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700">تاريخ الانتهاء</label>
-                    <div style="font-weight: 700">{{ stall.end_date|default:"لم يحدد" }}</div>
+            {% if stall.images.exists %}
+            <div>
+                <h4 style="font-size: 1.1rem; margin-bottom: 20px">معرض الصور والمرفقات</h4>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px">
+                    {% for img in stall.images.all %}
+                    <div style="height: 180px; border-radius: var(--radius-lg); overflow: hidden; border: 1px solid var(--glass-border); box-shadow: var(--shadow-sm)">
+                        <img src="{{ img.image.url }}" style="width: 100%; height: 100%; object-fit: cover; transition: var(--transition)" onmouseover="this.style.scale='1.05'" onmouseout="this.style.scale='1'">
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
+            {% endif %}
         </div>
 
-        {% if stall.images.exists %}
-        <div class="card">
-            <h3 style="margin-bottom: 20px">صور البسطة والمعروضات</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px">
-                {% for img in stall.images.all %}
-                <div style="border-radius: var(--radius-lg); overflow: hidden; height: 150px; border: 1px solid var(--glass-border)">
-                    <img src="{{ img.image.url }}" style="width: 100%; height: 100%; object-fit: cover">
+        <!-- Location Management Card -->
+        <div class="card" style="padding: 32px">
+            <h4 style="font-size: 1.2rem; margin-bottom: 24px">النطاق الجغرافي المعين</h4>
+            {% if stall.location %}
+            <div style="padding: 24px; background: #EFF6FF; border-radius: var(--radius-lg); border: 1px solid #DBEAFE; display: flex; align-items: center; gap: 20px">
+                <div style="width: 48px; height: 48px; border-radius: 12px; background: var(--primary); color: white; display: grid; place-items: center; font-size: 1.5rem">
+                    <i class="ri-map-pin-2-line"></i>
                 </div>
-                {% endfor %}
+                <div>
+                    <div style="font-weight: 800; font-size: 1.1rem; color: #1E40AF">{{ stall.location.name }}</div>
+                    <div style="font-size: 0.85rem; color: #60A5FA; font-weight: 600">إحداثيات: {{ stall.location.latitude|floatformat:4 }}, {{ stall.location.longitude|floatformat:4 }}</div>
+                </div>
             </div>
+            {% else %}
+            <div style="text-align: center; padding: 40px; background: #F1F5F9; border-radius: var(--radius-lg); border: 2px dashed #CBD5E1">
+                <p style="color: var(--text-muted); font-weight: 600">لم يتم تعيين موقع رسمي لهذه البسطة بعد.</p>
+                <p style="font-size: 0.8rem; color: #94A3B8; margin-top: 8px">سيطلب منك النظام اختيار موقع عند البدء في إجراءات الموافقة.</p>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
 
-    <!-- Actions & Context -->
+    <!-- Side Actions -->
     <aside>
-        <div class="card">
-            <h3 style="margin-bottom: 16px">إجراءات المراجعة</h3>
+        <div class="card" style="padding: 24px; position: sticky; top: 100px">
+            <h4 style="font-size: 1.1rem; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid var(--base)">مركز التحكم بالطلب</h4>
             
             {% if stall.status == 'pending' %}
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px">الطلب بانتظار المراجعة والتحقق من الموقع المختار.</p>
-                <div style="display: flex; flex-direction: column; gap: 12px">
-                    <a href="{% url 'municipality_portal:stall_approve' stall.pk %}" class="btn btn-primary" style="justify-content: center">
-                        <i class="ri-checkbox-circle-line"></i> الموافقة والتعيين
-                    </a>
-                    <a href="{% url 'municipality_portal:stall_reject' stall.pk %}" class="btn btn-outline" style="justify-content: center; color: var(--danger)">
-                        <i class="ri-close-circle-line"></i> رفض الطلب
-                    </a>
-                </div>
+            <div style="display: flex; flex-direction: column; gap: 12px">
+                <a href="{% url 'municipality_portal:stall_approve' stall.pk %}" class="btn btn-primary" style="justify-content: center; padding: 14px">
+                    <i class="ri-checkbox-circle-line"></i> الموافقة وتعيين الموقع
+                </a>
+                <a href="{% url 'municipality_portal:stall_reject' stall.pk %}" class="btn btn-outline" style="justify-content: center; color: var(--danger); border-color: #FEE2E2">
+                    <i class="ri-close-circle-line"></i> رفض الطلب نهائياً
+                </a>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 20px; text-align: center; line-height: 1.5">تم التحقق من صحة المستندات آلياً، الطلب جاهز للمراجعة البلدية.</p>
             {% else %}
-                <div style="display: flex; flex-direction: column; gap: 12px">
-                    <a href="{% url 'municipality_portal:subscription_create' stall.pk %}" class="btn btn-primary" style="justify-content: center">
-                        <i class="ri-bank-card-line"></i> تجديد / تسجيل اشتراك
-                    </a>
-                    <a href="{% url 'municipality_portal:stall_suspend' stall.pk %}" class="btn btn-outline" style="justify-content: center; color: var(--danger)">
-                        <i class="ri-stop-circle-line"></i> إيقاف مؤقت
-                    </a>
-                </div>
+            <div style="display: flex; flex-direction: column; gap: 12px">
+                <a href="{% url 'municipality_portal:subscription_create' stall.pk %}" class="btn btn-outline" style="justify-content: center">
+                    <i class="ri-bank-card-line"></i> تجديد رخصة الاشتراك
+                </a>
+                {% if stall.status == 'active' or stall.status == 'approved' %}
+                <a href="{% url 'municipality_portal:stall_suspend' stall.pk %}" class="btn btn-outline" style="justify-content: center; color: var(--warning); border-color: #FEF3C7">
+                    <i class="ri-stop-circle-line"></i> إيقاف مؤقت للنشاط
+                </a>
+                {% endif %}
+                <a href="{% url 'municipality_portal:stall_reject' stall.pk %}" class="btn btn-ghost" style="justify-content: center; color: var(--danger)">
+                    إحالة للإلغاء النهائي
+                </a>
+            </div>
             {% endif %}
         </div>
 
-        <div class="card">
-            <h3 style="margin-bottom: 16px">الموقع المعين</h3>
-            {% if stall.location %}
-                <div style="font-weight: 800; color: var(--text-main); margin-bottom: 8px">{{ stall.location.name }}</div>
-                <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 16px">
-                    أوقات العمل: {{ stall.location.start_time|time:"H:i" }} - {{ stall.location.end_time|time:"H:i" }}
-                </div>
-                <div style="height: 150px; background: var(--surface-hover); border-radius: var(--radius-md); display: grid; place-items: center; color: var(--text-muted); font-size: 0.8rem">
-                    <i class="ri-map-pin-line" style="font-size: 1.5rem"></i>
-                    موقع GPS نشط
-                </div>
-            {% else %}
-                <p style="font-size: 0.85rem; color: var(--text-muted)">لم يتم تعيين موقع رسمي لهذه البسطة بعد.</p>
-            {% endif %}
+        <div class="card" style="padding: 24px; margin-top: 24px">
+            <h4 style="font-size: 1rem; margin-bottom: 16px">القواعد المطبقة</h4>
+            <ul style="list-style: none; display: grid; gap: 12px">
+                <li style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #475569">
+                    <i class="ri-check-line" style="color: var(--success)"></i> الالتزام بحدود الموقع ({{ stall.location.radius_meters|default:"15" }}م)
+                </li>
+                <li style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #475569">
+                    <i class="ri-check-line" style="color: var(--success)"></i> ساعات العمل: {{ stall.location.start_time|time:"H:i" }} - {{ stall.location.end_time|time:"H:i" }}
+                </li>
+                <li style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #475569">
+                    <i class="ri-check-line" style="color: var(--success)"></i> الحفاظ على النظافة العامة
+                </li>
+            </ul>
         </div>
     </aside>
-
 </div>
 {% endblock %}

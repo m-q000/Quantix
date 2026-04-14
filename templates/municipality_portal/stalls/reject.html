@@ -1,11 +1,32 @@
 {% extends 'municipality_portal/base.html' %}
+
+{% block page_title %}رفض وإلغاء طلب البسطة{% endblock %}
+
 {% block content %}
-<h2>رفض البسطة</h2>
-<br>
-<form method="post" class="card">
-    {% csrf_token %}
-    <label>سبب الرفض</label><br>
-    <textarea name="reason" class="form-control" required></textarea>
-    <button type="submit" class="btn btn-danger" style="width:100%">تأكيد الرفض</button>
-</form>
+<div style="max-width: 600px; margin: 40px auto">
+    <div class="card" style="border-top: 4px solid var(--danger)">
+        <div style="text-align: center; margin-bottom: 32px">
+            <div style="width: 72px; height: 72px; background: #FEE2E2; color: var(--danger); border-radius: 50%; display: grid; place-items: center; margin: 0 auto 20px; font-size: 2rem">
+                <i class="ri-error-warning-fill"></i>
+            </div>
+            <h3 style="font-size: 1.4rem; margin-bottom: 8px">هل أنت متأكد من رفض الطلب؟</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem">سيتم إغلاق هذا الطلب وإشعار التاجر بالقرار نهائياً.</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-field">
+                <label class="form-label" for="reason">سبب الرفض الإداري</label>
+                <textarea name="reason" id="reason" class="form-textarea" rows="4" placeholder="يرجى توضيح أسباب رفض الطلب ليتم إرسالها للتاجر..." required></textarea>
+                <div class="form-help">يجب أن يكون السبب واضحاً ومستنداً للأنظمة واللوائح البلدية.</div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 32px">
+                <button type="submit" class="btn btn-primary" style="background: var(--danger); border: none">تأكيد الرفض والإغلاق</button>
+                <a href="{% url 'municipality_portal:stall_detail' stall_pk %}" class="btn btn-outline">تراجع</a>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

@@ -1,10 +1,101 @@
 {% extends 'municipality_portal/base.html' %}
+
+{% block page_title %}تسجيل مفتش ميداني جديد{% endblock %}
+
 {% block content %}
-<h2>{{ title }}</h2>
-<br>
-<form method="post" class="card">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn" style="width:100%">حفظ</button>
-</form>
+<div style="max-width: 800px; margin: 0 auto">
+    <div class="card">
+        <div style="margin-bottom: 32px">
+            <h3 style="font-size: 1.2rem; margin-bottom: 8px">بيانات الحساب والتعريف</h3>
+            <p style="font-size: 0.9rem; color: var(--text-muted)">يرجى إدخال البيانات الشخصية والمهنية للمفتش بدقة لضمان تفعيل صلاحيات الرقابة.</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div style="background: rgba(220, 38, 38, 0.05); color: var(--danger); padding: 16px; border-radius: var(--radius-md); margin-bottom: 24px; font-size: 0.9rem; font-weight: 600">
+                {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="form-grid">
+                <!-- First Name -->
+                <div class="form-field">
+                    <label class="form-label" for="id_first_name">الاسم الأول</label>
+                    <input type="text" name="first_name" id="id_first_name" class="form-input" placeholder="مثال: أحمد" value="{{ form.first_name.value|default:'' }}">
+                    {% if form.first_name.errors %}<div class="form-error">{{ form.first_name.errors|join:", " }}</div>{% endif %}
+                </div>
+
+                <!-- Last Name -->
+                <div class="form-field">
+                    <label class="form-label" for="id_last_name">اسم العائلة</label>
+                    <input type="text" name="last_name" id="id_last_name" class="form-input" placeholder="مثال: القواسمي" value="{{ form.last_name.value|default:'' }}">
+                    {% if form.last_name.errors %}<div class="form-error">{{ form.last_name.errors|join:", " }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <!-- Username -->
+                <div class="form-field">
+                    <label class="form-label" for="id_username">اسم المستخدم (بالأحرف الإنجليزية)</label>
+                    <input type="text" name="username" id="id_username" class="form-input" placeholder="مثال: hebron_officer_01" value="{{ form.username.value|default:'' }}">
+                    {% if form.username.errors %}<div class="form-error">{{ form.username.errors|join:", " }}</div>{% endif %}
+                </div>
+
+                <!-- Badge Number -->
+                <div class="form-field">
+                    <label class="form-label" for="id_badge_number">رقم الشارة / الرقم الوظيفي</label>
+                    <input type="text" name="badge_number" id="id_badge_number" class="form-input" placeholder="HMC-9999" value="{{ form.badge_number.value|default:'' }}">
+                    <div class="form-help">يستخدم للتحقق من هوية المفتش في تطبيق الرقابة.</div>
+                    {% if form.badge_number.errors %}<div class="form-error">{{ form.badge_number.errors|join:", " }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <!-- Phone -->
+                <div class="form-field">
+                    <label class="form-label" for="id_phone">رقم الهاتف الجوال</label>
+                    <input type="text" name="phone" id="id_phone" class="form-input" placeholder="05XXXXXXXX" value="{{ form.phone.value|default:'' }}">
+                    {% if form.phone.errors %}<div class="form-error">{{ form.phone.errors|join:", " }}</div>{% endif %}
+                </div>
+
+                <!-- Email -->
+                <div class="form-field">
+                    <label class="form-label" for="id_email">البريد الإلكتروني</label>
+                    <input type="email" name="email" id="id_email" class="form-input" placeholder="name@hebron.ps" value="{{ form.email.value|default:'' }}">
+                    {% if form.email.errors %}<div class="form-error">{{ form.email.errors|join:", " }}</div>{% endif %}
+                </div>
+            </div>
+
+            <hr style="border: none; border-top: 1px solid var(--base); margin: 32px 0">
+
+            <div style="margin-bottom: 24px">
+                <h3 style="font-size: 1.1rem; margin-bottom: 8px">تعيين كلمة المرور</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted)">يجب أن تكون كلمة المرور قوية ومعقدة لزيادة أمان الحساب.</p>
+            </div>
+
+            <div class="form-grid">
+                <!-- Password 1 -->
+                <div class="form-field">
+                    <label class="form-label" for="id_password1">كلمة المرور</label>
+                    <input type="password" name="password1" id="id_password1" class="form-input">
+                    {% if form.password1.errors %}<div class="form-error">{{ form.password1.errors|join:", " }}</div>{% endif %}
+                </div>
+
+                <!-- Password 2 -->
+                <div class="form-field">
+                    <label class="form-label" for="id_password2">تأكيد كلمة المرور</label>
+                    <input type="password" name="password2" id="id_password2" class="form-input">
+                    {% if form.password2.errors %}<div class="form-error">{{ form.password2.errors|join:", " }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div style="margin-top: 40px; display: flex; gap: 16px">
+                <button type="submit" class="btn btn-primary" style="flex: 2">إكمال التسجيل وتفعيل الحساب</button>
+                <a href="{% url 'municipality_portal:officer_list' %}" class="btn btn-outline" style="flex: 1">إلغاء</a>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

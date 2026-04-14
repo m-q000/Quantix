@@ -1,10 +1,32 @@
 {% extends 'municipality_portal/base.html' %}
+
+{% block page_title %}الإيقاف المؤقت لنشاط البسطة{% endblock %}
+
 {% block content %}
-<h2>إيقاف البسطة</h2>
-<br>
-<form method="post" class="card">
-    {% csrf_token %}
-    <p style="margin-bottom:10px;">هل أنت متأكد من إيقاف هذه البسطة؟</p>
-    <button type="submit" class="btn btn-danger" style="width:100%">تأكيد الإيقاف</button>
-</form>
+<div style="max-width: 600px; margin: 40px auto">
+    <div class="card" style="border-top: 4px solid var(--warning)">
+        <div style="text-align: center; margin-bottom: 32px">
+            <div style="width: 72px; height: 72px; background: #FEF3C7; color: var(--warning); border-radius: 50%; display: grid; place-items: center; margin: 0 auto 20px; font-size: 2rem">
+                <i class="ri-pause-circle-fill"></i>
+            </div>
+            <h3 style="font-size: 1.4rem; margin-bottom: 8px">تعليق نشاط البسطة مؤقتاً</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem">سيتم إيقاف صلاحية رمز الـ QR ومنع البيع في الموقع المخصص حتى إشعار آخر.</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            
+            <div style="background: #FFFBEB; padding: 20px; border-radius: var(--radius-lg); margin-bottom: 32px; border: 1px solid #FEF3C7">
+                <p style="font-size: 0.9rem; color: #92400E; line-height: 1.6">
+                    <strong>ملاحظة:</strong> هذا الإجراء لا يلغي التصريح، بل يجمده فقط. يمكن للمسؤول إعادة تفعيل البسطة في أي وقت لاحق من شاشة التفاصيل.
+                </p>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px">
+                <button type="submit" class="btn btn-primary" style="background: var(--warning); border: none">تأكيد التعليق المؤقت</button>
+                <a href="{% url 'municipality_portal:stall_detail' stall_pk %}" class="btn btn-outline">تراجع</a>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}

@@ -1,60 +1,91 @@
 {% extends 'municipality_portal/base.html' %}
 
-{% block page_title %}إدارة البسطات والموافقة عليها{% endblock %}
+{% block page_title %}إدارة طلبات وطلبات البسطات{% endblock %}
 
 {% block content %}
-<div class="data-table-wrapper">
-    <table class="data-table desktop-only">
+<div class="section-title">
+    <div>
+        <h3 style="font-size: 1.15rem; color: var(--text-muted)">قائمة طلبات وبسطات التجار القائمة</h3>
+        <p style="font-size: 0.9rem; color: #64748B">إجمالي عدد البسطات المسجلة: {{ stalls.count }}</p>
+    </div>
+</div>
+
+<div class="table-container">
+    <table class="admin-table desktop-only">
         <thead>
             <tr>
-                <th>المعرف</th>
-                <th>التاجر</th>
-                <th>الموقع</th>
+                <th style="padding-right: 32px">التاجر / المالك</th>
                 <th>التصنيف</th>
+                <th>الموقع الحالي</th>
                 <th>الحالة</th>
-                <th>تاريخ الطلب</th>
+                <th>تاريخ التسجيل</th>
                 <th>الإجراء</th>
             </tr>
         </thead>
         <tbody>
             {% for stall in stalls %}
             <tr>
-                <td style="color: var(--text-muted)">#{{ stall.pk }}</td>
-                <td style="font-weight: 700">{{ stall.owner.user.get_full_name }}</td>
-                <td>{{ stall.location.name|default:"—" }}</td>
-                <td>{{ stall.category.name }}</td>
-                <td>
-                    <span class="badge 
-                        {% if stall.status == 'approved' or stall.status == 'active' %}badge-success
-                        {% elif stall.status == 'pending' %}badge-warning
-                        {% else %}badge-danger{% endif %}">
-                        {{ stall.get_status_display }}
-                    </span>
+                <td style="padding-right: 32px">
+                    <div style="font-weight: 700; color: var(--text-main)">{{ stall.owner.user.get_full_name }}</div>
+                    <div style="font-size: 0.75rem; color: var(--text-muted)">هاتف: {{ stall.owner.user.phone|default:"—" }}</div>
                 </td>
-                <td style="color: var(--text-muted)">{{ stall.created_at|date:"Y-m-d" }}</td>
                 <td>
-                    <a href="{% url 'municipality_portal:stall_detail' stall.pk %}" class="btn btn-outline" style="padding: 6px 14px; font-size: 0.8rem">تفاصيل</a>
+                    <span style="font-weight: 600; color: var(--text-main)">{{ stall.category.name }}</span>
+                </td>
+                <td>
+                    {% if stall.location %}
+                    <div style="font-size: 0.9rem; font-weight: 600">{{ stall.location.name }}</div>
+                    {% else %}
+                    <span style="color: var(--text-muted); font-style: italic">غير محدد بعد</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if stall.status == 'pending' %}
+                        <span class="status-pill pill-warning">بانتظار المراجعة</span>
+                    {% elif stall.status == 'active' or stall.status == 'approved' %}
+                        <span class="status-pill pill-success">نشطة / معتمدة</span>
+                    {% elif stall.status == 'suspended' %}
+                        <span class="status-pill pill-danger">موقوفة مؤقتاً</span>
+                    {% else %}
+                        <span class="status-pill pill-info">{{ stall.get_status_display }}</span>
+                    {% endif %}
+                </td>
+                <td style="color: var(--text-muted)">{{ stall.created_at|date:"Y/m/d" }}</td>
+                <td>
+                    <a href="{% url 'municipality_portal:stall_detail' stall.pk %}" class="btn btn-dark" style="padding: 6px 14px; font-size: 0.8rem">التفاصيل</a>
                 </td>
             </tr>
             {% empty %}
-            <tr><td colspan="7" style="text-align: center; padding: 48px; color: var(--text-muted)">لا توجد بسطات مسجلة بعد</td></tr>
+            <tr>
+                <td colspan="6" style="text-align: center; padding: 64px; color: var(--text-muted)">
+                    <i class="ri-store-2-line" style="font-size: 3rem; display: block; margin-bottom: 16px; opacity: 0.2"></i>
+                    لا توجد بسطات مسجلة حالياً في النظام.
+                </td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    <!-- Mobile Cards -->
-    <div class="mobile-cards" style="padding: 16px">
+    <div class="mobile-only" style="padding: 16px">
         {% for stall in stalls %}
-        <div class="card" style="padding: 16px; margin-bottom: 12px">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px">
-                <span class="badge {% if stall.status == 'active' %}badge-success{% elif stall.status == 'pending' %}badge-warning{% else %}badge-danger{% endif %}">{{ stall.get_status_display }}</span>
-                <span style="font-size: 0.8rem; color: var(--text-muted)">#{{ stall.pk }}</span>
+        <div class="card" style="padding: 20px; margin-bottom: 12px">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px">
+                <div>
+                    <h4 style="margin: 0">{{ stall.owner.user.get_full_name }}</h4>
+                    <span style="font-size: 0.75rem; color: var(--text-muted)">{{ stall.category.name }}</span>
+                </div>
+                {% if stall.status == 'pending' %}
+                    <span class="status-pill pill-warning">انتظار</span>
+                {% elif stall.status == 'active' or stall.status == 'approved' %}
+                    <span class="status-pill pill-success">نشطة</span>
+                {% else %}
+                    <span class="status-pill pill-danger">إيقاف</span>
+                {% endif %}
             </div>
-            <h4 style="margin-bottom: 4px">{{ stall.owner.user.get_full_name }}</h4>
-            <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px">
-                {{ stall.category.name }} · {{ stall.location.name|default:"لم يحدد" }}
+            <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px">
+                <i class="ri-map-pin-line"></i> {{ stall.location.name|default:"لم يحدد الموقع بك" }}
             </div>
-            <a href="{% url 'municipality_portal:stall_detail' stall.pk %}" class="btn btn-primary" style="width: 100%">عرض التفاصيل</a>
+            <a href="{% url 'municipality_portal:stall_detail' stall.pk %}" class="btn btn-outline" style="width: 100%">عرض التفاصيل</a>
         </div>
         {% endfor %}
     </div>
