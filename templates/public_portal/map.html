@@ -489,6 +489,112 @@
             .glass-header { margin: 0; border-radius: var(--radius-lg); }
             .bottom-sheet { max-width: 100%; }
         }
+
+        /* ── Prototype Demo Panel ───────────────────────── */
+        .demo-panel {
+            position: fixed;
+            bottom: 24px;
+            left: 20px;
+            z-index: 1200;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-float);
+            width: 192px;
+            overflow: hidden;
+            transition: width 0.3s var(--ease-out);
+        }
+
+        .demo-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: var(--accent);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .demo-label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .demo-toggle-icon {
+            color: rgba(255,255,255,0.6);
+            font-size: 1rem;
+            transition: transform 0.3s var(--ease-out);
+        }
+
+        .demo-panel.collapsed .demo-toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .demo-body {
+            padding: 12px 14px 14px;
+            overflow: hidden;
+            max-height: 200px;
+            transition: max-height 0.35s var(--ease-out), opacity 0.25s, padding 0.3s;
+            opacity: 1;
+        }
+
+        .demo-panel.collapsed .demo-body {
+            max-height: 0;
+            opacity: 0;
+            padding-top: 0;
+            padding-bottom: 0;
+        }
+
+        .demo-sub {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .demo-roles {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 7px;
+        }
+
+        .demo-role-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            padding: 10px 6px;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            font-size: 0.7rem;
+            font-weight: 700;
+            transition: transform 0.2s var(--spring), opacity 0.15s;
+            line-height: 1;
+        }
+
+        .demo-role-btn i { font-size: 1.15rem; }
+        .demo-role-btn:active { transform: scale(0.94); }
+
+        .role-officer  { background: rgba(16,16,16,0.07);   color: var(--accent);  }
+        .role-officer:hover  { background: rgba(16,16,16,0.13); }
+
+        .role-vendor   { background: rgba(59,130,246,0.09); color: #3B82F6; }
+        .role-vendor:hover   { background: rgba(59,130,246,0.16); }
+
+        .role-citizen  { background: rgba(16,185,129,0.09); color: var(--success); }
+        .role-citizen:hover  { background: rgba(16,185,129,0.16); }
+
+        .role-admin    { background: rgba(245,158,11,0.09); color: var(--warning); }
+        .role-admin:hover    { background: rgba(245,158,11,0.16); }
     </style>
 </head>
 <body>
@@ -594,6 +700,37 @@
 
     <!-- Dim Overlay -->
     <div id="ui-overlay" class="ui-overlay"></div>
+
+    <!-- Prototype Demo Panel -->
+    <div class="demo-panel" id="demo-panel">
+        <div class="demo-header" onclick="toggleDemoPanel()">
+            <span class="demo-label">
+                <i class="ri-flask-line"></i> عرض تجريبي
+            </span>
+            <i class="ri-arrow-up-s-line demo-toggle-icon" id="demo-toggle-icon"></i>
+        </div>
+        <div class="demo-body">
+            <p class="demo-sub">دخول سريع كـ…</p>
+            <div class="demo-roles">
+                <a href="/auth/demo/officer/" class="demo-role-btn role-officer">
+                    <i class="ri-shield-check-line"></i>
+                    <span>مفتش</span>
+                </a>
+                <a href="/auth/demo/vendor/" class="demo-role-btn role-vendor">
+                    <i class="ri-store-2-line"></i>
+                    <span>بائع</span>
+                </a>
+                <a href="/auth/demo/citizen/" class="demo-role-btn role-citizen">
+                    <i class="ri-user-line"></i>
+                    <span>مواطن</span>
+                </a>
+                <a href="/auth/demo/admin/" class="demo-role-btn role-admin">
+                    <i class="ri-building-line"></i>
+                    <span>إدارة</span>
+                </a>
+            </div>
+        </div>
+    </div>
 
     <!-- Stall data from Django (JSON) -->
     <script id="stalls-data" type="application/json">{{ stalls_json|safe }}</script>
@@ -791,6 +928,12 @@
 
         /* ── Close sheet on map click ── */
         map.on('click', function () { closeSheet(); });
+
+        /* ── Demo panel collapse toggle ── */
+        window.toggleDemoPanel = function () {
+            var panel = document.getElementById('demo-panel');
+            panel.classList.toggle('collapsed');
+        };
 
         /* ── Show count pill on load if stalls present ── */
         if (STALLS.length > 0) {

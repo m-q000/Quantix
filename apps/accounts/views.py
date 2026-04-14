@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
 from .forms import LoginForm, VendorRegistrationForm
-from .models import CustomUser
+from .models import CustomUser, OfficerProfile
 
 
 def login_view(request):
@@ -46,6 +46,63 @@ def register_vendor(request):
 @login_required
 def profile(request):
     return render(request, 'accounts/profile.html', {'user': request.user})
+
+
+def demo_login(request, role):
+    """
+    Prototype demo: instantly log in as a pre-built mock user for any role.
+    Creates the user on first access if it doesn't exist yet.
+    """
+    DEMO_USERS = {
+        CustomUser.ROLE_CITIZEN: {
+            'username': 'demo_citizen',
+            'first_name': 'سارة',
+            'last_name': 'إبراهيم',
+        },
+        CustomUser.ROLE_VENDOR: {
+            'username': 'demo_vendor',
+            'first_name': 'محمد',
+            'last_name': 'الشريف',
+        },
+        CustomUser.ROLE_OFFICER: {
+            'username': 'demo_officer',
+            'first_name': 'أحمد',
+            'last_name': 'الخطيب',
+        },
+        CustomUser.ROLE_ADMIN: {
+            'username': 'demo_admin',
+            'first_name': 'خالد',
+            'last_name': 'العمر',
+        },
+    }
+
+    if role not in DEMO_USERS:
+        return redirect('public_portal:map')
+
+    info = DEMO_USERS[role]
+    user, created = CustomUser.objects.get_or_create(
+        username=info['username'],
+        defaults={
+            'role': role,
+            'first_name': info['first_name'],
+            'last_name': info['last_name'],
+        },
+    )
+    if created:
+        user.set_unusable_password()
+        user.save()
+    elif user.role != role:
+        user.role = role
+        user.save(update_fields=['role'])
+
+    if role == CustomUser.ROLE_OFFICER:
+        OfficerProfile.objects.get_or_create(
+            user=user,
+            defaults={'badge_number': 'OFC-001'},
+        )
+
+    login(request, user, backend='django.contrib.auth.backends.ModelBackend')
+    return _redirect_by_role(user)
 
 
 def _redirect_by_role(user):
