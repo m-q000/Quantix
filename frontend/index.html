@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -8,10 +8,10 @@
     <!-- Mapbox GL JS -->
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
     
-    <!-- Custom Web Fonts (using Fontshare for distinct, modern aesthetics) -->
+    <!-- Custom Web Fonts (Fontshare for English, standard system fallback for Arabic) -->
     <link href="https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@800,700,500,400&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
     
-    <!-- Remix Icons for crisp, recognizable icons -->
+    <!-- Remix Icons -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     
     <link rel="stylesheet" href="styles.css">
@@ -23,37 +23,39 @@
     <!-- UI Overlay Layer -->
     <div class="ui-layer">
         
-        <!-- Top Navigation & Mode Switcher -->
+        <!-- Top Navigation (Search & Auth) -->
         <header class="top-layer">
             <div class="glass-header">
-                <div class="brand">
-                    <div class="dot active"></div>
-                    <h1>Q-Zone</h1>
-                </div>
-                
-                <div class="mode-toggles">
-                    <button class="mode-btn active" data-mode="citizen">Citizen</button>
-                    <button class="mode-btn" data-mode="vendor">Vendor</button>
-                    <button class="mode-btn" data-mode="admin">Admin</button>
-                </div>
-                
-                <button class="menu-btn" aria-label="Menu">
+                <!-- Hamburger Menu -->
+                <button class="menu-btn" aria-label="Menu" id="hamburger-btn">
                     <i class="ri-menu-4-line"></i>
                 </button>
+                
+                <!-- Search Bar -->
+                <div class="search-container">
+                    <i class="ri-search-line search-icon"></i>
+                    <input type="text" id="search-input" data-i18n-placeholder="searchPlaceholder" placeholder="Search vendors, products...">
+                    <button id="clear-search" class="clear-btn hidden"><i class="ri-close-circle-fill"></i></button>
+                </div>
+                
+                <!-- Auth Buttons -->
+                <div class="auth-buttons" id="auth-container">
+                    <button class="btn-text" id="login-btn" data-i18n="login">Login</button>
+                    <button class="btn-primary btn-sm" id="signup-btn" data-i18n="signup">Sign Up</button>
+                </div>
+
+                <!-- Logged In User Avatar (Hidden by default) -->
+                <div class="user-profile hidden" id="user-profile">
+                    <div class="user-avatar text-avatar" id="avatar-circle">AN</div>
+                </div>
             </div>
         </header>
 
-        <!-- Floating Notifications / Status -->
-        <div class="status-pill hidden" id="status-pill">
-            <i class="ri-map-pin-line"></i>
-            <span>Select a spot on the map</span>
-        </div>
-
-        <!-- Main Action Button (Vendor Flow) -->
+        <!-- Main Action Button (Vendor Flow) - Hidden in Guest/Citizen Mode -->
         <button id="main-fab" class="fab hidden">
             <div class="fab-content">
-                <span>Book Spot</span>
-                <i class="ri-arrow-right-line"></i>
+                <span data-i18n="bookSpot">Book Spot</span>
+                <i class="ri-map-pin-add-line"></i>
             </div>
         </button>
 
@@ -68,6 +70,71 @@
             </div>
         </div>
         
+    </div>
+
+    <!-- Hamburger Side Menu -->
+    <div id="side-menu" class="side-menu hidden">
+        <div class="menu-header">
+            <div class="brand">
+                <div class="dot active"></div>
+                <h1 data-i18n="appName">Q-Zone</h1>
+            </div>
+            <button class="menu-btn" id="close-menu-btn"><i class="ri-close-line"></i></button>
+        </div>
+        
+        <div class="menu-content">
+            <a href="#" class="menu-item">
+                <i class="ri-star-line"></i> 
+                <span data-i18n="highestRated">Highest Rated Vendors</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="ri-bookmark-line"></i> 
+                <span data-i18n="savedVendors">Saved Vendors</span>
+            </a>
+            <a href="#" class="menu-item">
+                <i class="ri-edit-box-line"></i> 
+                <span data-i18n="addReview">Add Review</span>
+            </a>
+            <a href="#" class="menu-item" id="share-btn">
+                <i class="ri-share-forward-line"></i> 
+                <span data-i18n="shareStall">Share Vendor Stall</span>
+            </a>
+            
+            <div class="menu-divider"></div>
+            
+            <a href="#" class="menu-item">
+                <i class="ri-information-line"></i> 
+                <span data-i18n="aboutUs">About Us</span>
+            </a>
+            <button class="menu-item lang-toggle" id="lang-toggle-btn">
+                <i class="ri-translate-2"></i> 
+                <span data-i18n="languageMode">AR / العربية</span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- Dim Overlay for Menus & Modals -->
+    <div id="ui-overlay" class="ui-overlay hidden"></div>
+
+    <!-- Login Modal (Simulated Auth) -->
+    <div id="auth-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="close-modal"><i class="ri-close-line"></i></button>
+            <h2 data-i18n="loginTitle">Welcome to Q-Zone</h2>
+            <p data-i18n="loginSub" class="text-muted">Select an account to simulate login</p>
+            
+            <div class="auth-options">
+                <button class="btn-secondary auth-simulate" data-role="citizen">
+                    <i class="ri-user-line"></i> <span data-i18n="loginCitizen">Login as Citizen</span>
+                </button>
+                <button class="btn-secondary auth-simulate" data-role="vendor">
+                    <i class="ri-store-2-line"></i> <span data-i18n="loginVendor">Login as Vendor</span>
+                </button>
+                <button class="btn-secondary auth-simulate" data-role="admin">
+                    <i class="ri-shield-user-line"></i> <span data-i18n="loginAdmin">Login as Admin</span>
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- Mapbox Map Core script -->
