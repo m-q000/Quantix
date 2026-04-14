@@ -1,0 +1,108 @@
+{% extends 'municipality_portal/base.html' %}
+
+{% block page_title %}لوحة القيادة والملخص العام{% endblock %}
+
+{% block content %}
+<!-- Statistics Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(16,110,235,0.1); color: #106EEB;">
+            <i class="ri-store-2-line"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700">إجمالي البسطات</div>
+            <div style="font-size: 1.5rem; font-weight: 800">{{ total_stalls }}</div>
+        </div>
+    </div>
+    
+    <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(245,158,11,0.1); color: var(--warning);">
+            <i class="ri-time-line"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700">بانتظار الموافقة</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: var(--warning)">{{ pending_stalls }}</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(16,185,129,0.1); color: var(--success);">
+            <i class="ri-user-line"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700">إجمالي التجار</div>
+            <div style="font-size: 1.5rem; font-weight: 800">{{ total_vendors }}</div>
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon" style="background: rgba(239,68,68,0.1); color: var(--danger);">
+            <i class="ri-error-warning-line"></i>
+        </div>
+        <div>
+            <div style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700">المخالفات المسجلة</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: var(--danger)">{{ total_violations }}</div>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+    <!-- Recent Applications -->
+    <div class="data-table-wrapper">
+        <div style="padding: 20px 24px; border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center">
+            <h3 style="font-size: 1.1rem">أحدث الطلبات</h3>
+            <a href="{% url 'municipality_portal:stall_list' %}" class="btn btn-outline" style="padding: 6px 14px; font-size: 0.8rem">عرض الكل</a>
+        </div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>التاجر</th>
+                    <th>التصنيف</th>
+                    <th>التاريخ</th>
+                    <th>الإجراء</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in recent_applications %}
+                <tr>
+                    <td style="font-weight: 700">{{ app.owner.user.get_full_name }}</td>
+                    <td>{{ app.category.name }}</td>
+                    <td style="color: var(--text-muted)">{{ app.created_at|date:"Y-m-d" }}</td>
+                    <td>
+                        <a href="{% url 'municipality_portal:stall_detail' app.pk %}" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.75rem">مراجعة</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="4" style="text-align: center; padding: 40px; color: var(--text-muted)">لا توجد طلبات معلقة حالياً</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Quick Actions -->
+    <div>
+        <div class="card">
+            <h3 style="font-size: 1.1rem; margin-bottom: 20px">روابط سريعة</h3>
+            <div style="display: flex; flex-direction: column; gap: 12px">
+                <a href="{% url 'municipality_portal:location_create' %}" class="btn btn-outline" style="width: 100%; justify-content: flex-start">
+                    <i class="ri-map-pin-add-line"></i> إضافة موقع جديد
+                </a>
+                <a href="{% url 'municipality_portal:officer_create' %}" class="btn btn-outline" style="width: 100%; justify-content: flex-start">
+                    <i class="ri-user-add-line"></i> إضافة مفتش جديد
+                </a>
+                <a href="{% url 'municipality_portal:reports' %}" class="btn btn-outline" style="width: 100%; justify-content: flex-start">
+                    <i class="ri-printer-line"></i> استخراج تقارير
+                </a>
+            </div>
+        </div>
+
+        <div class="card" style="background: var(--accent); color: white">
+            <h3 style="font-size: 1.1rem; margin-bottom: 12px">حالة النظام</h3>
+            <div style="display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 0.9rem">
+                <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--success); box-shadow: 0 0 10px var(--success)"></div>
+                النظام يعمل بشكل طبيعي
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

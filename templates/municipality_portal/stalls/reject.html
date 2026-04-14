@@ -1,0 +1,11 @@
+{% extends 'municipality_portal/base.html' %}
+{% block content %}
+<h2>رفض البسطة</h2>
+<br>
+<form method="post" class="card">
+    {% csrf_token %}
+    <label>سبب الرفض</label><br>
+    <textarea name="reason" class="form-control" required></textarea>
+    <button type="submit" class="btn btn-danger" style="width:100%">تأكيد الرفض</button>
+</form>
+{% endblock %}

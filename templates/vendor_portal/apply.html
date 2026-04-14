@@ -1,0 +1,366 @@
+{% extends 'vendor_portal/base.html' %}
+
+{% block title %}اختر موقعك{% endblock %}
+{% block nav_apply %}active{% endblock %}
+
+{% block extra_styles %}
+/* Override content-area padding for map page */
+.content-area {
+    padding: 0 !important;
+    overflow: hidden !important;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Map ────────────────────────────────────────────── */
+#location-map {
+    width: 100%;
+    flex: 0 0 52%;
+    z-index: 1;
+}
+
+/* Leaflet overrides */
+.leaflet-control-attribution { display: none !important; }
+.leaflet-control-zoom { border-radius: var(--radius-md) !important; overflow: hidden; }
+
+/* Location marker */
+.loc-marker {
+    width: 36px;
+    height: 36px;
+    background: white;
+    border: 2.5px solid var(--accent);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 16px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+    cursor: pointer;
+    transition: transform 0.2s var(--spring);
+}
+
+.loc-marker.selected {
+    background: var(--accent);
+    color: white;
+    transform: scale(1.2);
+    border-color: var(--accent);
+}
+
+/* ── Scrollable form panel ──────────────────────────── */
+.form-panel {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--base);
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    padding: 16px 16px 100px;
+    box-shadow: 0 -6px 24px rgba(0,0,0,0.07);
+    position: relative;
+    z-index: 10;
+}
+
+.drag-handle {
+    width: 40px;
+    height: 4px;
+    background: var(--glass-border);
+    border-radius: 4px;
+    margin: 0 auto 16px;
+}
+
+/* Selected location card */
+.location-selected-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    border: 1.5px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.location-selected-card.has-selection {
+    border-color: var(--success);
+    box-shadow: 0 0 0 3px rgba(16,185,129,0.08);
+}
+
+.loc-icon {
+    width: 40px; height: 40px;
+    border-radius: var(--radius-md);
+    background: var(--surface-hover);
+    display: grid;
+    place-items: center;
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+    transition: background 0.2s, color 0.2s;
+}
+
+.location-selected-card.has-selection .loc-icon {
+    background: rgba(16,185,129,0.1);
+    color: var(--success);
+}
+
+.loc-info .loc-label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 2px;
+}
+
+.loc-info .loc-name {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+.loc-info .loc-schedule {
+    font-size: 0.74rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* No locations state */
+.no-locations {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--text-muted);
+}
+
+.no-locations i { font-size: 2rem; display: block; margin-bottom: 8px; opacity: 0.4; }
+{% endblock %}
+
+{% block content %}
+
+<!-- Leaflet map -->
+<div id="location-map"></div>
+
+<!-- Form panel -->
+<div class="form-panel" id="form-panel">
+    <div class="drag-handle"></div>
+
+    <div class="page-heading" style="margin-bottom:14px;">
+        <h2>اختر موقع بسطتك</h2>
+        <p>انقر على أحد المواقع على الخريطة ثم أكمل بيانات الطلب</p>
+    </div>
+
+    {% if form.errors %}
+    <div class="form-errors-banner">
+        <i class="ri-error-warning-line"></i> يرجى تصحيح الأخطاء أدناه
+    </div>
+    {% endif %}
+
+    <form method="post" id="apply-form">
+        {% csrf_token %}
+
+        <!-- Hidden location field — populated by map JS -->
+        {{ form.location }}
+
+        <!-- Selected location display card -->
+        <div class="location-selected-card" id="location-card">
+            <div class="loc-icon" id="loc-icon">
+                <i class="ri-map-pin-line"></i>
+            </div>
+            <div class="loc-info">
+                <div class="loc-label">الموقع المختار</div>
+                <div class="loc-name" id="loc-name">انقر على موقع في الخريطة</div>
+                <div class="loc-schedule" id="loc-schedule"></div>
+            </div>
+        </div>
+
+        {% if form.location.errors %}
+        <div class="field-error" style="margin-top:-10px; margin-bottom:12px;">
+            {{ form.location.errors.0 }}
+        </div>
+        {% endif %}
+
+        <!-- Category -->
+        <div class="form-group">
+            <label class="form-label" for="{{ form.category.id_for_label }}">
+                <i class="ri-price-tag-3-line"></i> فئة النشاط
+            </label>
+            <select name="{{ form.category.html_name }}" id="{{ form.category.id_for_label }}" class="form-control">
+                <option value="">— اختر الفئة —</option>
+                {% for val, label in form.category.field.choices %}
+                    {% if val %}
+                    <option value="{{ val }}" {% if form.category.value == val|stringformat:"s" %}selected{% endif %}>{{ label }}</option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+            {% if form.category.errors %}
+            <div class="field-error">{{ form.category.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+            <label class="form-label" for="{{ form.description.id_for_label }}">
+                <i class="ri-file-text-line"></i> وصف البسطة
+            </label>
+            <textarea name="{{ form.description.html_name }}"
+                      id="{{ form.description.id_for_label }}"
+                      class="form-control"
+                      rows="4"
+                      placeholder="اذكر المنتجات التي ستبيعها، وأوقات العمل، وأي معلومات مفيدة...">{{ form.description.value|default:'' }}</textarea>
+            {% if form.description.errors %}
+            <div class="field-error">{{ form.description.errors.0 }}</div>
+            {% endif %}
+        </div>
+
+        <button type="submit" class="btn-primary" id="submit-btn">
+            <i class="ri-send-plane-line"></i>
+            إرسال الطلب
+        </button>
+    </form>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- Leaflet CSS + JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+(function () {
+    'use strict';
+
+    const LOCATIONS = {{ locations_json|safe }};
+
+    // Arabic day names
+    const DAYS_AR = {
+        monday: 'الإثنين', tuesday: 'الثلاثاء', wednesday: 'الأربعاء',
+        thursday: 'الخميس', friday: 'الجمعة', saturday: 'السبت', sunday: 'الأحد'
+    };
+
+    // ── Map init ──────────────────────────────────────────────
+    const defaultCenter = LOCATIONS.length
+        ? [LOCATIONS[0].lat, LOCATIONS[0].lng]
+        : [31.527, 35.100]; // Hebron fallback
+
+    const map = L.map('location-map', {
+        center: defaultCenter,
+        zoom: 15,
+        zoomControl: true,
+        attributionControl: false,
+    });
+
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        maxZoom: 19,
+    }).addTo(map);
+
+    // ── State ────────────────────────────────────────────────
+    let selectedId = null;
+    const markerEls = {};
+    const markerObjs = {};
+
+    // ── UI refs ──────────────────────────────────────────────
+    const hiddenInput   = document.getElementById('id_location_selected');
+    const locationCard  = document.getElementById('location-card');
+    const locIcon       = document.getElementById('loc-icon');
+    const locName       = document.getElementById('loc-name');
+    const locSchedule   = document.getElementById('loc-schedule');
+
+    function selectLocation(loc) {
+        selectedId = loc.id;
+        hiddenInput.value = loc.id;
+
+        // Update card
+        locationCard.classList.add('has-selection');
+        locIcon.innerHTML = '<i class="ri-map-pin-2-fill"></i>';
+        locName.textContent = loc.name;
+
+        const days = (loc.days || []).map(d => DAYS_AR[d] || d).join('، ');
+        locSchedule.textContent = days
+            ? `${days} · ${loc.start} – ${loc.end}`
+            : `${loc.start} – ${loc.end}`;
+
+        // Update marker styles
+        Object.keys(markerEls).forEach(id => {
+            markerEls[id].classList.remove('selected');
+        });
+        if (markerEls[loc.id]) {
+            markerEls[loc.id].classList.add('selected');
+        }
+
+        // Fly to
+        map.flyTo([loc.lat, loc.lng], 16, { duration: 0.8 });
+    }
+
+    // ── Render markers ───────────────────────────────────────
+    if (LOCATIONS.length === 0) {
+        locName.textContent = 'لا توجد مواقع متاحة حالياً';
+    }
+
+    LOCATIONS.forEach(loc => {
+        const el = document.createElement('div');
+        el.className = 'loc-marker';
+        el.innerHTML = '<i class="ri-map-pin-fill" style="color:inherit;font-size:18px;"></i>';
+
+        const marker = L.marker([loc.lat, loc.lng], {
+            icon: L.divIcon({
+                html: el.outerHTML,
+                className: '',
+                iconSize: [36, 36],
+                iconAnchor: [18, 18],
+            })
+        }).addTo(map);
+
+        // Get the actual DOM element after adding to map
+        marker.on('add', function () {
+            const domEl = marker.getElement();
+            if (domEl) {
+                markerEls[loc.id] = domEl.querySelector('.loc-marker') || domEl;
+            }
+        });
+
+        marker.on('click', function () {
+            selectLocation(loc);
+        });
+
+        // Tooltip with location name
+        marker.bindTooltip(loc.name, {
+            direction: 'top',
+            offset: [0, -20],
+            permanent: false,
+            className: 'loc-tooltip',
+        });
+
+        markerObjs[loc.id] = marker;
+    });
+
+    // Fit map to all markers
+    if (LOCATIONS.length > 1) {
+        const group = L.featureGroup(Object.values(markerObjs));
+        map.fitBounds(group.getBounds().pad(0.3));
+    }
+
+    // ── Form validation ──────────────────────────────────────
+    document.getElementById('apply-form').addEventListener('submit', function (e) {
+        if (!hiddenInput.value) {
+            e.preventDefault();
+            locationCard.style.borderColor = 'var(--danger)';
+            locName.style.color = 'var(--danger)';
+            locName.textContent = 'يرجى اختيار موقع من الخريطة أولاً';
+            // Scroll map into view
+            document.getElementById('location-map').scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+
+})();
+</script>
+
+<style>
+/* Leaflet tooltip style */
+.loc-tooltip {
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    font-family: var(--font-body);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.loc-tooltip::before { border-top-color: var(--accent) !important; }
+</style>
+{% endblock %}

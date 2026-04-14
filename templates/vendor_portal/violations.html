@@ -1,0 +1,238 @@
+{% extends 'vendor_portal/base.html' %}
+
+{% block title %}المخالفات{% endblock %}
+
+{% block extra_styles %}
+/* Summary strip */
+.violations-summary {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    animation: slideUp 0.35s var(--ease-out) both;
+}
+
+.summary-icon {
+    width: 50px; height: 50px;
+    border-radius: var(--radius-lg);
+    display: grid;
+    place-items: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
+.summary-icon.has-violations { background: rgba(239,68,68,0.1); color: var(--danger); }
+.summary-icon.clean          { background: rgba(16,185,129,0.1); color: var(--success); }
+
+.summary-count {
+    font-size: 1.8rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.summary-label {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 3px;
+}
+
+/* Violation card */
+.violation-card {
+    background: var(--surface);
+    border-radius: var(--radius-xl);
+    padding: 18px 20px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--glass-border);
+    animation: slideUp 0.4s var(--ease-out) both;
+    border-right: 4px solid var(--glass-border);
+}
+
+.violation-card.action-warning    { border-right-color: var(--warning); }
+.violation-card.action-fine       { border-right-color: var(--danger); }
+.violation-card.action-suspension { border-right-color: #7C3AED; }
+
+.v-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.v-type {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin-bottom: 3px;
+}
+
+.v-date {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.v-action-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border-radius: var(--radius-pill);
+    font-size: 0.78rem;
+    font-weight: 700;
+    flex-shrink: 0;
+}
+
+.v-action-badge.warning    { background: rgba(245,158,11,0.1); color: var(--warning); }
+.v-action-badge.fine       { background: rgba(239,68,68,0.1); color: var(--danger); }
+.v-action-badge.suspension { background: rgba(124,58,237,0.1); color: #7C3AED; }
+
+.v-description {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    line-height: 1.6;
+    padding-top: 10px;
+    border-top: 1px solid var(--glass-border);
+}
+
+/* Evidence image */
+.v-evidence {
+    margin-top: 10px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    max-height: 160px;
+}
+
+.v-evidence img {
+    width: 100%;
+    object-fit: cover;
+    display: block;
+}
+{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+    <h2>المخالفات</h2>
+    <p>سجل المخالفات الصادرة بحق بسطتك</p>
+</div>
+
+<!-- Summary -->
+<div class="violations-summary">
+    <div class="summary-icon {% if violations_count > 0 %}has-violations{% else %}clean{% endif %}">
+        {% if violations_count > 0 %}
+            <i class="ri-error-warning-line"></i>
+        {% else %}
+            <i class="ri-shield-check-line"></i>
+        {% endif %}
+    </div>
+    <div>
+        <div class="summary-count">{{ violations_count }}</div>
+        <div class="summary-label">
+            {% if violations_count == 0 %}
+                لا توجد مخالفات — سجل نظيف
+            {% elif violations_count == 1 %}
+                مخالفة واحدة مسجلة
+            {% else %}
+                مخالفة مسجلة
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Violations list -->
+{% if violations %}
+{% for v in violations %}
+<div class="violation-card action-{{ v.action }}" style="animation-delay: {{ forloop.counter0 }}1ms;">
+
+    <div class="v-top">
+        <div>
+            <div class="v-type">
+                {% if v.violation_type == 'out_of_location' %}
+                    <i class="ri-map-pin-off-line" style="color:var(--danger);"></i>
+                    خارج الموقع المرخص
+                {% elif v.violation_type == 'out_of_time' %}
+                    <i class="ri-time-line" style="color:var(--warning);"></i>
+                    خارج أوقات العمل
+                {% elif v.violation_type == 'wrong_activity' %}
+                    <i class="ri-forbid-line" style="color:var(--danger);"></i>
+                    نشاط تجاري غير مرخص
+                {% elif v.violation_type == 'no_qr' %}
+                    <i class="ri-qr-code-line" style="color:var(--text-muted);"></i>
+                    غياب رمز QR
+                {% elif v.violation_type == 'expired_subscription' %}
+                    <i class="ri-bank-card-line" style="color:var(--danger);"></i>
+                    اشتراك منتهي الصلاحية
+                {% else %}
+                    <i class="ri-alert-line"></i>
+                    {{ v.get_violation_type_display }}
+                {% endif %}
+            </div>
+            <div class="v-date">
+                <i class="ri-calendar-line"></i>
+                {{ v.created_at|date:"d/m/Y · H:i" }}
+            </div>
+        </div>
+
+        <span class="v-action-badge {{ v.action }}">
+            {% if v.action == 'warning' %}
+                <i class="ri-alert-line"></i> تنبيه
+            {% elif v.action == 'fine' %}
+                <i class="ri-money-dollar-circle-line"></i> غرامة
+            {% else %}
+                <i class="ri-forbid-2-line"></i> إيقاف
+            {% endif %}
+        </span>
+    </div>
+
+    {% if v.description %}
+    <div class="v-description">{{ v.description }}</div>
+    {% endif %}
+
+    {% if v.evidence_image %}
+    <div class="v-evidence">
+        <img src="{{ v.evidence_image.url }}" alt="صورة دليل">
+    </div>
+    {% endif %}
+
+</div>
+{% endfor %}
+
+{% else %}
+<!-- Clean record -->
+<div class="empty-state">
+    <i class="ri-shield-check-line" style="opacity:0.35; color:var(--success);"></i>
+    <p>سجل نظيف — لا توجد مخالفات مسجلة</p>
+</div>
+{% endif %}
+
+<!-- Tips card -->
+<div class="card" style="margin-top:8px;">
+    <div class="section-header" style="margin-bottom:12px;">
+        <h3>نصائح للامتثال</h3>
+    </div>
+    <div class="detail-row">
+        <i class="ri-map-pin-check-line" style="color:var(--success);"></i>
+        <div class="detail-value" style="font-size:0.85rem; font-weight:400;">التزم بموقعك المخصص ضمن نطاق لا يتجاوز 20 متراً</div>
+    </div>
+    <div class="detail-row">
+        <i class="ri-time-line" style="color:var(--success);"></i>
+        <div class="detail-value" style="font-size:0.85rem; font-weight:400;">التزم بالأيام والساعات المرخصة في موقعك</div>
+    </div>
+    <div class="detail-row">
+        <i class="ri-qr-code-line" style="color:var(--success);"></i>
+        <div class="detail-value" style="font-size:0.85rem; font-weight:400;">علّق رمز QR بشكل واضح وسهل المسح</div>
+    </div>
+    <div class="detail-row" style="border-bottom:none;">
+        <i class="ri-bank-card-line" style="color:var(--success);"></i>
+        <div class="detail-value" style="font-size:0.85rem; font-weight:400;">جدّد اشتراكك قبل انتهائه لضمان الاستمرارية</div>
+    </div>
+</div>
+
+{% endblock %}

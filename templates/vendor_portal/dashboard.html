@@ -1,0 +1,383 @@
+{% extends 'vendor_portal/base.html' %}
+
+{% block title %}الرئيسية{% endblock %}
+{% block nav_home %}active{% endblock %}
+{% block nav_home_icon %}fill{% endblock %}
+
+{% block extra_styles %}
+.welcome-card {
+    background: var(--accent);
+    color: white;
+    border-radius: var(--radius-xl);
+    padding: 24px 20px;
+    margin-bottom: 12px;
+    animation: slideUp 0.35s var(--ease-out) both;
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome-card::before {
+    content: '';
+    position: absolute;
+    top: -30px; left: -30px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+}
+
+.welcome-card::after {
+    content: '';
+    position: absolute;
+    bottom: -20px; right: -20px;
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+}
+
+.welcome-card .greeting {
+    font-size: 0.85rem;
+    color: rgba(255,255,255,0.55);
+    margin-bottom: 4px;
+}
+
+.welcome-card h2 {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: white;
+    margin-bottom: 16px;
+}
+
+.welcome-card .vendor-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: var(--radius-pill);
+    padding: 6px 14px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Quick actions grid */
+.actions-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.action-card {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    padding: 18px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--glass-border);
+    text-decoration: none;
+    color: var(--text-main);
+    transition: transform 0.2s var(--spring), box-shadow 0.2s;
+    animation: slideUp 0.4s var(--ease-out) both;
+}
+
+.action-card:nth-child(1) { animation-delay: 0.12s; }
+.action-card:nth-child(2) { animation-delay: 0.16s; }
+.action-card:nth-child(3) { animation-delay: 0.20s; }
+.action-card:nth-child(4) { animation-delay: 0.24s; }
+
+.action-card:active { transform: scale(0.96); }
+
+.action-icon {
+    width: 42px; height: 42px;
+    border-radius: var(--radius-md);
+    display: grid;
+    place-items: center;
+    font-size: 1.25rem;
+}
+
+.action-card .action-label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.action-card .action-sub {
+    font-size: 0.73rem;
+    color: var(--text-muted);
+    margin-top: -6px;
+}
+
+/* Stall status card */
+.stall-status-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.stall-category-icon {
+    width: 44px; height: 44px;
+    background: var(--surface-hover);
+    border-radius: var(--radius-md);
+    display: grid;
+    place-items: center;
+    font-size: 1.4rem;
+}
+
+/* CTA card (no stall yet) */
+.cta-card {
+    background: linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(16,185,129,0.03) 100%);
+    border: 1.5px dashed rgba(16,185,129,0.3);
+    border-radius: var(--radius-xl);
+    padding: 28px 20px;
+    text-align: center;
+    margin-bottom: 12px;
+    animation: slideUp 0.35s var(--ease-out) both;
+}
+
+.cta-card i {
+    font-size: 2.2rem;
+    color: var(--success);
+    display: block;
+    margin-bottom: 12px;
+}
+
+.cta-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+}
+
+.cta-card p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+/* Violation mini row */
+.violation-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.violation-row:last-child { border-bottom: none; }
+
+.violation-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.violation-dot.warning  { background: var(--warning); }
+.violation-dot.fine     { background: var(--danger); }
+.violation-dot.suspension { background: #7C3AED; }
+
+.violation-info { flex: 1; }
+.violation-type { font-size: 0.85rem; font-weight: 600; }
+.violation-date { font-size: 0.75rem; color: var(--text-muted); margin-top: 1px; }
+
+.violation-action {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+}
+
+.action-warning    { background: rgba(245,158,11,0.1); color: var(--warning); }
+.action-fine       { background: rgba(239,68,68,0.1);  color: var(--danger); }
+.action-suspension { background: rgba(124,58,237,0.1); color: #7C3AED; }
+{% endblock %}
+
+{% block content %}
+
+<!-- Welcome card -->
+<div class="welcome-card">
+    <p class="greeting">أهلاً بك،</p>
+    <h2>{{ user.get_full_name|default:user.username }}</h2>
+    <div class="vendor-status">
+        <i class="ri-shield-check-line"></i>
+        {% if vendor.status == 'approved' %}
+            بائع معتمد
+        {% elif vendor.status == 'pending' %}
+            قيد المراجعة
+        {% elif vendor.status == 'rejected' %}
+            مرفوض
+        {% else %}
+            موقوف
+        {% endif %}
+    </div>
+</div>
+
+<!-- Stall status or CTA -->
+{% if stall %}
+
+<div class="card">
+    <div class="stall-status-row">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div class="stall-category-icon">
+                {% if stall.category.icon %}{{ stall.category.icon }}{% else %}<i class="ri-store-2-line"></i>{% endif %}
+            </div>
+            <div>
+                <div style="font-size:0.78rem; color:var(--text-muted); margin-bottom:2px;">فئة البسطة</div>
+                <div style="font-weight:700; font-size:0.95rem;">{{ stall.category.name }}</div>
+            </div>
+        </div>
+        <span class="status-badge status-{{ stall.status }}">
+            {% if stall.status == 'pending' %}
+                <i class="ri-time-line"></i> قيد المراجعة
+            {% elif stall.status == 'active' %}
+                <i class="ri-checkbox-circle-line"></i> نشطة
+            {% elif stall.status == 'expired' %}
+                <i class="ri-time-line"></i> منتهية
+            {% elif stall.status == 'suspended' %}
+                <i class="ri-forbid-line"></i> موقوفة
+            {% elif stall.status == 'rejected' %}
+                <i class="ri-close-circle-line"></i> مرفوضة
+            {% endif %}
+        </span>
+    </div>
+
+    {% if stall.location %}
+    <div class="detail-row" style="border-bottom:none; padding-top:0;">
+        <i class="ri-map-pin-2-line"></i>
+        <div>
+            <div class="detail-label">الموقع المخصص</div>
+            <div class="detail-value">{{ stall.location.name }}</div>
+        </div>
+    </div>
+    {% elif stall.status == 'pending' %}
+    <div style="font-size:0.82rem; color:var(--text-muted); border-top:1px solid var(--glass-border); padding-top:12px; margin-top:4px;">
+        <i class="ri-information-line"></i> في انتظار تخصيص موقع من البلدية
+    </div>
+    {% endif %}
+
+    {% if stall.status == 'rejected' and stall.rejection_reason %}
+    <div style="background:rgba(239,68,68,0.06); border-radius:var(--radius-md); padding:12px; margin-top:12px;">
+        <div style="font-size:0.78rem; color:var(--danger); font-weight:600; margin-bottom:4px;">سبب الرفض</div>
+        <div style="font-size:0.85rem; color:var(--text-main);">{{ stall.rejection_reason }}</div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Subscription mini card -->
+{% if subscription %}
+<div class="card" style="padding:16px 20px;">
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <i class="ri-bank-card-line" style="font-size:1.2rem; color:var(--success);"></i>
+            <div>
+                <div style="font-size:0.78rem; color:var(--text-muted);">الاشتراك الحالي</div>
+                <div style="font-weight:700; font-size:0.9rem;">
+                    {% if subscription.plan_type == 'daily' %}يومي
+                    {% elif subscription.plan_type == 'monthly' %}شهري
+                    {% else %}موسمي{% endif %}
+                </div>
+            </div>
+        </div>
+        <div style="text-align:left;">
+            <div style="font-size:0.72rem; color:var(--text-muted);">ينتهي في</div>
+            <div style="font-weight:700; font-size:0.85rem; color:var(--success);">{{ subscription.expiry_date }}</div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Quick action grid -->
+<div class="section-header">
+    <h3>الإجراءات السريعة</h3>
+</div>
+
+<div class="actions-grid">
+    <a href="{% url 'vendor_portal:my_stall' %}" class="action-card">
+        <div class="action-icon" style="background:rgba(59,130,246,0.1); color:#3B82F6;">
+            <i class="ri-store-2-line"></i>
+        </div>
+        <div>
+            <div class="action-label">بسطتي</div>
+            <div class="action-sub">تفاصيل وحالة البسطة</div>
+        </div>
+    </a>
+
+    <a href="{% url 'vendor_portal:upload_images' %}" class="action-card">
+        <div class="action-icon" style="background:rgba(139,92,246,0.1); color:#8B5CF6;">
+            <i class="ri-image-add-line"></i>
+        </div>
+        <div>
+            <div class="action-label">الصور</div>
+            <div class="action-sub">إضافة صور المنتجات</div>
+        </div>
+    </a>
+
+    <a href="{% url 'vendor_portal:qr_code' %}" class="action-card">
+        <div class="action-icon" style="background:rgba(16,185,129,0.1); color:var(--success);">
+            <i class="ri-qr-code-line"></i>
+        </div>
+        <div>
+            <div class="action-label">رمز QR</div>
+            <div class="action-sub">عرض وتحميل الرمز</div>
+        </div>
+    </a>
+
+    <a href="{% url 'vendor_portal:subscription' %}" class="action-card">
+        <div class="action-icon" style="background:rgba(245,158,11,0.1); color:var(--warning);">
+            <i class="ri-bank-card-line"></i>
+        </div>
+        <div>
+            <div class="action-label">الاشتراك</div>
+            <div class="action-sub">سجل الاشتراكات</div>
+        </div>
+    </a>
+</div>
+
+<!-- Recent violations -->
+{% if recent_violations %}
+<div class="section-header" style="margin-top:8px;">
+    <h3>آخر المخالفات</h3>
+    <a href="{% url 'vendor_portal:violations' %}">عرض الكل</a>
+</div>
+
+<div class="card">
+    {% for v in recent_violations %}
+    <div class="violation-row">
+        <div class="violation-dot {{ v.action }}"></div>
+        <div class="violation-info">
+            <div class="violation-type">
+                {% if v.violation_type == 'out_of_location' %}خارج الموقع
+                {% elif v.violation_type == 'out_of_time' %}خارج أوقات العمل
+                {% elif v.violation_type == 'wrong_activity' %}نشاط غير مرخص
+                {% elif v.violation_type == 'no_qr' %}غياب رمز QR
+                {% elif v.violation_type == 'expired_subscription' %}اشتراك منتهي
+                {% else %}{{ v.get_violation_type_display }}{% endif %}
+            </div>
+            <div class="violation-date">{{ v.created_at|date:"d/m/Y" }}</div>
+        </div>
+        <span class="violation-action action-{{ v.action }}">
+            {% if v.action == 'warning' %}تنبيه
+            {% elif v.action == 'fine' %}غرامة
+            {% else %}إيقاف{% endif %}
+        </span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% else %}
+<!-- No stall yet — CTA -->
+<div class="cta-card">
+    <i class="ri-map-pin-add-line"></i>
+    <h3>لا توجد بسطة بعد</h3>
+    <p>قدّم طلبك الآن واختر موقعك المناسب على الخريطة ليتم مراجعته من البلدية</p>
+    <a href="{% url 'vendor_portal:apply' %}" class="btn-primary" style="text-decoration:none; border-radius:var(--radius-pill);">
+        <i class="ri-map-pin-add-line"></i>
+        تقديم طلب جديد
+    </a>
+</div>
+{% endif %}
+
+{% endblock %}

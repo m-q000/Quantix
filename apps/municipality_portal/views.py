@@ -131,7 +131,8 @@ def location_create(request):
         form.save()
         return redirect('municipality_portal:location_list')
     return render(request, 'municipality_portal/locations/form.html', {
-        'form': form, 'title': 'Add Location'
+        'form': form, 'title': 'إضافة موقع جديد',
+        'locations': Location.objects.all(),
     })
 
 
@@ -143,7 +144,8 @@ def location_edit(request, pk):
         form.save()
         return redirect('municipality_portal:location_list')
     return render(request, 'municipality_portal/locations/form.html', {
-        'form': form, 'title': 'Edit Location'
+        'form': form, 'title': 'تعديل الموقع',
+        'locations': Location.objects.all(),
     })
 
 

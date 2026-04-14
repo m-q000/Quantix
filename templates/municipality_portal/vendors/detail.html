@@ -1,0 +1,10 @@
+{% extends 'municipality_portal/base.html' %}
+{% block content %}
+<h2>تفاصيل التاجر</h2>
+<br>
+<div class="card">
+    <p><strong>الاسم:</strong> {{ vendor.user.get_full_name }}</p>
+    <p><strong>الهوية:</strong> {{ vendor.national_id }}</p>
+    <p><strong>الحالة:</strong> {{ vendor.get_status_display }}</p>
+</div>
+{% endblock %}

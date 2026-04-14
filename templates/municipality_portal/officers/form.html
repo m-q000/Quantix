@@ -1,0 +1,10 @@
+{% extends 'municipality_portal/base.html' %}
+{% block content %}
+<h2>{{ title }}</h2>
+<br>
+<form method="post" class="card">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn" style="width:100%">حفظ</button>
+</form>
+{% endblock %}
